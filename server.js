@@ -25,6 +25,34 @@ io.on('connection', (socket) => {
     socket.emit('updateGame', gameState);
 
     socket.on('joinTable', (data) => {
+    // 1. เพิ่มการเช็กว่ามีชื่อนี้อยู่ในโต๊ะหรือยัง
+    const isAlreadyJoined = gameState.players.find(p => p.name === data.name);
+    
+    if (isAlreadyJoined) {
+        socket.emit('alert', 'คุณอยู่ในโต๊ะเรียบร้อยแล้ว');
+        return;
+    }
+
+    if (gameState.players.length >= 11) {
+        socket.emit('alert', 'โต๊ะเต็มแล้ว');
+        return;
+    }
+
+    // ... โค้ดเดิมที่ใช้ push ข้อมูลผู้เล่น ...
+    gameState.players.push({ 
+        id: socket.id, 
+        name: data.name, 
+        money: data.money, 
+        bet: 0, 
+        score: 0, 
+        scoreText: "" 
+    });
+    
+    // ... ส่วนที่เหลือ ...
+});
+
+});
+
         if (gameState.players.length >= 11) { socket.emit('alert', 'โต๊ะเต็มแล้ว'); return; }
         gameState.players.push({ id: socket.id, name: data.name, money: data.money, bet: 0, score: 0, scoreText: "" });
         gameState.statusText = `คุณ ${data.name} เข้านั่งแล้ว`;
