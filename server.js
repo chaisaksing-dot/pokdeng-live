@@ -92,7 +92,6 @@ io.on('connection', (socket) => {
         else gameState.statusText = `รอบวางเดิมพัน: ตาของ ${gameState.players[gameState.currentPlayerBettingIndex].name}`;
         io.emit('updateGame', gameState);
     });
-});
 
 function dealCards() {
     gameState.players.forEach((p) => {
