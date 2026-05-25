@@ -33,7 +33,7 @@ io.on('connection', (socket) => {
       return;
     }
 
-    if (gameState.players.length >= 11) {
+    if (gameState.players.length >= 8) {
       socket.emit('alert', 'โต๊ะเต็มแล้ว');
       return;
     }
@@ -53,7 +53,7 @@ io.on('connection', (socket) => {
   });
 
 
-        if (gameState.players.length >= 11) { socket.emit('alert', 'โต๊ะเต็มแล้ว'); return; }
+        if (gameState.players.length >= 8) { socket.emit('alert', 'โต๊ะเต็มแล้ว'); return; }
         gameState.players.push({ id: socket.id, name: data.name, money: data.money, bet: 0, score: 0, scoreText: "" });
         gameState.statusText = `คุณ ${data.name} เข้านั่งแล้ว`;
         io.emit('updateGame', gameState);
