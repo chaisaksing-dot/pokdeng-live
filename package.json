@@ -1,12 +1,43 @@
-{
-  "name": "pokdeng-live",
-  "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "socket.io": "^4.7.2"
-  }
+body {
+    background-color: #1a1a1a;
+    color: white;
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+.table-area {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+#poker-table {
+    width: 300px;
+    height: 180px;
+    background-color: #006633;
+    border: 8px solid #4d2600;
+    border-radius: 100px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary { background-color: #e0115f; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 5px; }
+.btn-success { background-color: #28a745; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 5px; }
+
+.player-node {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.avatar-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid gold;
 }
