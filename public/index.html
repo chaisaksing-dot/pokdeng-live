@@ -3,127 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pok Deng Online Multiplayer</title>
+    <title>Pok Deng Online - Multiplayer</title>
+    <link rel="stylesheet" href="style.css">
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <style>
-        body { background-color: #1a1a1a; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
-        .poker-table-wrapper { position: relative; width: 800px; height: 450px; display: flex; align-items: center; justify-content: center; }
-        .poker-table { width: 600px; height: 300px; background-color: #00713d; border: 15px solid #5c2c16; border-radius: 200px; box-shadow: inset 0 0 50px rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; }
-        .table-status { text-align: center; font-size: 1.1rem; font-weight: bold; padding: 0 30px; line-height: 1.5; }
-        .seats-container { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; }
-        .seat { position: absolute; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -50%); }
-        .avatar { width: 55px; height: 55px; background: #ccc; border: 3px solid #ffcc00; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; }
-        .seat.dealer .avatar { border-color: #ff3333 !important; box-shadow: 0 0 20px #ff3333; }
-        .player-card { background: rgba(0,0,0,0.85); padding: 5px 8px; border-radius: 8px; font-size: 0.75rem; margin-top: 4px; border: 1px solid #ffcc00; text-align: center; min-width: 90px; }
-        .money-tag { color: #66ff66; font-weight: bold; }
-        .bet-tag { color: #ffcc00; }
-        .cards-hand { background: rgba(255,255,255,0.2); margin-top: 2px; padding: 1px 3px; border-radius: 3px; }
-        .controls { display: flex; gap: 8px; margin-top: 15px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; }
-        .btn { padding: 10px 15px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; }
-    </style>
 </head>
 <body>
-
-    <h1>♠️ ป๊อกเด้งออนไลน์ (Multiplayer) ♥️</h1>
-    <div id="roomInfo" style="color:#ffcc00; margin-bottom:10px;">กำลังเชื่อมต่อเซิร์ฟเวอร์...</div>
-
-    <div class="poker-table-wrapper">
-        <div class="poker-table"><div class="table-status" id="tableStatus"></div></div>
-        <div class="seats-container" id="seatsContainer"></div>
-    </div>
-
-    <div class="controls" id="controlPanel">
-        <input type="text" id="pName" placeholder="ชื่อคุณ" style="padding:10px; width:100px;">
-        <input type="number" id="pMoney" value="1500" style="padding:10px; width:70px;">
-        <button class="btn" style="background:#ffcc00;" onclick="join()">นั่งเก้าอี้</button>
-    </div>
-
-    <script>
-        const socket = io();
-        let myId = "";
-        const avatars = ["👦", "👧", "👨", "👩", "🧔", "🕶️", "🦊", "🦁", "🐼", "🐨", "🤖"];
-
-        socket.on('connect', () => { myId = socket.id; document.getElementById('roomInfo').innerText = "เชื่อมต่อสำเร็จ! ชวนเพื่อนเข้าเล่นได้เลย"; });
-        socket.on('alert', (msg) => alert(msg));
+    <div id="game-container">
+        <h1>♠️ ป๊อกเด้งออนไลน์ ❤️</h1>
         
-        socket.on('updateGame', (state) => {
-            document.getElementById('tableStatus').innerHTML = state.statusText;
-            renderTable(state);
-            renderControls(state);
-        });
+        <div id="status-area">
+            <p id="loading-text">กำลังโหลดข้อมูล LINE...</p>
+        </div>
 
-        function join() {
-            const name = document.getElementById('pName').value.trim();
-            const money = parseInt(document.getElementById('pMoney').value) || 0;
-            if(!name) return alert('ใส่ชื่อด้วยครับ');
-            socket.emit('joinTable', { name, money });
-        }
+        <div class="table-area">
+            <div id="poker-table">
+                <div id="players-list"></div>
+                <div id="table-message">รอผู้เล่นเข้าโต๊ะ...</div>
+            </div>
+        </div>
 
-        function renderTable(state) {
-            const container = document.getElementById('seatsContainer');
-            container.innerHTML = "";
-            const total = state.players.length;
-            const rx = 360, ry = 190, cx = 400, cy = 225;
+        <div id="controls" style="display: none;">
+            <button id="btnJoin" class="btn-primary">เข้าเล่นเกม</button>
+            <button id="btnShare" class="btn-success">🟢 ชวนเพื่อน</button>
+        </div>
+    </div>
 
-            state.players.forEach((p, idx) => {
-                const angle = (idx * (2 * Math.PI / total)) + (Math.PI / 2);
-                const x = cx + rx * Math.cos(angle);
-                const y = cy + ry * Math.sin(angle);
-
-                const div = document.createElement('div');
-                div.className = 'seat' + (idx === state.dealerIndex ? ' dealer' : '');
-                div.style.left = `${x}px`; div.style.top = `${y}px`;
-
-                let betText = (idx !== state.dealerIndex && p.bet > 0) ? `<div class="bet-tag">แทง: ฿${p.bet}</div>` : '';
-                let cardText = p.scoreText ? `<div class="cards-hand">${p.scoreText}</div>` : '';
-
-                div.innerHTML = `
-                    <div class="avatar">${avatars[idx % avatars.length]}</div>
-                    <div class="player-card">
-                        <b>${idx === state.dealerIndex ? '👑 ' : ''}${p.name}</b>
-                        <div class="money-tag">฿${p.money}</div>
-                        ${betText} ${cardText}
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function renderControls(state) {
-            const panel = document.getElementById('controlPanel');
-            const me = state.players.find(p => p.id === myId);
-            const meIdx = state.players.findIndex(p => p.id === myId);
-
-            if (!me) return; 
-
-            if (state.currentPlayerBettingIndex !== -1 && state.players[state.currentPlayerBettingIndex].id === myId) {
-                let chipsHtml = `<b>เลือกยอดแทงตานี้: </b>`;
-                [10,20,30,40,50,100,200,300,500,1000].forEach(amt => {
-                    if(amt <= state.maxBetLimit && amt <= me.money) {
-                        chipsHtml += `<button class="btn" style="background:#fff; margin-right:5px;" onclick="socket.emit('submitBet', ${amt})">฿${amt}</button>`;
-                    }
-                });
-                panel.innerHTML = chipsHtml;
-                return;
-            }
-
-            let html = `<span style="align-self:center;">คุณ: <b>${me.name}</b></span>`;
-            if (state.dealerIndex === -1) {
-                html += `<button class="btn" style="background:#ff3333; color:#fff;" onclick="claimDealerPrompt()">ขอเป็นเจ้ามือ</button>`;
-            } else if (state.dealerIndex === meIdx) {
-                html += `<button class="btn" style="background:#555; color:#fff;" onclick="socket.emit('claimDealer')">ลงจากเจ้ามือ</button>`;
-                if (state.players.length >= 2 && state.currentPlayerBettingIndex === -1) {
-                    html += `<button class="btn" style="background:#4caf50; color:#fff;" onclick="socket.emit('startGame')">เริ่มเกมส์</button>`;
-                }
-            }
-            panel.innerHTML = html;
-        }
-
-        function claimDealerPrompt() {
-            let limit = prompt("กำหนดวงเงินเดิมพันสูงสุดต่อคนในตานี้ (บาท):", "50");
-            socket.emit('claimDealer', { limit: parseInt(limit) || 50 });
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
