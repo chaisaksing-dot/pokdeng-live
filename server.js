@@ -27,11 +27,19 @@ io.on('connection', (socket) => {
     socket.on('joinTable', (data) => {
     // 1. เช็คว่ามีชื่อนี้อยู่ในโต๊ะหรือยัง
     const isAlreadyJoined = gameState.players.find(p => p && p.name === data.name);
+        
+socket.on('joinTable', (data) => {
+    // 1. เช็คจากชื่อ (Name)
+    const nameExists = gameState.players.find(p => p.name === data.name);
+    
+    // 2. เช็คจาก Socket ID (ป้องกันคนเดิมเปิดหลายจอหรือกดซ้ำ)
+    const socketExists = gameState.players.find(p => p.id === socket.id);
 
-    if (isAlreadyJoined) {
-      socket.emit('alert', 'คุณอยู่ในโต๊ะเรียบร้อยแล้ว');
-      return;
+    if (nameExists || socketExists) {
+        socket.emit('alert', 'คุณอยู่ในโต๊ะเรียบร้อยแล้ว');
+        return;
     }
+
 
     if (gameState.players.length >= 8) {
       socket.emit('alert', 'โต๊ะเต็มแล้ว');
