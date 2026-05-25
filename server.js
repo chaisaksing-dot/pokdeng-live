@@ -50,7 +50,6 @@ io.on('connection', (socket) => {
     });
 
     io.emit('updateGame', gameState); // ส่งข้อมูลใหม่ให้ทุกคนในโต๊ะ
-  });
 
 
         if (gameState.players.length >= 8) { socket.emit('alert', 'โต๊ะเต็มแล้ว'); return; }
@@ -92,7 +91,7 @@ io.on('connection', (socket) => {
         else gameState.statusText = `รอบวางเดิมพัน: ตาของ ${gameState.players[gameState.currentPlayerBettingIndex].name}`;
         io.emit('updateGame', gameState);
     });
-
+});
 function dealCards() {
     gameState.players.forEach((p) => {
         let c1 = cardValues[Math.floor(Math.random() * cardValues.length)] + cardSuits[Math.floor(Math.random() * 4)];
