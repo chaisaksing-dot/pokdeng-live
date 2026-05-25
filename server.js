@@ -24,65 +24,34 @@ const cardValues = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q',
 io.on('connection', (socket) => {
     socket.emit('updateGame', gameState);
 
-    socket.on('joinTable', (data) => {
+  // เปลี่ยนจากรับแค่ชื่อ เป็นรับ Object ข้อมูลจาก LINE
+socket.on('joinTable', (lineData) => {
+    // lineData ควรจะมี { displayName: '...', userId: '...', pictureUrl: '...' }
 
-    // 1. เพิ่มการเช็ค: ถ้าชื่อนี้ หรือ ID นี้ มีอยู่ในโต๊ะแล้ว ให้หยุดทำงานทันที
-    const isDuplicate = gameState.players.find(p => p.id === socket.id || p.name === data.name);
+    // 1. เช็คว่าคนนี้ (ใช้ userId) อยู่ในโต๊ะหรือยัง
+    const isDuplicate = gameState.players.find(p => p.lineId === lineData.userId);
     
     if (isDuplicate) {
-        // ส่งข้อความเตือนกลับไปหาคนกด (ถ้าต้องการ)
-        socket.emit('alert', 'คุณอยู่ในโต๊ะแล้วครับ');
-        return; // สำคัญมาก: ต้องมี return เพื่อไม่ให้รันบรรทัดถัดไป
+        socket.emit('alert', 'คุณอยู่ในโต๊ะเรียบร้อยแล้ว');
+        return;
     }
 
-    // 2. จำกัดจำนวน 8 ที่นั่ง
+    // 2. จำกัดจำนวน 8 ที่นั่ง (เหมือนเดิม)
     if (gameState.players.length >= 8) {
         socket.emit('alert', 'โต๊ะเต็มแล้ว');
         return;
     }
 
-    // 3. ถ้าเช็คผ่านหมดแล้ว ค่อยเพิ่มชื่อเข้าโต๊ะ
+    // 3. เพิ่มเข้าโต๊ะโดยใช้ข้อมูลจาก LINE
     gameState.players.push({
         id: socket.id,
-        name: data.name,
-        // ... ข้อมูลอื่นๆ
-    });
-    
-    // อัปเดตสถานะให้ทุกคนในโต๊ะเห็น
-    io.emit('updateGame', gameState);
-
-
-    // 1. เช็คจากชื่อ (Name)
-    const nameExists = gameState.players.find(p => p.name === data.name);
-    
-    // 2. เช็คจาก Socket ID (ป้องกันคนเดิมเปิดหลายจอหรือกดซ้ำ)
-    const socketExists = gameState.players.find(p => p.id === socket.id);
-
-    if (nameExists || socketExists) {
-        socket.emit('alert', 'คุณอยู่ในโต๊ะเรียบร้อยแล้ว');
-        return;
-    }
-
-
-    if (gameState.players.length >= 8) {
-      socket.emit('alert', 'โต๊ะเต็มแล้ว');
-      return;
-    }
-
-    // เพิ่มข้อมูลผู้เล่นใหม่ลงไปให้ครบ
-    gameState.players.push({
-      id: socket.id,
-      name: data.name,
-      money: data.money || 0,
-      bet: 0,
-      cards: [],
-      score: 0,
-      scoreText: ""
+        lineId: lineData.userId, // เก็บ ID จริงของ LINE ไว้กันคนปลอมชื่อ
+        name: lineData.displayName,
+        avatar: lineData.pictureUrl || avatars[Math.floor(Math.random() * avatars.length)], // ใช้รูป LINE หรือสุ่มถ้าไม่มี
+        points: 0 // หรือค่าเริ่มต้นอื่นๆ
     });
 
-    io.emit('updateGame', gameState); // ส่งข้อมูลใหม่ให้ทุกคนในโต๊ะ
-
-
+    io.emit('updateGame', 
         if (gameState.players.length >= 8) { socket.emit('alert', 'โต๊ะเต็มแล้ว'); return; }
         gameState.players.push({ id: socket.id, name: data.name, money: data.money, bet: 0, score: 0, scoreText: "" });
         gameState.statusText = `คุณ ${data.name} เข้านั่งแล้ว`;
