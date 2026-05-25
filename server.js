@@ -25,10 +25,7 @@ io.on('connection', (socket) => {
     socket.emit('updateGame', gameState);
 
     socket.on('joinTable', (data) => {
-    // 1. เช็คว่ามีชื่อนี้อยู่ในโต๊ะหรือยัง
-    const isAlreadyJoined = gameState.players.find(p => p && p.name === data.name);
         
-socket.on('joinTable', (data) => {
     // 1. เช็คจากชื่อ (Name)
     const nameExists = gameState.players.find(p => p.name === data.name);
     
