@@ -98,7 +98,7 @@
 
             if (state.currentPlayerBettingIndex !== -1 && state.players[state.currentPlayerBettingIndex].id === myId) {
                 let chipsHtml = `<b>เลือกยอดแทงตานี้: </b>`;
-                [10,20,30,40,50].forEach(amt => {
+                [10,20,30,40,50,100,200,300,500,1000].forEach(amt => {
                     if(amt <= state.maxBetLimit && amt <= me.money) {
                         chipsHtml += `<button class="btn" style="background:#fff; margin-right:5px;" onclick="socket.emit('submitBet', ${amt})">฿${amt}</button>`;
                     }
