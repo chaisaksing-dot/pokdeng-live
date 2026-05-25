@@ -25,7 +25,33 @@ io.on('connection', (socket) => {
     socket.emit('updateGame', gameState);
 
     socket.on('joinTable', (data) => {
-        
+
+    // 1. เพิ่มการเช็ค: ถ้าชื่อนี้ หรือ ID นี้ มีอยู่ในโต๊ะแล้ว ให้หยุดทำงานทันที
+    const isDuplicate = gameState.players.find(p => p.id === socket.id || p.name === data.name);
+    
+    if (isDuplicate) {
+        // ส่งข้อความเตือนกลับไปหาคนกด (ถ้าต้องการ)
+        socket.emit('alert', 'คุณอยู่ในโต๊ะแล้วครับ');
+        return; // สำคัญมาก: ต้องมี return เพื่อไม่ให้รันบรรทัดถัดไป
+    }
+
+    // 2. จำกัดจำนวน 8 ที่นั่ง
+    if (gameState.players.length >= 8) {
+        socket.emit('alert', 'โต๊ะเต็มแล้ว');
+        return;
+    }
+
+    // 3. ถ้าเช็คผ่านหมดแล้ว ค่อยเพิ่มชื่อเข้าโต๊ะ
+    gameState.players.push({
+        id: socket.id,
+        name: data.name,
+        // ... ข้อมูลอื่นๆ
+    });
+    
+    // อัปเดตสถานะให้ทุกคนในโต๊ะเห็น
+    io.emit('updateGame', gameState);
+
+
     // 1. เช็คจากชื่อ (Name)
     const nameExists = gameState.players.find(p => p.name === data.name);
     
