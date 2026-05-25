@@ -97,6 +97,7 @@ io.on('connection', (socket) => {
         io.emit('updateGame', gameState);
     });
 });
+});
 function dealCards() {
     gameState.players.forEach((p) => {
         let c1 = cardValues[Math.floor(Math.random() * cardValues.length)] + cardSuits[Math.floor(Math.random() * 4)];
