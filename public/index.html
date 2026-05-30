@@ -2,25 +2,29 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>แอปเล่นไพ่</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
 
   <div class="app">
 
     <!-- หน้า Login -->
-    <section id="loginPage" class="page active">
+    <section id="loginPage" class="page" style="display:block;">
       <div class="card center">
         <h1>แอปเล่นไพ่</h1>
         <p>เข้าสู่ระบบด้วย LINE</p>
-        <button onclick="loginLine()" class="btn line">เข้าสู่ระบบด้วย LINE</button>
+        <button onclick="window.loginLine()" class="btn">เข้าสู่ระบบด้วย LINE</button>
       </div>
     </section>
 
     <!-- หน้า Lobby -->
-    <section id="lobbyPage" class="page">
+    <section id="lobbyPage" class="page" style="display:none;">
       <div class="topbar">
         <div>
           <h2>Lobby</h2>
@@ -48,12 +52,12 @@
     </section>
 
     <!-- หน้าห้องไพ่ -->
-    <section id="roomPage" class="page">
+    <section id="roomPage" class="page" style="display:none;">
 
       <div class="topbar">
         <div>
           <h2>ห้อง <span id="roomIdText"></span></h2>
-          <p>เจ้ามือ: <span id="bankerNameText"></span></p>
+          <p>เจ้ามือ: <span id="bankerMoneyText"></span></p>
           <p>แทงสูงสุด: <span id="maxBetText"></span></p>
         </div>
         <button onclick="leaveRoom()" class="btn small danger">ออกห้อง</button>
@@ -64,36 +68,58 @@
         <div id="playersList"></div>
       </div>
 
-      <div class="card">
-        <h3>เดิมพัน</h3>
-        <p>เงินของฉัน: <b id="myCreditText"></b></p>
+      <div class="card" id="betCard">
+  <h3>เดิมพัน</h3>
 
-        <label>เลือกเงินแทง</label>
-        <input id="betAmount" type="number" placeholder="เช่น 100" oninput="updateMaxLose()">
+  <div id="myMoneyText"></div>
 
-        <p>เสียสูงสุดกรณีตอง x5: <b id="maxLoseText">0</b></p>
+  <label>เลือกเงินแทง</label>
+  <input id="betAmount" type="number" placeholder="เช่น 100"
+         oninput="updateMaxLose()">
 
-        <button onclick="setReady()" class="btn">พร้อมเล่น</button>
-        <button onclick="inviteLine()" class="btn line">เชิญเพื่อน LINE</button>
-      </div>
+  <p>เสียสูงสุดกรณีตอง x5 : <b id="maxLoseText">0</b></p>
 
-      <div class="card table">
-        <h3>โต๊ะไพ่</h3>
-        <div id="cardsArea" class="cards">
-          🂠 🂠
-        </div>
-        <button onclick="dealCards()" class="btn">แจกไพ่ทดลอง</button>
-      </div>
+  <button class="btn" onclick="playerReady()">พร้อม</button>
+</div>
 
-      <div class="card">
-        <h3>ผลตานี้</h3>
-        <div id="resultText">ยังไม่มีผล</div>
-      </div>
+<button
+id="startGameBtn"
+class="btn"
+onclick="dealCards()"
+style="display:none;">
+เริ่มเกม
+</button>
+  
+<button id="playerDrawBtn" class="btn" style="display:none;" onclick="playerDraw()">
+ผู้เล่นจั่ว
+</button>
+
+<button id="playerStandBtn" class="btn" style="display:none;" onclick="playerStand()">
+ผู้เล่นอยู่
+</button>
+
+<button id="bankerDrawBtn" class="btn" style="display:none;" onclick="bankerDraw()">
+เจ้ามือจั่ว
+</button>
+
+<button id="bankerStandBtn" class="btn" style="display:none;" onclick="bankerStand()">
+เจ้ามืออยู่
+</button>
+        
+ <button id="newRoundBtn" class="btn" onclick="newRound()" style="display:none;"> เริ่มตาใหม่</button>       
+
+<button class="btn small" onclick="copyInviteLink()">คัดลอกลิงก์เชิญ</button>
+<div id="cardsArea"></div>
+
+<div id="resultText">
+ยังไม่มีผล
+</div>
 
     </section>
 
   </div>
 
   <script src="app.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
