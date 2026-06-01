@@ -255,23 +255,23 @@ h4 {
 }
 
 .player2{
-    bottom:90px;
-    left:40px;
+    bottom:80px;
+    left:30px;
 }
 
 .player3{
-    top:220px;
-    left:10px;
+    top:180px;
+    left:20px;
 }
 
 .player4{
-    top:220px;
-    right:10px;
+    top:180px;
+    right:20px;
 }
 
 .player5{
-    bottom:90px;
-    right:40px;
+    bottom:80px;
+    right:30px;
 }
 #cardsArea{
     display:flex;
