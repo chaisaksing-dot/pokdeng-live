@@ -196,9 +196,9 @@ h4 {
 }
 .casino-table{
   position:relative;
-  width:90%;
-  max-width500px;
-  height:90px;
+  width:95%;
+  max-width:760px;
+  height:420px;
   margin:20px auto;
 
   background:radial-gradient(circle,#0f8a35,#066324);
