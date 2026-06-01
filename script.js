@@ -557,10 +557,11 @@ function copyInviteLink() {
     return;
   }
 
-  const link = window.location.origin + "/?room=" + currentRoom.id;
+  const link = "https://chaisaksing-dot.github.io/pokdeng-live/?room=" + currentRoom.id;
 
-  navigator.clipboard.writeText(link);
-  alert("คัดลอกลิงก์เชิญแล้ว: " + link);
+  navigator.clipboard.writeText(link)
+    .then(() => alert("คัดลอกลิงก์เชิญแล้ว:\n" + link))
+    .catch(() => prompt("คัดลอกลิงก์นี้ส่งให้เพื่อน", link));
 }
 
 window.copyInviteLink = copyInviteLink;
