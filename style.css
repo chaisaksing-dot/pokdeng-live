@@ -194,3 +194,83 @@ h4 {
     opacity: 1;
   }
 }
+.casino-table{
+    position:relative;
+    width:100%;
+    max-width:900px;
+    height:600px;
+
+    margin:20px auto;
+
+    background:#0b6b2f;
+    border:8px solid gold;
+    border-radius:300px;
+
+    box-shadow:
+    0 0 30px rgba(255,215,0,.5),
+    inset 0 0 40px rgba(0,0,0,.5);
+}
+
+.banker-seat{
+    position:absolute;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+
+    text-align:center;
+    font-weight:bold;
+    color:white;
+}
+
+.table-center{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+
+    text-align:center;
+    color:white;
+}
+
+.player-seat{
+    position:absolute;
+
+    width:120px;
+    min-height:80px;
+
+    background:#1f2937;
+    border-radius:15px;
+
+    padding:10px;
+
+    color:white;
+    text-align:center;
+
+    border:2px solid rgba(255,255,255,.2);
+}
+
+.player1{
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+.player2{
+    bottom:80px;
+    left:60px;
+}
+
+.player3{
+    top:220px;
+    left:20px;
+}
+
+.player4{
+    top:220px;
+    right:20px;
+}
+
+.player5{
+    bottom:80px;
+    right:60px;
+}
