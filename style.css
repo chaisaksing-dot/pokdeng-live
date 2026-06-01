@@ -233,6 +233,7 @@ aspect-ratio: 1.6 / 1;
 }
 
 .player-seat{
+  display:none;
     position:absolute;
 
     width:120px;
