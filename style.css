@@ -196,17 +196,18 @@ h4 {
 }
 .casino-table{
     position:relative;
-    width:92vw;
-    max-width:760px;
-    aspect-ratio:1.55 / 1;
+    width:95%;
+    max-width:700px;
+    height:450px;
     margin:20px auto;
 
-    background:#0b6b2f;
+    background:radial-gradient(circle,#0f8a35,#066324);
     border:8px solid gold;
-    border-radius:50%;
+
+    border-radius:50% 50% 35% 35% / 35% 35% 65% 65%;
 
     box-shadow:
-    0 0 30px rgba(255,215,0,.5),
+    0 0 30px rgba(255,215,0,.7),
     inset 0 0 40px rgba(0,0,0,.5);
 }
 .banker-seat{
