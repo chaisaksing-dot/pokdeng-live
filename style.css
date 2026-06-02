@@ -194,6 +194,7 @@ h4 {
     opacity: 1;
   }
 }
+
 .casino-table{
   position:relative;
   width:95%;
@@ -204,7 +205,7 @@ h4 {
   background:radial-gradient(circle,#0f8a35,#066324);
   border:8px solid gold;
 
-  border-radius:65% /30%;
+  border-radius:50%;
 
   box-shadow:
     0 0 30px rgba(255,215,0,.7),
