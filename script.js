@@ -57,8 +57,8 @@ function logout() {
   };
 
   db.ref("rooms/" + roomId).set(currentRoom);
-  myPlayerId = "owner";
-localStorage.setItem("playerId", "owner");
+    myPlayerId = localStorage.getItem("playerId") || "owner";
+
 db.ref("rooms/" + roomId + "/players/" + myPlayerId).set({
   name: "เจ้าของห้อง",
   money: 1500,
