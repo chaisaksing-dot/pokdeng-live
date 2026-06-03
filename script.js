@@ -11,8 +11,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.database();
+
 function showPage(pageId) {
   document.getElementById("loginPage").style.display = "none";
+  document.getElementById("adminPage").style.display = "none";
   document.getElementById("lobbyPage").style.display = "none";
   document.getElementById("roomPage").style.display = "none";
 
