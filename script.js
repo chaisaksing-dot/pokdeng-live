@@ -520,10 +520,29 @@ renderPlayers();
 
 document.getElementById("resultText").innerText = result;
 }
-
 window.loginLine = function () {
-  alert("LINE LOGIN");
-  showPage("lobbyPage");
+
+  const playerId =
+    document.getElementById("playerId").value.trim();
+
+  if (!playerId) {
+    alert("กรอกรหัสผู้เล่น");
+    return;
+  }
+
+  localStorage.setItem("playerId", playerId);
+
+  db.ref("wallet/" + playerId)
+    .once("value")
+    .then((snap) => {
+
+      const money = snap.val() || 0;
+
+      localStorage.setItem("playerMoney", money);
+
+      document.getElementById("userInfo").innerText =
+        "รหัส: " + playerId + " | เครดิต: " + money;
+    });
 };
 
 window.logout = logout;
