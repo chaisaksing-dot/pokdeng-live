@@ -356,22 +356,6 @@ document.getElementById("bankerStandBtn").style.display = "none";
     });
   });
 }
-function loginLine() {
-  const playerId = document.getElementById("playerId").value.trim();
-
-  alert("รหัสที่กรอก = " + playerId);
-
-  if (!playerId) {
-    alert("กรอกรหัสผู้เล่น");
-    return;
-  }
-
-  localStorage.setItem("playerId", playerId);
-  localStorage.setItem("playerMoney", 0);
-
-  showPage("lobbyPage");
-}
-
 
 window.onload = function () {
   showPage("loginPage");
