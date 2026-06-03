@@ -86,7 +86,6 @@ function listenPlayers(roomId) {
     checkAllReady();
 
   });
-
 }
 
 function joinRoom() {
@@ -567,3 +566,39 @@ function copyInviteLink() {
 }
 
 window.copyInviteLink = copyInviteLink;
+
+function topUp() {
+  const playerName = document.getElementById("playerName").value.trim();
+  const amount = Number(document.getElementById("amount").value);
+
+  if (!playerName) {
+    alert("กรอกชื่อผู้เล่น");
+    return;
+  }
+
+  if (!amount || amount <= 0) {
+    alert("กรอกจำนวนเงิน");
+    return;
+  }
+
+  db.ref("wallet/" + playerName)
+    .once("value")
+    .then((snap) => {
+
+      let currentMoney = snap.val() || 0;
+
+      db.ref("wallet/" + playerName)
+        .set(currentMoney + amount);
+
+      alert(
+        "เติมเงินให้ " +
+        playerName +
+        " จำนวน " +
+        amount +
+        " บาท สำเร็จ"
+      );
+
+      document.getElementById("playerName").value = "";
+      document.getElementById("amount").value = "";
+    });
+}
