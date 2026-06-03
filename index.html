@@ -16,19 +16,19 @@
 
     <!-- หน้า Login -->
     <section id="loginPage" class="page" style="display:block;">
-      <button onclick="showPage('adminPage')" class="btn">
-  เข้าแอดมิน</button>
-        <input id="playerId" placeholder="รหัสผู้เล่น">
+  <div class="card center">
+    <h1>แอปเล่นไพ่</h1>
 
-<button onclick="loginLine()" class="btn">
-  เข้าสู่ระบบ
-</button>
-      <div class="card center">
-        <h1>แอปเล่นไพ่</h1>
-        <p>เข้าสู่ระบบด้วย LINE</p>
-        <button onclick="window.loginLine()" class="btn">เข้าสู่ระบบด้วย LINE</button>
-      </div>
-    </section>
+    <button onclick="showPage('adminPage')" class="btn">เข้าแอดมิน</button>
+
+    <input id="playerId" placeholder="รหัสผู้เล่น เช่น 01">
+
+    <button onclick="window.loginLine()" class="btn">
+      เข้าสู่ระบบ
+    </button>
+  </div>
+</section>
+
 <section id="adminPage" class="page">
     <h2>หน้าแอดมิน</h2>
     <input id="playerName" placeholder="ชื่อผู้เล่น">
