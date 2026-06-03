@@ -356,6 +356,7 @@ document.getElementById("bankerStandBtn").style.display = "none";
     });
   });
 }
+window.loginline=function() {
 function loginLine() {
   const playerId =
     document.getElementById("playerId").value.trim();
