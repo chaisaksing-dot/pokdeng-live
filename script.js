@@ -41,6 +41,7 @@ function loginLine() {
 
     showPage("lobbyPage");
 }
+window.loginLine = loginLine;
 let roomNumber = 1000;
 let currentRoom = null;
 let myPlayerId = null;
