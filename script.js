@@ -623,3 +623,4 @@ function topUp() {
       document.getElementById("amount").value = "";
     });
 }
+window.topUp = topUp;
