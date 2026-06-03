@@ -564,6 +564,7 @@ if (players[0] && players[1]) {
 };
 };
 
+window.loginLine = loginLine;
 window.logout = logout;
 window.createRoom = createRoom;
 window.joinRoom = joinRoom;
