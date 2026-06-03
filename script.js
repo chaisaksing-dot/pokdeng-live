@@ -356,9 +356,8 @@ document.getElementById("bankerStandBtn").style.display = "none";
     });
   });
 }
-function loginLine(){
-  const playerId =
-    document.getElementById("playerId").value.trim();
+function loginLine() {
+  const playerId = document.getElementById("playerId").value.trim();
 
   alert("รหัสที่กรอก = " + playerId);
 
