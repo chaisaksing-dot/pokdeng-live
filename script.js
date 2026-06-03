@@ -17,7 +17,13 @@ function showPage(pageId) {
   document.getElementById("adminPage").style.display = "none";
   document.getElementById("lobbyPage").style.display = "none";
   document.getElementById("roomPage").style.display = "none";
+if (pageId === "lobbyPage") {
+  const playerId = localStorage.getItem("playerId") || "";
+  const money = localStorage.getItem("playerMoney") || "0";
 
+  document.getElementById("userInfo").innerText =
+    "รหัส: " + playerId + " | เครดิต: " + money;
+}
   document.getElementById(pageId).style.display = "block";
 }
 
