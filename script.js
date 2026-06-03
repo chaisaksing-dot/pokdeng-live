@@ -36,10 +36,8 @@ let playerCards = [];
 let bankerCards = [];
 
 function logout() {
-  localStorage.removeItem("playerId");
-  localStorage.removeItem("playerMoney");
+  localStorage.clear();
   showPage("loginPage");
-
 }
 
   function createRoom() {
