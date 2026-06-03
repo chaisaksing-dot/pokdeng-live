@@ -407,11 +407,6 @@ function listenGame() {
     document.getElementById("resultText").innerText = game.result;
   });
 }
-
-window.loginLine = function () {
-  alert("LINE LOGIN");
-  showPage("lobbyPage");
-};
 function checkAllReady() {
   const startBtn = document.getElementById("startGameBtn");
   if (!startBtn) return;
