@@ -26,7 +26,19 @@ if (pageId === "lobbyPage") {
     "รหัส: " + playerId + " | เครดิต: " + money;
 }
   document.getElementById(pageId).style.display = "block";
+function loginLine() {
+    const playerId =
+        document.getElementById("playerId").value.trim();
 
+    if (!playerId) {
+        alert("กรอกรหัสผู้เล่น");
+        return;
+    }
+
+    localStorage.setItem("playerId", playerId);
+    localStorage.setItem("playerMoney", 0);
+
+    showPage("lobbyPage");
 }
 let roomNumber = 1000;
 let currentRoom = null;
