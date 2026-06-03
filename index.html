@@ -16,20 +16,30 @@
 
     <!-- หน้า Login -->
     <section id="loginPage" class="page" style="display:block;">
+      <button onclick="showPage('adminPage')" class="btn">
+  เข้าแอดมิน
+</button>
       <div class="card center">
         <h1>แอปเล่นไพ่</h1>
         <p>เข้าสู่ระบบด้วย LINE</p>
         <button onclick="window.loginLine()" class="btn">เข้าสู่ระบบด้วย LINE</button>
       </div>
     </section>
-
+<section id="adminPage" class="page">
+    <h2>หน้าแอดมิน</h2>
+    <input id="playerName" placeholder="ชื่อผู้เล่น">
+    <input id="amount" type="number" placeholder="จำนวนเงิน">
+  <button onclick="topUp()" class="btn">เติมเงิน</button>
+  <button onclick="showPage('loginPage')" class="btn">กลับ
+</button>
+</section>
     <!-- หน้า Lobby -->
     <section id="lobbyPage" class="page" style="display:none;">
       <div class="topbar">
         <div>
           <h2>Lobby</h2>
           <p id="userInfo"></p>
-        </div>
+        </div>ึ
         <button onclick="logout()" class="btn small">ออก</button>
       </div>
 
