@@ -19,6 +19,7 @@ function showPage(pageId) {
   document.getElementById("roomPage").style.display = "none";
 if (pageId === "lobbyPage") {
   const playerId = localStorage.getItem("playerId") || "";
+  console.log("playerId =", playerId);
   const money = localStorage.getItem("playerMoney") || "0";
 
   document.getElementById("userInfo").innerText =
