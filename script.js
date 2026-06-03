@@ -25,11 +25,7 @@ if (pageId === "lobbyPage") {
     "รหัส: " + playerId + " | เครดิต: " + money;
 }
   document.getElementById(pageId).style.display = "block";
-}
 
-function loginLine() {
-  alert("LINE LOGIN");
-  showPage("lobbyPage");
 }
 let roomNumber = 1000;
 let currentRoom = null;
