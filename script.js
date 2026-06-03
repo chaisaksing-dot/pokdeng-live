@@ -26,6 +26,7 @@ if (pageId === "lobbyPage") {
     "รหัส: " + playerId + " | เครดิต: " + money;
 }
   document.getElementById(pageId).style.display = "block";
+}
 function loginLine() {
     const playerId =
         document.getElementById("playerId").value.trim();
