@@ -19,7 +19,12 @@
   <div class="card center">
     <h1>แอปเล่นไพ่</h1>
 
-    <button onclick="showPage('adminPage')" class="btn">เข้าแอดมิน</button>
+    <button onclick="
+document.getElementById('loginPage').style.display='none';
+document.getElementById('lobbyPage').style.display='none';
+document.getElementById('roomPage').style.display='none';
+document.getElementById('adminPage').style.display='block';
+" class="btn">เข้าแอดมิน</button>
 
     <input id="playerId" placeholder="รหัสผู้เล่น เช่น 01">
 <button onclick="
