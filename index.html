@@ -52,7 +52,13 @@
           <p id="userInfo" style="color:#ffcc00; font-size:18px; font-weight:bold;"></p>
     
         </div>
-        <button onclick="logout()" class="btn small">ออก</button>
+        <button onclick="
+  localStorage.clear();
+  document.getElementById('lobbyPage').style.display='none';
+  document.getElementById('roomPage').style.display='none';
+  document.getElementById('adminPage').style.display='none';
+  document.getElementById('loginPage').style.display='block';
+" class="btn small">ออก</button>
       </div>
 
       <div class="card">
