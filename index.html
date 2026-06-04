@@ -45,18 +45,9 @@ document.getElementById('adminPage').style.display='block';
     <h2>หน้าแอดมิน</h2>
     <input id="playerName" placeholder="ชื่อผู้เล่น">
     <input id="amount" type="number" placeholder="จำนวนเงิน">
-    <button onclick="
-const name = document.getElementById('playerName').value.trim();
-const amount = Number(document.getElementById('amount').value);
-if (!name) { alert('กรอกชื่อผู้เล่น'); return; }
-if (!amount || amount <= 0) { alert('กรอกจำนวนเงิน'); return; }
-
-firebase.database().ref('wallet/' + name).once('value').then(snap => {
-  const oldMoney = snap.val() || 0;
-  firebase.database().ref('wallet/' + name).set(oldMoney + amount);
-  alert('เติมเงินให้ ' + name + ' สำเร็จ ยอดรวม ' + (oldMoney + amount));
-});
-" class="btn">เติมเงิน</button>
+    <button onclick="alert('กดเติมเงินแล้ว')" class="btn">
+เติมเงิน
+</button>
 
   <button onclick="showPage('loginPage')" class="btn">กลับ<button>
 </section>
