@@ -242,6 +242,40 @@ function renderPlayers() {
     const me = players.find(p => p.name === myPlayerId);
     betCard.style.display = me && me.role === "banker" ? "none" : "block";
   }
+  const startBtn = document.getElementById("startGameBtn");
+if (startBtn) {
+  const me = players.find(p => p.name === myPlayerId);
+  const normalPlayers = players.filter(p => p.role !== "banker");
+
+  if (
+    me &&
+    me.role === "banker" &&
+    normalPlayers.length > 0 &&
+    normalPlayers.every(p => p.ready === true)
+  ) {
+    startBtn.style.display = "block";
+  } else {
+    startBtn.style.display = "none";
+  }
+}
+
+if (startBtn) {
+  const me = players.find(p => p.name === myPlayerId);
+
+  const normalPlayers =
+    players.filter(p => p.role !== "banker");
+
+  if (
+    me &&
+    me.role === "banker" &&
+    normalPlayers.length > 0 &&
+    normalPlayers.every(p => p.ready)
+  ) {
+    startBtn.style.display = "block";
+  } else {
+    startBtn.style.display = "none";
+  }
+}
 }
 
 function setReady() {
@@ -323,50 +357,43 @@ function getPoint(cards) {
 
   return total % 10;
 }
+
+["♠","♥","♦","♣"].forEach(suit => {
+  for(let value = 1; value <= 13; value++){
+    cards.push({
+      value:value,
+      suit:suit
+    });
+  }
+});
+
 function dealCards() {
   const normalPlayers = players.filter(p => p.role !== "banker");
 
-if (normalPlayers.length === 0) {
-  alert("ต้องมีผู้เล่นก่อนถึงเริ่มเกมได้");
-  return;
-}
-
-if (!normalPlayers.every(p => p.ready === true)) {
-  alert("ผู้เล่นต้องกดพร้อมทุกคนก่อน");
-  return;
-}
-  if (!currentRoom) return;
-
-  const player1 = randomCard();
-  const player2 = randomCard();
-  const banker1 = randomCard();
-  const banker2 = randomCard();
-playerCards = [player1, player2];
-bankerCards = [banker1, banker2];
-  const playerPoint =
-    (cardValue(player1) + cardValue(player2)) % 10;
-
-  const bankerPoint =
-    (cardValue(banker1) + cardValue(banker2)) % 10;
-
-  document.getElementById("cardsArea").innerHTML =
-    "ผู้เล่น: " + player1 + " " + player2 + " (" + playerPoint + ")" +
-    "<br>เจ้ามือ: " + banker1 + " " + banker2 + " (" + bankerPoint + ")";
-
-  document.getElementById("resultText").innerText = "ยังไม่มีผล";
-
-  if (playerPoint >= 8 || bankerPoint >= 8) {
-    document.getElementById("resultText").innerText =
-      "ป๊อก! เปิดผลทันที";
+  if (normalPlayers.length === 0) {
+    alert("ต้องมีผู้เล่นก่อนถึงเริ่มเกมได้");
     return;
   }
 
-  if (playerPoint <= 3) {
-    playerDraw();
-  } else {
-    document.getElementById("playerDrawBtn").style.display = "block";
-    document.getElementById("playerStandBtn").style.display = "block";
+  if (!normalPlayers.every(p => p.ready === true)) {
+    alert("ผู้เล่นต้องกดพร้อมทุกคนก่อน");
+    return;
   }
+
+  const deck = [...cards];
+  deck.sort(() => Math.random() - 0.5);
+
+  players.forEach(player => {
+    const card1 = deck.pop();
+    const card2 = deck.pop();
+
+    db.ref("rooms/" + currentRoom.id + "/players/" + player.name + "/cards").set([
+      card1,
+      card2
+    ]);
+  });
+
+  alert("แจกไพ่แล้ว");
 }
 function newRound() {
   document.getElementById("cardsArea").innerHTML = "";
