@@ -144,68 +144,61 @@ function listenPlayers(roomId) {
 
   });
 }
-
 function joinRoom() {
-  const roomId = document.getElementById("joinRoomId").value;
+  const roomId = document.getElementById("joinRoomId").value.trim();
 
   if (!roomId) {
     alert("กรุณาใส่เลขห้อง");
     return;
   }
 
-  db.ref("rooms/" + roomId).once("value").then((snapshot) => {
-    if (!snapshot.exists()) {
+  myPlayerId = localStorage.getItem("playerId");
+
+  if (!myPlayerId) {
+    alert("กรุณาเข้าสู่ระบบก่อน");
+    showPage("loginPage");
+    return;
+  }
+
+  db.ref("rooms/" + roomId).once("value").then((roomSnap) => {
+    if (!roomSnap.exists()) {
       alert("ไม่พบห้องนี้");
       return;
     }
 
-    currentRoom = snapshot.val();
+    currentRoom = roomSnap.val();
 
     document.getElementById("roomIdText").innerText = currentRoom.id;
     document.getElementById("bankerMoneyText").innerText = currentRoom.bankerMoney;
     document.getElementById("maxBetText").innerText = currentRoom.maxBet;
-myPlayerId = localStorage.getItem("playerId");
 
-if (!myPlayerId) {
-  myPlayerId = "player_" + Date.now();
-  localStorage.setItem("playerId", myPlayerId);
-}
+    db.ref("wallet/" + myPlayerId).once("value").then((moneySnap) => {
+      const walletMoney = Number(moneySnap.val()) || 0;
 
-const playerId = myPlayerId;
+      db.ref("rooms/" + roomId + "/players/" + myPlayerId)
+        .once("value")
+        .then((playerSnap) => {
+          if (!playerSnap.exists()) {
+            db.ref("rooms/" + roomId + "/players/" + myPlayerId).set({
+              name: myPlayerId,
+              money: walletMoney,
+              bet: 0,
+              ready: false,
+              role: "player"
+            });
+          } else {
+            db.ref("rooms/" + roomId + "/players/" + myPlayerId).update({
+              money: walletMoney
+            });
+          }
 
-
-db.ref("rooms/" + roomId + "/players/" + playerId)
-.once("value")
-.then((snap) => {
-
-  if (!snap.exists()) {
-
-    db.ref("rooms/" + roomId + "/players/" + playerId).set({
-      name: "ผู้เล่น LINE",
-      money: 1500,
-      bet: 0,
-      ready: false
+          listenPlayers(roomId);
+          listenGame();
+          showPage("roomPage");
+        });
     });
-
-  }
-
-});
-    
-db.ref("rooms/" + roomId + "/players").off();
-
-db.ref("rooms/" + roomId + "/players").on("value", (snap) => {
-
-  const data = snap.val() || {};
-  players = Object.values(data);
-  renderPlayers();
-  listenGame();
-  checkAllReady();
-});
-    
-    showPage("roomPage");
   });
 }
-  
 
 function leaveRoom() {
   
@@ -226,39 +219,29 @@ function addMeToRoom() {
   renderPlayers();
   checkAllReady();
 }
-
 function renderPlayers() {
-  const box = document.getElementById("playersList");
-  box.innerHTML = "";
-  if (players[0]) {
-  document.getElementById("myMoneyText").innerText =
-    "เงินของฉัน: " + players[0].money;
+  for (let i = 1; i <= 5; i++) {
+    const seat = document.getElementById("player" + i);
+    if (seat) seat.innerHTML = "";
+  }
 
-}
-  players.forEach(player => {
-    box.innerHTML += `
-      <div class="player">
-        <div>
-        <b>${player.name === "เจ้าของห้อง"? "👑 เจ้าของห้อง (เจ้ามือ)" : "🙂 " +player.name}</b><br>
-          เงิน: ${player.money}<br>
-          แทง: ${player.bet}
-        </div>
-        <div>${player.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม"}</div>
-      </div>
+  players.forEach((player, index) => {
+    const seat = document.getElementById("player" + (index + 1));
+    if (!seat) return;
+
+    seat.innerHTML = `
+      <b>${player.role === "banker" ? "👑 เจ้ามือ" : "🙂 " + player.name}</b><br>
+      เงิน: ${player.money}<br>
+      แทง: ${player.bet || 0}<br>
+      ${player.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม"}
     `;
   });
-  const newRoundBtn = document.getElementById("newRoundBtn");
 
-if (newRoundBtn) {
-newRoundBtn.style.display =
-  myPlayerId === "owner" ? "block" : "none";
-
-}
   const betCard = document.getElementById("betCard");
-
-if (betCard) {
-  betCard.style.display = myPlayerId === "owner" ? "none" : "block";
-}
+  if (betCard) {
+    const me = players.find(p => p.name === myPlayerId);
+    betCard.style.display = me && me.role === "banker" ? "none" : "block";
+  }
 }
 
 function setReady() {
