@@ -126,6 +126,8 @@ function logout() {
       document.getElementById("maxBetText").innerText = maxBet;
 
       showPage("roomPage");
+      document.getElementById("betCard").style.display = "none";
+document.getElementById("startGameBtn").style.display = "block";
     });
   });
 }
@@ -339,6 +341,17 @@ function getPoint(cards) {
   return total % 10;
 }
 function dealCards() {
+  const normalPlayers = players.filter(p => p.role !== "banker");
+
+if (normalPlayers.length === 0) {
+  alert("ต้องมีผู้เล่นก่อนถึงเริ่มเกมได้");
+  return;
+}
+
+if (!normalPlayers.every(p => p.ready === true)) {
+  alert("ผู้เล่นต้องกดพร้อมทุกคนก่อน");
+  return;
+}
   if (!currentRoom) return;
 
   const player1 = randomCard();
