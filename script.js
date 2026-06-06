@@ -11,36 +11,52 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.database();
-
 function showPage(pageId) {
   document.getElementById("loginPage").style.display = "none";
   document.getElementById("adminPage").style.display = "none";
   document.getElementById("lobbyPage").style.display = "none";
   document.getElementById("roomPage").style.display = "none";
-if (pageId === "lobbyPage") {
-  const playerId = localStorage.getItem("playerId") || "";
-  console.log("playerId =", playerId);
-  const money = localStorage.getItem("playerMoney") || "0";
 
-  document.getElementById("userInfo").innerText =
-    "รหัส: " + playerId + " | เครดิต: " + money;
-}
+  if (pageId === "lobbyPage") {
+    const playerId = localStorage.getItem("playerId") || "";
+
+    db.ref("wallet/" + playerId).once("value").then((snap) => {
+      const money = snap.val() || 0;
+      console.log("เงินจาก Firebase =", snap.val());
+      localStorage.setItem("playerMoney", money);
+
+      document.getElementById("userInfo").innerText =
+        "รหัส: " + playerId + " | เครดิต: " + money;
+    });
+  }
+
   document.getElementById(pageId).style.display = "block";
 }
+
+window.showPage = showPage;
+
 function loginLine() {
-    const playerId =
-        document.getElementById("playerId").value.trim();
+const playerId =
+document.getElementById("playerId")
+.value
+.trim();
 
-    if (!playerId) {
-        alert("กรอกรหัสผู้เล่น");
-        return;
-    }
+db.ref("wallet/" + playerId)
+.once("value")
+.then((snap) => {
 
-    localStorage.setItem("playerId", playerId);
-    localStorage.setItem("playerMoney", 0);
+const money = Number(snap.val()) || 0;
 
-    showPage("lobbyPage");
+localStorage.setItem("playerId", playerId);
+localStorage.setItem("playerMoney", money);
+
+document.getElementById("userInfo").innerText =
+"รหัส: " + playerId + " | เครดิต: " + money;
+
+showPage("lobbyPage");
+});
 }
+
 window.loginLine = loginLine;
 let roomNumber = 1000;
 let currentRoom = null;
@@ -54,43 +70,64 @@ function logout() {
   showPage("loginPage");
 }
 
-  function createRoom() {
-
+ function createRoom() {
   const roomId = Date.now();
+  const bankerMoney = Number(document.getElementById("bankerMoney").value);
+  const maxBet = Number(document.getElementById("maxBet").value);
+  const playerId = localStorage.getItem("playerId") || "owner";
 
-  const bankerMoney =
-    document.getElementById("bankerMoney").value;
+  if (!bankerMoney || bankerMoney <= 0) {
+    alert("กรอกเงินเจ้ามือ");
+    return;
+  }
 
-  const maxBet =
-    document.getElementById("maxBet").value;
+  if (!maxBet || maxBet <= 0) {
+    alert("กรอกแทงสูงสุดต่อคน");
+    return;
+  }
 
-  currentRoom = {
-    id: roomId,
-    bankerMoney: bankerMoney,
-    maxBet: maxBet
-  };
+  db.ref("wallet/" + playerId).once("value").then((snap) => {
+    const walletMoney = Number(snap.val()) || 0;
 
-  db.ref("rooms/" + roomId).set(currentRoom);
-    myPlayerId = localStorage.getItem("playerId") || "owner";
+    if (walletMoney < bankerMoney) {
+      alert("เครดิตไม่พอเป็นเจ้ามือ");
+      return;
+    }
 
-db.ref("rooms/" + roomId + "/players/" + myPlayerId).set({
-  name: "เจ้าของห้อง",
-  money: 1500,
-  bet: 0,
-  ready: false
-});
-  alert("สร้างห้องสำเร็จ ห้องเลข: " + roomId);
-listenPlayers(roomId);
-listenGame();
-  document.getElementById("roomIdText").innerText = roomId;
+    currentRoom = {
+      id: roomId,
+      banker: playerId,
+      bankerMoney: bankerMoney,
+      maxBet: maxBet,
+      status: "waiting"
+    };
 
-  document.getElementById("bankerMoneyText").innerText =
-    bankerMoney;
+    db.ref("rooms/" + roomId).set({
+      ...currentRoom,
+      players: {
+        [playerId]: {
+          name: playerId,
+          money: walletMoney,
+          bet: 0,
+          ready: false,
+          role: "banker"
+        }
+      }
+    }).then(() => {
+      myPlayerId = playerId;
 
-  document.getElementById("maxBetText").innerText =
-    maxBet;
+      alert("สร้างห้องสำเร็จ ห้องเลข: " + roomId);
 
-  showPage("roomPage");
+      listenPlayers(roomId);
+      listenGame();
+
+      document.getElementById("roomIdText").innerText = roomId;
+      document.getElementById("bankerMoneyText").innerText = bankerMoney;
+      document.getElementById("maxBetText").innerText = maxBet;
+
+      showPage("roomPage");
+    });
+  });
 }
 function listenPlayers(roomId) {
 
@@ -525,8 +562,9 @@ if (players[0] && players[1]) {
       ready: false
     });
   }
+  }
+document.getElementById("resultText").innerText = result;
 }
-
 window.loginLine = loginLine;
 window.logout = logout;
 window.createRoom = createRoom;
@@ -569,7 +607,37 @@ function copyInviteLink() {
 
 window.copyInviteLink = copyInviteLink;
 
-function topUp() {
+  window.topUp = function() {
+    const playerName =
+document.getElementById("playerName")
+.value
+.trim();
+
+  const amount = Number(document.getElementById("amount").value);
+
+  if (!playerName) {
+    alert("กรอกชื่อผู้เล่น");
+    return;
+  }
+
+  if (!amount || amount <= 0) {
+    alert("กรอกจำนวนเงิน");
+    return;
+  }
+
+  db.ref("wallet/" + playerName).once("value").then((snap) => {
+  const oldMoney = snap.val() || 0;
+  const newMoney = oldMoney + amount;
+
+  db.ref("wallet/" + playerName).set(newMoney).then(() => {
+    alert("เติมเงินให้ " + playerName + " รวมเป็น " + newMoney);
+
+    document.getElementById("playerName").value = "";
+    document.getElementById("amount").value = "";
+  });
+});
+  };
+window.withdraw = function() {
   const playerName = document.getElementById("playerName").value.trim();
   const amount = Number(document.getElementById("amount").value);
 
@@ -583,25 +651,21 @@ function topUp() {
     return;
   }
 
-  db.ref("wallet/" + playerName)
-    .once("value")
-    .then((snap) => {
+  db.ref("wallet/" + playerName).once("value").then((snap) => {
+    const oldMoney = Number(snap.val()) || 0;
 
-      let currentMoney = snap.val() || 0;
+    if (oldMoney < amount) {
+      alert("ยอดเงินไม่พอถอน");
+      return;
+    }
 
-      db.ref("wallet/" + playerName)
-        .set(currentMoney + amount);
+    const newMoney = oldMoney - amount;
 
-      alert(
-        "เติมเงินให้ " +
-        playerName +
-        " จำนวน " +
-        amount +
-        " บาท สำเร็จ"
-      );
+    db.ref("wallet/" + playerName).set(newMoney).then(() => {
+      alert("ถอนเงินให้ " + playerName + " จำนวน " + amount + " บาท คงเหลือ " + newMoney);
 
       document.getElementById("playerName").value = "";
       document.getElementById("amount").value = "";
     });
-}
-window.topUp = topUp;
+  });
+};
