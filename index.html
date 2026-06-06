@@ -27,17 +27,9 @@ document.getElementById('adminPage').style.display='block';
 " class="btn">เข้าแอดมิน</button>
 
     <input id="playerId" placeholder="รหัสผู้เล่น เช่น 01">
-<button onclick="
-  const id = document.getElementById('playerId').value.trim();
-  if (!id) { alert('กรอกรหัสผู้เล่น'); return; }
-  localStorage.setItem('playerId', id);
-  localStorage.setItem('playerMoney', '0');
-  document.getElementById('loginPage').style.display='none';
-  document.getElementById('adminPage').style.display='none';
-  document.getElementById('lobbyPage').style.display='block';
-  document.getElementById('roomPage').style.display='none';
-  document.getElementById('userInfo').innerText='รหัส: ' + id + ' | เครดิต: 0';
-" class="btn">เข้าสู่ระบบ</button>
+    <button onclick="window.loginLine()" class="btn">
+เข้าสู่ระบบ
+</button>
     
   </div>
     </section>
@@ -45,28 +37,9 @@ document.getElementById('adminPage').style.display='block';
     <h2>หน้าแอดมิน</h2>
     <input id="playerName" placeholder="ชื่อผู้เล่น">
     <input id="amount" type="number" placeholder="จำนวนเงิน">
-    <button onclick="
-const name=document.getElementById('playerName').value.trim();
-const amount=Number(document.getElementById('amount').value);
 
-if(!name){
- alert('กรอกชื่อผู้เล่น');
- return;
-}
-
-if(amount<=0){
- alert('กรอกจำนวนเงิน');
- return;
-}
-
-localStorage.setItem('playerMoney', amount);
-
-alert('เติมเงินสำเร็จ ' + amount);
-" class="btn">
-เติมเงิน
-</button>
-  
-
+    <button onclick="window.topUp()" class="btn">เติมเงิน</button>
+    <button onclick="window.withdraw()" class="btn">ถอนเงิน</button>
   <button onclick="showPage('loginPage')" class="btn">กลับ<button>
 </section>
     <!-- หน้า Lobby -->
