@@ -220,21 +220,24 @@ function addMeToRoom() {
   checkAllReady();
 }
 function renderPlayers() {
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 10; i++) {
     const seat = document.getElementById("player" + i);
     if (seat) seat.innerHTML = "";
   }
 
-  players.forEach((player, index) => {
+  players
+  .filter(p => p.role !== "banker")
+  .forEach((player, index) => {
     const seat = document.getElementById("player" + (index + 1));
     if (!seat) return;
 
     seat.innerHTML = `
-      <b>${player.role === "banker" ? "👑 เจ้ามือ" : "🙂 " + player.name}</b><br>
-      เงิน: ${player.money}<br>
-      แทง: ${player.bet || 0}<br>
-      ${player.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม"}
-    `;
+  <b>${player.role === "banker" ? "👑 เจ้ามือ" : "🙂 " + player.name}</b><br>
+  เงิน: ${player.money}<br>
+  ${player.role === "banker" ? "" : "แทง: " + (player.bet || 0) + "<br>"}
+  ${player.role === "banker" ? "🎮 รอเริ่มเกม" : (player.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม")}
+`;
+
   });
 
   const betCard = document.getElementById("betCard");
@@ -242,42 +245,34 @@ function renderPlayers() {
     const me = players.find(p => p.name === myPlayerId);
     betCard.style.display = me && me.role === "banker" ? "none" : "block";
   }
+
   const startBtn = document.getElementById("startGameBtn");
-if (startBtn) {
-  const me = players.find(p => p.name === myPlayerId);
-  const normalPlayers = players.filter(p => p.role !== "banker");
+  if (startBtn) {
+    const banker = players.find(p => p.role === "banker");
+    const normalPlayers = players.filter(p => p.role === "player");
 
-  if (
-    me &&
-    me.role === "banker" &&
-    normalPlayers.length > 0 &&
-    normalPlayers.every(p => p.ready === true)
-  ) {
-    startBtn.style.display = "block";
-  } else {
-    startBtn.style.display = "none";
+    if (
+      banker &&
+      banker.name === myPlayerId &&
+      normalPlayers.length > 0 &&
+      normalPlayers.every(p => p.ready === true)
+    ) {
+      startBtn.style.display = "block";
+    } else {
+      startBtn.style.display = "none";
+    }
   }
-}
+  const bankerBox = document.getElementById("banker");
+const banker = players.find(p => p.role === "banker");
 
-if (startBtn) {
-  const me = players.find(p => p.name === myPlayerId);
-
-  const normalPlayers =
-    players.filter(p => p.role !== "banker");
-
-  if (
-    me &&
-    me.role === "banker" &&
-    normalPlayers.length > 0 &&
-    normalPlayers.every(p => p.ready)
-  ) {
-    startBtn.style.display = "block";
-  } else {
-    startBtn.style.display = "none";
-  }
+if (bankerBox && banker) {
+  bankerBox.innerHTML = `
+    <b>👑 เจ้ามือ</b><br>
+    เงิน: ${banker.money}<br>
+    🎮 รอเริ่มเกม
+  `;
 }
 }
-
 function setReady() {
   const bet = Number(document.getElementById("betAmount").value);
 if (!players[0]) {
