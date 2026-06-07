@@ -206,36 +206,32 @@ function leaveRoom() {
   
 }
 
-function addMeToRoom() {
-  players = [
-    {
-      name: "ผู้เล่น LINE",
-      money: 1500,
-      bet: 0,
-      ready: false
-    }
-  ];
-
-  renderPlayers();
-  checkAllReady();
-}
 function renderPlayers() {
   for (let i = 1; i <= 10; i++) {
     const seat = document.getElementById("player" + i);
     if (seat) seat.innerHTML = "";
   }
-
+  
   players
   .filter(p => p.role !== "banker")
   .forEach((player, index) => {
     const seat = document.getElementById("player" + (index + 1));
     if (!seat) return;
 
-    seat.innerHTML = `
-  <b>${player.role === "banker" ? "👑 เจ้ามือ" : "🙂 " + player.name}</b><br>
-  เงิน: ${player.money}<br>
-  ${player.role === "banker" ? "" : "แทง: " + (player.bet || 0) + "<br>"}
-  ${player.role === "banker" ? "🎮 รอเริ่มเกม" : (player.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม")}
+const isMe = player.name === myPlayerId;
+
+const cardText = isMe && player.cards
+  ? "<br>ไพ่: " + player.cards.map(c => c.value + c.suit).join(" ")
+  : player.cards
+    ? "<br>ไพ่: 🂠 🂠"
+    : "";
+    
+seat.innerHTML = `
+<b>${player.role === "banker" ? "👑 เจ้ามือ" : "🙂 " + player.name}</b><br>
+เงิน: ${player.money}<br>
+${player.role === "banker" ? "" : "แทง: " + (player.bet || 0) + "<br>"}
+${player.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม"}
+${cardText}
 `;
 
   });
@@ -245,7 +241,7 @@ function renderPlayers() {
     const me = players.find(p => p.name === myPlayerId);
     betCard.style.display = me && me.role === "banker" ? "none" : "block";
   }
-
+  
   const startBtn = document.getElementById("startGameBtn");
   if (startBtn) {
     const banker = players.find(p => p.role === "banker");
@@ -363,10 +359,15 @@ function getPoint(cards) {
 });
 
 function dealCards() {
-  const normalPlayers = players.filter(p => p.role !== "banker");
+  if (!currentRoom || !currentRoom.id) {
+    alert("ไม่พบห้อง");
+    return;
+  }
+
+  const normalPlayers = players.filter(p => p.role === "player");
 
   if (normalPlayers.length === 0) {
-    alert("ต้องมีผู้เล่นก่อนถึงเริ่มเกมได้");
+    alert("ต้องมีผู้เล่นก่อนเริ่มเกม");
     return;
   }
 
@@ -378,17 +379,21 @@ function dealCards() {
   const deck = [...cards];
   deck.sort(() => Math.random() - 0.5);
 
-  players.forEach(player => {
-    const card1 = deck.pop();
-    const card2 = deck.pop();
+  const updates = {};
 
-    db.ref("rooms/" + currentRoom.id + "/players/" + player.name + "/cards").set([
-      card1,
-      card2
-    ]);
+  players.forEach(player => {
+    updates["rooms/" + currentRoom.id + "/players/" + player.name + "/cards"] = [
+      deck.pop(),
+      deck.pop()
+    ];
   });
 
-  alert("แจกไพ่แล้ว");
+  updates["rooms/" + currentRoom.id + "/status"] = "playing";
+
+  db.ref().update(updates).then(() => {
+    document.getElementById("startGameBtn").style.display = "none";
+    document.getElementById("resultText").innerText = "แจกไพ่แล้ว";
+  });
 }
 function newRound() {
   document.getElementById("cardsArea").innerHTML = "";
@@ -464,19 +469,21 @@ function listenGame() {
 function checkAllReady() {
   const startBtn = document.getElementById("startGameBtn");
   if (!startBtn) return;
-const normalPlayers = players.filter(p => !String(p.name).includes("เจ้าของห้อง"));
+
+  const me = players.find(p => p.name === myPlayerId);
+  const normalPlayers = players.filter(p => p.role === "player");
 
   if (
-    myPlayerId === "owner" &&
-    localStorage.getItem("playerId") === "owner" &&
-    normalPlayers.every(p => p.ready)
+    me &&
+    me.role === "banker" &&
+    normalPlayers.length > 0 &&
+    normalPlayers.every(p => p.ready === true)
   ) {
     startBtn.style.display = "block";
   } else {
     startBtn.style.display = "none";
   }
 }
-
 function playerDraw() {
 
   const card = randomCard();
