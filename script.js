@@ -72,33 +72,34 @@ function logout() {
 
  function createRoom() {
   const roomId = Date.now();
-  const bankerMoney = Number(document.getElementById("bankerMoney").value);
-  const maxBet = Number(document.getElementById("maxBet").value);
+   let minBet = Number(document.getElementById("minBet").value) || 10;
+let maxBet = Number(document.getElementById("maxBet").value) || 0;
+
   const playerId = localStorage.getItem("playerId") || "owner";
-
-  if (!bankerMoney || bankerMoney <= 0) {
-    alert("กรอกเงินเจ้ามือ");
-    return;
-  }
-
-  if (!maxBet || maxBet <= 0) {
-    alert("กรอกแทงสูงสุดต่อคน");
-    return;
-  }
 
   db.ref("wallet/" + playerId).once("value").then((snap) => {
     const walletMoney = Number(snap.val()) || 0;
+const bankerMoney = walletMoney;
+const autoMaxBet = Math.floor(walletMoney / 10);
 
-    if (walletMoney < bankerMoney) {
-      alert("เครดิตไม่พอเป็นเจ้ามือ");
-      return;
-    }
+if (!maxBet) maxBet = autoMaxBet;
+
+if (minBet > maxBet) {
+  alert("ขั้นต่ำต้องไม่เกินสูงสุด");
+  return;
+}
+
+if (maxBet * 9 > walletMoney) {
+  alert("เงินเจ้ามือไม่พอ");
+  return;
+}
 
     currentRoom = {
       id: roomId,
       banker: playerId,
-      bankerMoney: bankerMoney,
+      bankerMoney: walletMoney,
       maxBet: maxBet,
+      minBet: minBet,
       status: "waiting"
     };
 
@@ -170,8 +171,10 @@ function joinRoom() {
 
     document.getElementById("roomIdText").innerText = currentRoom.id;
     document.getElementById("bankerMoneyText").innerText = currentRoom.bankerMoney;
+    document.getElementById("minBetText").innerText = currentRoom.minBet || 10;
     document.getElementById("maxBetText").innerText = currentRoom.maxBet;
-
+loadBetOptions(currentRoom);
+    
     db.ref("wallet/" + myPlayerId).once("value").then((moneySnap) => {
       const walletMoney = Number(moneySnap.val()) || 0;
 
@@ -694,3 +697,20 @@ window.withdraw = function() {
     });
   });
 };
+function loadBetOptions(room) {
+  const select = document.getElementById("betAmount");
+  if (!select) return;
+
+  select.innerHTML = "";
+
+  const min = Number(room.minBet) || 10;
+  const max = Number(room.maxBet) || 10;
+
+  const options = [10,20,30,50,100,200,300,500,1000,2000,5000];
+
+  options.forEach(amount => {
+    if (amount >= min && amount <= max) {
+      select.innerHTML += `<option value="${amount}">${amount}</option>`;
+    }
+  });
+}
