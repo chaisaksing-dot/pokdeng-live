@@ -101,7 +101,7 @@
           <p>ขั้นต่ำ : <span id="minBetText"></span></p>
           <p>แทงสูงสุด: <span id="maxBetText"></span></p>
         </div>
-        <button onclick="leaveRoom()" class="btn small danger">ออกห้อง</button>
+  
       </div>
 
       <div class="casino-table">
@@ -122,8 +122,7 @@
 <div class="player-seat player6"><div id="player6"></div></div>
 <div class="player-seat player7"><div id="player7"></div></div>
 <div class="player-seat player8"><div id="player8"></div></div>
-<div class="player-seat player9"><div id="player9"></div></div>
-<div class="player-seat player10"><div id="player10"></div></div>
+
 
     
   
@@ -132,7 +131,7 @@
 
   <div id="myMoneyText"></div>
 <label>เลือกจำนวนเดิมพัน:</label>
-<select id="betAmount">
+        <select id="betAmount" onchange="updateMaxLose()">
 </select>
 <button onclick="placeBet()">ยืนยันเดิมพัน</button>
 
@@ -167,13 +166,16 @@ style="display:none;">
         
  <button id="newRoundBtn" class="btn" onclick="newRound()" style="display:none;"> เริ่มตาใหม่</button>       
 
-<button class="btn small" onclick="copyInviteLink()">คัดลอกลิงก์เชิญ</button>
 <div id="cardsArea"></div>
+<div class="room-buttons">
+  <button class="btn" onclick="copyInviteLink()">
+    คัดลอกลิงก์เชิญ
+  </button>
 
-<div id="resultText">
-ยังไม่มีผล
+  <button class="btn danger" onclick="leaveRoom()">
+    ออกห้อง
+  </button>
 </div>
-
     </section>
 
   </div>
