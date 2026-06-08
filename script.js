@@ -72,7 +72,7 @@ function logout() {
 
  function createRoom() {
   const roomId = Date.now();
-   let minBet = Number(document.getElementById("minBet").value) || 10;
+   let minBet = Number(document.getElementById("minBet").value) || 8;
 let maxBet = Number(document.getElementById("maxBet").value) || 0;
 
   const playerId = localStorage.getItem("playerId") || "owner";
@@ -80,7 +80,7 @@ let maxBet = Number(document.getElementById("maxBet").value) || 0;
   db.ref("wallet/" + playerId).once("value").then((snap) => {
     const walletMoney = Number(snap.val()) || 0;
 const bankerMoney = walletMoney;
-const autoMaxBet = Math.floor(walletMoney / 10);
+const autoMaxBet = Math.floor(walletMoney / 8);
 
 if (!maxBet) maxBet = autoMaxBet;
 
@@ -89,7 +89,7 @@ if (minBet > maxBet) {
   return;
 }
 
-if (maxBet * 9 > walletMoney) {
+if (maxBet * 8 > walletMoney) {
   alert("เงินเจ้ามือไม่พอ");
   return;
 }
@@ -210,7 +210,7 @@ function leaveRoom() {
 }
 
 function renderPlayers() {
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 8; i++) {
     const seat = document.getElementById("player" + i);
     if (seat) seat.innerHTML = "";
   }
@@ -223,11 +223,11 @@ function renderPlayers() {
 
 const isMe = player.name === myPlayerId;
 
-const cardText = isMe && player.cards
-  ? "<br>ไพ่: " + player.cards.map(c => c.value + c.suit).join(" ")
-  : player.cards
-    ? "<br>ไพ่: 🂠 🂠"
-    : "";
+const cardText = player.cards
+  ? (isMe
+      ? "<br>ไพ่: " + player.cards.join(" ")
+      : "<br>ไพ่: 🂠 🂠")
+  : "";
     
 seat.innerHTML = `
 <b>${player.role === "banker" ? "👑 เจ้ามือ" : "🙂 " + player.name}</b><br>
@@ -262,12 +262,12 @@ ${cardText}
     }
   }
   const bankerBox = document.getElementById("banker");
-const banker = players.find(p => p.role === "banker");
+const bankerPlayer = players.find(p => p.role === "banker");
 
-if (bankerBox && banker) {
+if (bankerBox && bankerPlayer) {
   bankerBox.innerHTML = `
     <b>👑 เจ้ามือ</b><br>
-    เงิน: ${banker.money}<br>
+    เงิน: ${bankerPlayer.money}<br>
     🎮 รอเริ่มเกม
   `;
 }
@@ -394,9 +394,17 @@ function dealCards() {
   updates["rooms/" + currentRoom.id + "/status"] = "playing";
 
   db.ref().update(updates).then(() => {
-    document.getElementById("startGameBtn").style.display = "none";
-    document.getElementById("resultText").innerText = "แจกไพ่แล้ว";
+  document.getElementById("startGameBtn").style.display = "none";
+  document.getElementById("resultText").innerText = "แจกไพ่แล้ว";
+  document.getElementById("betCard").style.display = "none";
+  players.forEach(p => {
+    if (updates["rooms/" + currentRoom.id + "/players/" + p.name + "/cards"]) {
+      p.cards = updates["rooms/" + currentRoom.id + "/players/" + p.name + "/cards"];
+    }
   });
+
+  renderPlayers();
+});
 }
 function newRound() {
   document.getElementById("cardsArea").innerHTML = "";
@@ -713,4 +721,11 @@ function loadBetOptions(room) {
       select.innerHTML += `<option value="${amount}">${amount}</option>`;
     }
   });
+updateMaxLose();
 }
+function updateMaxLose() {
+  const bet = Number(document.getElementById("betAmount").value) || 0;
+  document.getElementById("maxLoseText").innerText = bet * 5;
+}
+
+window.updateMaxLose = updateMaxLose;
