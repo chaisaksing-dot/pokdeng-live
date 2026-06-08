@@ -19,13 +19,8 @@
   <div class="card center">
     <h1>แอปเล่นไพ่</h1>
 
-    <button onclick="
-document.getElementById('loginPage').style.display='none';
-document.getElementById('lobbyPage').style.display='none';
-document.getElementById('roomPage').style.display='none';
-document.getElementById('adminPage').style.display='block';
-" class="btn">เข้าแอดมิน</button>
-
+<button onclick="document.getElementById('loginPage').style.display='none';document.getElementById('lobbyPage').style.display='none';document.getElementById('roomPage').style.display='none';document.getElementById('adminPage').style.display='block';" class="btn">เข้าแอดมิน</button>
+    
     <input id="playerId" placeholder="รหัสผู้เล่น เช่น 01">
     <button onclick="window.loginLine()" class="btn">
 เข้าสู่ระบบ
@@ -39,8 +34,8 @@ document.getElementById('adminPage').style.display='block';
     <input id="amount" type="number" placeholder="จำนวนเงิน">
 
     <button onclick="window.topUp()" class="btn">เติมเงิน</button>
-    <button onclick="window.withdraw()" class="btn">ถอนเงิน</button>
-  <button onclick="showPage('loginPage')" class="btn">กลับ<button>
+    <button onclick="window.withdraw()" class="btn">ถอนเงิน</button><button onclick="document.getElementById('adminPage').style.display='none'; document.getElementById('loginPage').style.display='block';" class="btn">กลับ</button>
+    
 </section>
     <!-- หน้า Lobby -->
     <section id="lobbyPage" class="page" style="display:none;">
@@ -61,11 +56,30 @@ document.getElementById('adminPage').style.display='block';
 
       <div class="card">
         <h3>สร้างห้อง</h3>
-        <label>เงินเจ้ามือ</label>
-        <input id="bankerMoney" type="number" placeholder="เช่น 5000">
+      <label>ขั้นต่ำต่อคน (ไม่บังคับ)</label>
+<select id="minBet">
+  <option value="">อัตโนมัติ</option>
+  <option value="10">10</option>
+  <option value="20">20</option>
+  <option value="50">50</option>
+  <option value="100">100</option>
+</select>
 
-        <label>แทงสูงสุดต่อคน</label>
-        <input id="maxBet" type="number" placeholder="เช่น 100">
+<label>สูงสุดต่อคน (ไม่บังคับ)</label>
+<select id="maxBet">
+  <option value="">อัตโนมัติ</option>
+  <option value="10">10</option>
+  <option value="20">20</option>
+  <option value="30">30</option>
+  <option value="50">50</option>
+  <option value="100">100</option>
+  <option value="200">200</option>
+  <option value="300">300</option>
+  <option value="500">500</option>
+  <option value="1000">1000</option>
+  <option value="2000">2000</option>
+  <option value="5000">5000</option>
+</select>
 
         <button onclick="createRoom()" class="btn">สร้างห้อง</button>
       </div>
@@ -84,6 +98,7 @@ document.getElementById('adminPage').style.display='block';
         <div>
           <h2>ห้อง <span id="roomIdText"></span></h2>
           <p>เจ้ามือ: <span id="bankerMoneyText"></span></p>
+          <p>ขั้นต่ำ : <span id="minBetText"></span></p>
           <p>แทงสูงสุด: <span id="maxBetText"></span></p>
         </div>
         <button onclick="leaveRoom()" class="btn small danger">ออกห้อง</button>
@@ -111,36 +126,15 @@ document.getElementById('adminPage').style.display='block';
 <div class="player-seat player10"><div id="player10"></div></div>
 
     
-    <div class="player-seat player2">
-        <div id="player2"></div>
-    </div>
-
-    <div class="player-seat player3">
-        <div id="player3"></div>
-    </div>
-
-    <div class="player-seat player4">
-        <div id="player4"></div>
-    </div>
-
-    <div class="player-seat player5">
-        <div id="player5"></div>
-    </div>
-
-    <div class="player-seat player6"><div id="player6"></div></div>
-<div class="player-seat player7"><div id="player7"></div></div>
-<div class="player-seat player8"><div id="player8"></div></div>
-<div class="player-seat player9"><div id="player9"></div></div>
-<div class="player-seat player10"><div id="player10"></div></div>
-</div>
+  
       <div class="card" id="betCard" style="display:none;">
   <h3>เดิมพัน</h3>
 
   <div id="myMoneyText"></div>
-
-  <label>เลือกเงินแทง</label>
-  <input id="betAmount" type="number" placeholder="เช่น 100"
-         oninput="updateMaxLose()">
+<label>เลือกจำนวนเดิมพัน:</label>
+<select id="betAmount">
+</select>
+<button onclick="placeBet()">ยืนยันเดิมพัน</button>
 
   <p>เสียสูงสุดกรณีตอง x5 : <b id="maxLoseText">0</b></p>
 
