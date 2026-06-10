@@ -783,17 +783,45 @@ function updateTurnTimer() {
 // ===========================
 
 function showCard(c) {
+
+  if (!c) return "";
+
   const suit = c.slice(-1);
   const value = c.slice(0, -1);
-  const cls = suit === "♥" || suit === "♦" ? "red-card" : "black-card";
-  return `<span class="${cls}">${value}${suit}</span>`;
-}
 
+  const cls =
+    suit === "♥" || suit === "♦"
+      ? "red-card"
+      : "black-card";
+
+  return `
+    <span class="${cls}">
+      ${value}${suit}
+    </span>
+  `;
+}
 function cardValue(card) {
-  const v = card.slice(0, -1);
+
+  if (!card) return 0;
+
+  let v = "";
+
+  if (typeof card === "string") {
+
+    v = card.slice(0, -1);
+
+  } else {
+
+    v = card.value || "";
+
+  }
+
   if (["J", "Q", "K"].includes(v)) return 0;
+
   if (v === "A") return 1;
+
   return Number(v) % 10;
+
 }
 
 function getPoint(cardList) {
@@ -804,16 +832,29 @@ function getPoint(cardList) {
 }
 
 function renderCards(cardList, open) {
+
   if (!cardList) return "";
+
+  const arr = Object.values(cardList);
+
   return `
+
     <div class="banker-cards">
-      ${Object.values(cardList).map(c =>
+
+      ${arr.map(c =>
+
         open
-          ? `<div class="mini-card">${showCard(c)}</div>`
+
+          ? `<div class="mini-card open-card">${showCard(c)}</div>`
+
           : `<div class="mini-card back"></div>`
+
       ).join("")}
+
     </div>
+
   `;
+
 }
 
 function renderPlayers() {
