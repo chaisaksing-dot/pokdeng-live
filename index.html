@@ -4,86 +4,109 @@
   <meta charset="UTF-8" />
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>แอปเล่นไพ่</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-
 <div class="app">
 
-  <!-- Login -->
   <section id="loginPage" class="page" style="display:block;">
     <div class="card center">
       <h1>แอปเล่นไพ่</h1>
+      <p class="muted">ระบบจะจำรหัสผู้เล่นให้อัตโนมัติ</p>
 
-      <button onclick="document.getElementById('loginPage').style.display='none';document.getElementById('lobbyPage').style.display='none';document.getElementById('roomPage').style.display='none';document.getElementById('adminPage').style.display='block';" class="btn">
-        เข้าแอดมิน
+      <button onclick="autoLogin()" class="btn">เริ่มเล่น</button>
+
+      <button onclick="showOldIdBox()" class="btn secondary">
+        ใช้รหัสเดิม
       </button>
 
-      <input id="playerId" placeholder="รหัสผู้เล่น เช่น 01">
-
-      <button onclick="window.loginLine()" class="btn">
-        เข้าสู่ระบบ
-      </button>
+      <div id="oldIdBox" style="display:none; margin-top:12px;">
+        <input id="playerId" placeholder="ใส่รหัส เช่น 0001">
+        <button onclick="loginLine()" class="btn">เข้าสู่ระบบ</button>
+      </div>
     </div>
   </section>
 
-  <!-- Admin -->
   <section id="adminPage" class="page" style="display:none;">
-    <h2>หน้าแอดมิน</h2>
+    <div class="topbar">
+      <h2>หน้าแอดมิน</h2>
+      <button onclick="showPage('lobbyPage')" class="btn small">กลับ</button>
+    </div>
 
-    <input id="playerName" placeholder="ชื่อผู้เล่น">
-    <input id="amount" type="number" placeholder="จำนวนเงิน">
+    <div class="card">
+      <h3>เติม / ถอนเครดิต</h3>
+      <input id="playerName" placeholder="รหัสผู้เล่น">
+      <input id="amount" type="number" placeholder="จำนวนเงิน">
+      <button onclick="topUp()" class="btn">เติมเงิน</button>
+      <button onclick="withdraw()" class="btn danger">ถอนเงิน</button>
+    </div>
 
-    <button onclick="window.topUp()" class="btn">เติมเงิน</button>
-    <button onclick="window.withdraw()" class="btn">ถอนเงิน</button>
+    <div class="card">
+      <h3>คำขอโอนเงิน</h3>
+      <div id="topupRequestsList">ยังไม่มีรายการ</div>
+    </div>
 
-    <button onclick="document.getElementById('adminPage').style.display='none';document.getElementById('loginPage').style.display='block';" class="btn">
-      กลับ
-    </button>
+    <div class="card">
+      <h3>คำขอถอนเงิน</h3>
+      <div id="withdrawRequestsList">ยังไม่มีรายการ</div>
+    </div>
+
+    <div class="card">
+      <h3>จัดการแอดมิน</h3>
+      <input id="adminTargetId" placeholder="รหัสผู้เล่น เช่น 0002">
+      <select id="adminRole">
+        <option value="staff">Staff</option>
+        <option value="admin">Admin</option>
+        <option value="owner">Owner</option>
+      </select>
+      <button onclick="addAdmin()" class="btn">เพิ่ม / เปลี่ยนสิทธิ์</button>
+      <button onclick="removeAdmin()" class="btn danger">ลบแอดมิน</button>
+      <div id="adminList"></div>
+    </div>
+
+    <div class="card">
+      <h3>รายงานระบบ</h3>
+      <div id="reportBox">กำลังโหลด...</div>
+    </div>
   </section>
 
-  <!-- Lobby -->
   <section id="lobbyPage" class="page" style="display:none;">
-
     <div class="topbar">
       <div>
         <h2>Lobby</h2>
-        <p id="userInfo" style="color:#ffcc00;font-size:18px;font-weight:bold;"></p>
+        <p id="userInfo" class="creditText"></p>
       </div>
+      <button onclick="logout()" class="btn small danger">ออก</button>
+    </div>
 
-      <button onclick="
-        localStorage.clear();
-        document.getElementById('lobbyPage').style.display='none';
-        document.getElementById('roomPage').style.display='none';
-        document.getElementById('adminPage').style.display='none';
-        document.getElementById('loginPage').style.display='block';
-      " class="btn small">
-        ออก
-      </button>
+    <div class="card">
+      <h3>กระเป๋าเงิน</h3>
+      <button onclick="showMoneyBox('topup')" class="btn">แจ้งโอนเงิน</button>
+      <button onclick="showMoneyBox('withdraw')" class="btn secondary">แจ้งถอนเงิน</button>
+
+      <div id="moneyRequestBox" style="display:none; margin-top:12px;">
+        <input id="requestAmount" type="number" placeholder="จำนวนเงิน">
+        <input id="bankInfo" placeholder="บัญชี / หมายเหตุ / รายละเอียด">
+        <button onclick="submitMoneyRequest()" class="btn">ส่งคำขอ</button>
+      </div>
     </div>
 
     <div class="card">
       <h3>สร้างห้อง</h3>
 
-      <label>ขั้นต่ำต่อคน (ไม่บังคับ)</label>
+      <label>ขั้นต่ำต่อคน</label>
       <select id="minBet">
-        <option value="">อัตโนมัติ</option>
         <option value="10">10</option>
         <option value="20">20</option>
         <option value="50">50</option>
         <option value="100">100</option>
       </select>
 
-      <label>สูงสุดต่อคน (ไม่บังคับ)</label>
+      <label>สูงสุดต่อคน</label>
       <select id="maxBet">
-        <option value="">อัตโนมัติ</option>
-        <option value="10">10</option>
-        <option value="20">20</option>
-        <option value="30">30</option>
         <option value="50">50</option>
         <option value="100">100</option>
         <option value="200">200</option>
@@ -94,32 +117,32 @@
         <option value="5000">5000</option>
       </select>
 
-      <button onclick="createRoom()" class="btn">
-        สร้างห้อง
-      </button>
+      <button onclick="createRoom()" class="btn">สร้างห้อง</button>
     </div>
 
     <div class="card">
-      <h3>เข้าห้อง</h3>
-
-      <input id="joinRoomId" type="number" placeholder="ใส่เลขห้อง">
-
-      <button onclick="joinRoom()" class="btn">
-        เข้าห้อง
-      </button>
+      <h3>ห้องที่ยังไม่เต็ม</h3>
+      <div id="openRoomsList">กำลังโหลด...</div>
     </div>
 
+    <div class="card">
+      <h3>เข้าห้องด้วยเลขห้อง</h3>
+      <input id="joinRoomId" type="number" placeholder="ใส่เลขห้อง">
+      <button onclick="joinRoom()" class="btn">เข้าห้อง</button>
+    </div>
+
+    <button id="hiddenAdminBtn" onclick="openAdmin()" class="hidden-admin-btn">
+      Admin
+    </button>
   </section>
 
-  <!-- Room -->
   <section id="roomPage" class="page" style="display:none;">
-
     <div class="topbar">
       <div>
         <h2>ห้อง <span id="roomIdText"></span></h2>
         <p>เจ้ามือ: <span id="bankerMoneyText"></span></p>
-        <p>ขั้นต่ำ : <span id="minBetText"></span></p>
-        <p>แทงสูงสุด: <span id="maxBetText"></span></p>
+        <p>ขั้นต่ำ: <span id="minBetText"></span></p>
+        <p>สูงสุด: <span id="maxBetText"></span></p>
       </div>
     </div>
 
@@ -131,16 +154,10 @@
 
       <div class="table-center">
         <div id="deckPile" class="mini-card back"></div>
-
-        <div id="deckRemain">
-          เหลือ <span id="deckRemainCount">52</span> ใบ
-        </div>
-
+        <div id="deckRemain">เหลือ <span id="deckRemainCount">52</span> ใบ</div>
+        <div id="turnTimer">เวลา: -</div>
         <div id="cardsArea"></div>
-
-        <div id="resultText">
-          ยังไม่มีผล
-        </div>
+        <div id="resultText">ยังไม่มีผล</div>
       </div>
 
       <div class="player-seat player1"><div id="player1"></div></div>
@@ -152,70 +169,42 @@
       <div class="player-seat player7"><div id="player7"></div></div>
       <div class="player-seat player8"><div id="player8"></div></div>
 
-      <div class="card" id="betCard" style="display:none;">
+      <div class="card bet-card" id="betCard" style="display:none;">
         <h3>เดิมพัน</h3>
-
         <div id="myMoneyText"></div>
 
         <label>เลือกจำนวนเดิมพัน:</label>
-
         <select id="betAmount" onchange="updateMaxLose()"></select>
 
-        <button onclick="playerReady()">
-          ยืนยันเดิมพัน
-        </button>
+        <p>เสียสูงสุดกรณีตอง x5: <b id="maxLoseText">0</b></p>
 
-        <p>
-          เสียสูงสุดกรณีตอง x5 :
-          <b id="maxLoseText">0</b>
-        </p>
-
-        <button class="btn" onclick="playerReady()">
-          พร้อม
-        </button>
+        <button class="btn" onclick="playerReady()">พร้อม</button>
       </div>
 
-      <button id="startGameBtn" class="btn" onclick="dealCards()" style="display:none;">
+      <button id="startGameBtn" class="btn action-main" onclick="dealCards()" style="display:none;">
         เริ่มเกม
       </button>
 
-      <button id="playerDrawBtn" class="btn" style="display:none;" onclick="playerDraw()">
-        ผู้เล่นจั่ว
-      </button>
+      <div class="action-buttons">
+        <button id="playerDrawBtn" class="btn action-btn" style="display:none;" onclick="playerDraw()">จั่ว</button>
+        <button id="playerStandBtn" class="btn action-btn secondary" style="display:none;" onclick="playerStand()">อยู่</button>
+        <button id="bankerDrawBtn" class="btn action-btn" style="display:none;" onclick="bankerDraw()">จั่ว</button>
+        <button id="bankerStandBtn" class="btn action-btn secondary" style="display:none;" onclick="bankerStand()">อยู่</button>
+      </div>
 
-      <button id="playerStandBtn" class="btn" style="display:none;" onclick="playerStand()">
-        ผู้เล่นอยู่
-      </button>
-
-      <button id="bankerDrawBtn" class="btn" style="display:none;" onclick="bankerDraw()">
-        เจ้ามือจั่ว
-      </button>
-
-      <button id="bankerStandBtn" class="btn" style="display:none;" onclick="bankerStand()">
-        เจ้ามืออยู่
-      </button>
-
-      <button id="newRoundBtn" class="btn" onclick="newRound()" style="display:none;">
+      <button id="newRoundBtn" class="btn action-main" onclick="newRound()" style="display:none;">
         เริ่มตาใหม่
       </button>
-
     </div>
 
     <div class="room-buttons">
-      <button class="btn" onclick="copyInviteLink()">
-        คัดลอกลิงก์เชิญ
-      </button>
-
-      <button class="btn danger" onclick="leaveRoom()">
-        ออกห้อง
-      </button>
+      <button class="btn" onclick="copyInviteLink()">คัดลอกลิงก์เชิญ</button>
+      <button class="btn danger" onclick="leaveRoom()">ออกห้อง</button>
     </div>
-
   </section>
 
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
