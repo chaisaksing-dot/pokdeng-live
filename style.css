@@ -199,4 +199,115 @@ input, select {
   justify-content: center;
   background: white;
   border-radius: 7px;
-  border: 1p
+  border: 1px solid #ddd;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 3px 6px rgba(0,0,0,.4);
+}
+
+.mini-card.back {
+  background:
+    repeating-linear-gradient(
+      45deg,
+      #ffffff 0 3px,
+      #16324a 3px 7px
+    );
+  border: 2px solid #ffffff;
+  color: transparent;
+  font-size: 0;
+}
+
+.red-card {
+  color: #e53935;
+}
+
+.black-card {
+  color: #111;
+}
+
+.bet-card {
+  position: absolute;
+  left: 50%;
+  bottom: -135px;
+  transform: translateX(-50%);
+  width: 300px;
+  max-width: 90%;
+  padding: 12px;
+  font-size: 14px;
+  z-index: 10;
+}
+
+.action-main {
+  position: absolute;
+  left: 50%;
+  bottom: -58px;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 42px;
+  padding: 8px;
+  font-size: 15px;
+  z-index: 20;
+}
+
+.action-buttons {
+  position: absolute;
+  left: 50%;
+  bottom: -58px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 30;
+}
+
+.action-btn {
+  width: 80px;
+  height: 40px;
+  padding: 6px;
+  font-size: 15px;
+  border-radius: 10px;
+  margin: 0;
+}
+
+.room-buttons {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  width: 160px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.room-buttons .btn {
+  width: 100%;
+  font-size: 14px;
+  padding: 10px;
+}
+
+#adminList,
+#reportBox,
+#topupRequestsList,
+#withdrawRequestsList,
+#openRoomsList {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.mini-card.open-card {
+  color: #111 !important;
+  font-size: 14px !important;
+}
+
+.mini-card.open-card span {
+  display: block;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.red-card {
+  color: #e53935 !important;
+}
+
+.black-card {
+  color: #111 !important;
+}
