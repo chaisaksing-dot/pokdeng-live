@@ -14,6 +14,7 @@ const db = firebase.database();
 let currentRoom = null;
 let myPlayerId = null;
 let players = [];
+let isDealing = false;
 
 const cards = [
   "A♠","2♠","3♠","4♠","5♠","6♠","7♠","8♠","9♠","10♠","J♠","Q♠","K♠",
@@ -30,15 +31,11 @@ function showPage(pageId) {
 
   if (pageId === "lobbyPage") {
     const playerId = localStorage.getItem("playerId") || "";
-
     db.ref("wallet/" + playerId).once("value").then(snap => {
       const money = Number(snap.val()) || 0;
       localStorage.setItem("playerMoney", money);
-
       const userInfo = document.getElementById("userInfo");
-      if (userInfo) {
-        userInfo.innerText = "รหัส: " + playerId + " | เครดิต: " + money;
-      }
+      if (userInfo) userInfo.innerText = "รหัส: " + playerId + " | เครดิต: " + money;
     });
   }
 
@@ -48,19 +45,13 @@ function showPage(pageId) {
 
 function loginLine() {
   const playerId = document.getElementById("playerId").value.trim();
-
-  if (!playerId) {
-    alert("กรุณาใส่รหัสผู้เล่น");
-    return;
-  }
+  if (!playerId) return alert("กรุณาใส่รหัสผู้เล่น");
 
   db.ref("wallet/" + playerId).once("value").then(snap => {
     const money = Number(snap.val()) || 0;
-
     myPlayerId = playerId;
     localStorage.setItem("playerId", playerId);
     localStorage.setItem("playerMoney", money);
-
     showPage("lobbyPage");
   });
 }
@@ -74,31 +65,22 @@ function createRoom() {
   const roomId = Date.now();
   let minBet = Number(document.getElementById("minBet").value) || 8;
   let maxBet = Number(document.getElementById("maxBet").value) || 0;
-
   const playerId = localStorage.getItem("playerId") || "owner";
 
   db.ref("wallet/" + playerId).once("value").then(snap => {
     const walletMoney = Number(snap.val()) || 0;
     const autoMaxBet = Math.floor(walletMoney / 8);
-
     if (!maxBet) maxBet = autoMaxBet;
 
-    if (minBet > maxBet) {
-      alert("ขั้นต่ำต้องไม่เกินสูงสุด");
-      return;
-    }
-
-    if (maxBet * 8 > walletMoney) {
-      alert("เงินเจ้ามือไม่พอ");
-      return;
-    }
+    if (minBet > maxBet) return alert("ขั้นต่ำต้องไม่เกินสูงสุด");
+    if (maxBet * 8 > walletMoney) return alert("เงินเจ้ามือไม่พอ");
 
     currentRoom = {
       id: roomId,
       banker: playerId,
       bankerMoney: walletMoney,
-      maxBet: maxBet,
-      minBet: minBet,
+      maxBet,
+      minBet,
       status: "waiting"
     };
 
@@ -110,18 +92,13 @@ function createRoom() {
           money: walletMoney,
           bet: 0,
           ready: false,
-          role: "banker"
+          role: "banker",
+          cards: null,
+          actionDone: false
         }
       }
     }).then(() => {
       myPlayerId = playerId;
-
-      document.getElementById("roomIdText").innerText = roomId;
-      document.getElementById("bankerMoneyText").innerText = walletMoney;
-      document.getElementById("minBetText").innerText = minBet;
-      document.getElementById("maxBetText").innerText = maxBet;
-      document.getElementById("deckRemainCount").innerText = 52;
-
       listenRoom(roomId);
       showPage("roomPage");
     });
@@ -130,14 +107,9 @@ function createRoom() {
 
 function joinRoom() {
   const roomId = document.getElementById("joinRoomId").value.trim();
-
-  if (!roomId) {
-    alert("กรุณาใส่เลขห้อง");
-    return;
-  }
+  if (!roomId) return alert("กรุณาใส่เลขห้อง");
 
   myPlayerId = localStorage.getItem("playerId");
-
   if (!myPlayerId) {
     alert("กรุณาเข้าสู่ระบบก่อน");
     showPage("loginPage");
@@ -145,44 +117,34 @@ function joinRoom() {
   }
 
   db.ref("rooms/" + roomId).once("value").then(roomSnap => {
-    if (!roomSnap.exists()) {
-      alert("ไม่พบห้องนี้");
-      return;
-    }
+    if (!roomSnap.exists()) return alert("ไม่พบห้องนี้");
 
-    currentRoom = roomSnap.val();
-
-    document.getElementById("roomIdText").innerText = currentRoom.id;
-    document.getElementById("bankerMoneyText").innerText = currentRoom.bankerMoney;
-    document.getElementById("minBetText").innerText = currentRoom.minBet || 10;
-    document.getElementById("maxBetText").innerText = currentRoom.maxBet;
-    document.getElementById("deckRemainCount").innerText = 52;
-
+    currentRoom = { ...roomSnap.val(), id: roomId };
     loadBetOptions(currentRoom);
 
     db.ref("wallet/" + myPlayerId).once("value").then(moneySnap => {
       const walletMoney = Number(moneySnap.val()) || 0;
 
-      db.ref("rooms/" + roomId + "/players/" + myPlayerId)
-        .once("value")
-        .then(playerSnap => {
-          if (!playerSnap.exists()) {
-            db.ref("rooms/" + roomId + "/players/" + myPlayerId).set({
-              name: myPlayerId,
-              money: walletMoney,
-              bet: 0,
-              ready: false,
-              role: "player"
-            });
-          } else {
-            db.ref("rooms/" + roomId + "/players/" + myPlayerId).update({
-              money: walletMoney
-            });
-          }
+      db.ref("rooms/" + roomId + "/players/" + myPlayerId).once("value").then(playerSnap => {
+        if (!playerSnap.exists()) {
+          db.ref("rooms/" + roomId + "/players/" + myPlayerId).set({
+            name: myPlayerId,
+            money: walletMoney,
+            bet: 0,
+            ready: false,
+            role: "player",
+            cards: null,
+            actionDone: false
+          });
+        } else {
+          db.ref("rooms/" + roomId + "/players/" + myPlayerId).update({
+            money: walletMoney
+          });
+        }
 
-          listenRoom(roomId);
-          showPage("roomPage");
-        });
+        listenRoom(roomId);
+        showPage("roomPage");
+      });
     });
   });
 }
@@ -192,27 +154,17 @@ function listenRoom(roomId) {
     const room = snap.val();
     if (!room) return;
 
-    currentRoom = {
-  ...room,
-  id: roomId
-};
+    currentRoom = { ...room, id: roomId };
+    players = Object.values(room.players || {});
 
-    const data = room.players || {};
-    players = Object.values(data);
-    console.log("MY ID =", myPlayerId);
-    console.log("PLAYERS =", players);
-
-    document.getElementById("roomIdText").innerText = room.id;
-    document.getElementById("bankerMoneyText").innerText = room.bankerMoney;
+    document.getElementById("roomIdText").innerText = roomId;
+    document.getElementById("bankerMoneyText").innerText = room.bankerMoney || 0;
     document.getElementById("minBetText").innerText = room.minBet || 10;
-    document.getElementById("maxBetText").innerText = room.maxBet;
+    document.getElementById("maxBetText").innerText = room.maxBet || 0;
 
     renderPlayers();
-updateDeckRemain();
-setTimeout(updateActionButtons, 300);
-setTimeout(updateActionButtons, 1000);
-setTimeout(updateActionButtons, 1500);
-
+    updateDeckRemain();
+    setTimeout(updateActionButtons, 300);
   });
 }
 
@@ -222,7 +174,6 @@ function leaveRoom() {
 
 function showCard(c) {
   let value, suit;
-
   if (typeof c === "string") {
     suit = c.slice(-1);
     value = c.slice(0, -1);
@@ -237,33 +188,51 @@ function showCard(c) {
   if (value == 13) value = "K";
 
   const colorClass = suit === "♥" || suit === "♦" ? "red-card" : "black-card";
-
   return `<span class="${colorClass}">${value}${suit}</span>`;
+}
+
+function cardValue(card) {
+  let v = card;
+  if (typeof card !== "string") {
+    v = card.value;
+  } else {
+    const last = card.slice(-1);
+    if (["♠", "♥", "♦", "♣"].includes(last)) v = card.slice(0, -1);
+  }
+
+  if (["J", "Q", "K"].includes(v)) return 0;
+  if (v === "A") return 1;
+  return Number(v) % 10;
+}
+
+function getPoint(cardList) {
+  if (!cardList) return 0;
+  let total = 0;
+  Object.values(cardList).forEach(card => total += cardValue(card));
+  return total % 10;
+}
+
+function isPok(cardList) {
+  if (!cardList) return false;
+  const arr = Object.values(cardList);
+  if (arr.length !== 2) return false;
+  const point = getPoint(arr);
+  return point === 8 || point === 9;
 }
 
 function renderCards(cardList, isOpen) {
   if (!cardList) return "";
-
   const arr = Object.values(cardList);
 
   return `
     <br>
     <div class="banker-cards">
-      ${arr.map(c => {
-        return isOpen
-          ? `<div class="mini-card">${showCard(c)}</div>`
-          : `<div class="mini-card back"></div>`;
-      }).join("")}
+      ${arr.map(c => isOpen
+        ? `<div class="mini-card">${showCard(c)}</div>`
+        : `<div class="mini-card back"></div>`
+      ).join("")}
     </div>
   `;
-}
-
-function isPok(cards) {
-  if (!cards) return false;
-  const arr = Object.values(cards);
-  if (arr.length !== 2) return false;
-  const point = getPoint(arr);
-  return point === 8 || point === 9;
 }
 
 function renderPlayers() {
@@ -280,6 +249,7 @@ function renderPlayers() {
 
     const isMe = String(player.name) === String(myPlayerId);
     const cardText = renderCards(player.cards, isMe || isPok(player.cards));
+
     seat.innerHTML = `
       <b>🙂 ${player.name}</b><br>
       เงิน: ${player.money}<br>
@@ -296,7 +266,6 @@ function renderPlayers() {
     const isBankerMe = String(bankerPlayer.name) === String(myPlayerId);
     const bankerCardsText = renderCards(bankerPlayer.cards, isBankerMe || isPok(bankerPlayer.cards));
 
-
     bankerBox.innerHTML = `
       <b>👑 เจ้ามือ</b><br>
       เงิน: ${bankerPlayer.money}<br>
@@ -307,47 +276,37 @@ function renderPlayers() {
 
   renderBetBox();
   checkAllReady();
-  updateActionButtons();
 }
 
 function renderBetBox() {
   const betCard = document.getElementById("betCard");
   if (!betCard) return;
 
-  const me = players.find(p => p.name === myPlayerId);
+  const me = players.find(p => String(p.name) === String(myPlayerId));
 
-  if (!me || me.role !== "player") {
+  if (me && me.role === "player" && me.ready !== true && !me.cards && currentRoom && currentRoom.status === "waiting") {
+    betCard.style.display = "block";
+  } else {
     betCard.style.display = "none";
-    return;
   }
-
-  if (me.ready === true || me.cards || currentRoom.status === "playing") {
-    betCard.style.display = "none";
-    return;
-  }
-
-  betCard.style.display = "block";
 }
 
 function checkAllReady() {
   const startBtn = document.getElementById("startGameBtn");
   if (!startBtn) return;
 
-  if (!currentRoom || currentRoom.status === "playing") {
+  if (!currentRoom || currentRoom.status !== "waiting") {
     startBtn.style.display = "none";
+    startBtn.disabled = false;
     return;
   }
 
-  const me = players.find(p => p.name === myPlayerId);
+  const me = players.find(p => String(p.name) === String(myPlayerId));
   const normalPlayers = players.filter(p => p.role === "player");
 
-  if (
-    me &&
-    me.role === "banker" &&
-    normalPlayers.length > 0 &&
-    normalPlayers.every(p => p.ready === true)
-  ) {
+  if (me && me.role === "banker" && normalPlayers.length > 0 && normalPlayers.every(p => p.ready === true)) {
     startBtn.style.display = "block";
+    startBtn.disabled = false;
   } else {
     startBtn.style.display = "none";
   }
@@ -356,142 +315,326 @@ function checkAllReady() {
 function playerReady() {
   const bet = Number(document.getElementById("betAmount").value) || 0;
 
-  if (!currentRoom || !currentRoom.id) {
-    alert("ไม่พบห้อง");
-    return;
-  }
+  if (!currentRoom || !currentRoom.id) return alert("ไม่พบห้อง");
+  if (!myPlayerId) return alert("ไม่พบผู้เล่น");
 
-  if (!myPlayerId) {
-    alert("ไม่พบผู้เล่น");
-    return;
-  }
+  const me = players.find(p => String(p.name) === String(myPlayerId));
+  if (!me) return alert("ไม่พบข้อมูลผู้เล่น");
 
-  const me = players.find(p => p.name === myPlayerId);
-
-  if (!me) {
-    alert("ไม่พบข้อมูลผู้เล่น");
-    return;
-  }
-
-  if (!bet || bet <= 0) {
-    alert("กรุณาเลือกเงินแทง");
-    return;
-  }
-
-  if (bet > Number(currentRoom.maxBet)) {
-    alert("แทงเกินที่เจ้ามือกำหนด");
-    return;
-  }
-
-  if (me.money < bet * 5) {
-    alert("เงินไม่พอ ต้องมีอย่างน้อย " + bet * 5);
-    return;
-  }
+  if (!bet || bet <= 0) return alert("กรุณาเลือกเงินแทง");
+  if (bet > Number(currentRoom.maxBet)) return alert("แทงเกินที่เจ้ามือกำหนด");
+  if (me.money < bet * 5) return alert("เงินไม่พอ ต้องมีอย่างน้อย " + bet * 5);
 
   const betCard = document.getElementById("betCard");
   if (betCard) betCard.style.display = "none";
 
   db.ref("rooms/" + currentRoom.id + "/players/" + myPlayerId).update({
-    bet: bet,
-    ready: true
-  }).then(() => {
-    const betCard = document.getElementById("betCard");
-    if (betCard) betCard.style.display = "none";
+    bet,
+    ready: true,
+    actionDone: false
   });
+}
+
+function shuffleDeck() {
+  const deck = [...cards];
+  deck.sort(() => Math.random() - 0.5);
+  return deck;
+}
+
+function getUsedCards() {
+  const used = [];
+  players.forEach(p => {
+    if (p.cards) used.push(...Object.values(p.cards));
+  });
+  return used;
+}
+
+function drawOneCard() {
+  const used = getUsedCards();
+  const available = cards.filter(c => !used.includes(c));
+  if (available.length === 0) return cards[Math.floor(Math.random() * cards.length)];
+  return available[Math.floor(Math.random() * available.length)];
 }
 
 function dealCards() {
-  if (!currentRoom || !currentRoom.id) {
-    alert("ไม่พบห้อง");
-    return;
+  if (isDealing) return;
+  if (!currentRoom || !currentRoom.id) return;
+  if (currentRoom.status !== "waiting") return;
+
+  isDealing = true;
+
+  const startBtn = document.getElementById("startGameBtn");
+  if (startBtn) {
+    startBtn.disabled = true;
+    startBtn.style.display = "none";
   }
 
   const normalPlayers = players.filter(p => p.role === "player");
+  const bankerPlayer = players.find(p => p.role === "banker");
 
   if (normalPlayers.length === 0) {
-    alert("ต้องมีผู้เล่นก่อนเริ่มเกม");
-    return;
+    isDealing = false;
+    return alert("ต้องมีผู้เล่นก่อนเริ่มเกม");
   }
 
   if (!normalPlayers.every(p => p.ready === true)) {
-    alert("ผู้เล่นต้องกดพร้อมทุกคนก่อน");
-    return;
+    isDealing = false;
+    return alert("ผู้เล่นต้องกดพร้อมทุกคนก่อน");
   }
 
-  const startBtn = document.getElementById("startGameBtn");
   const betCard = document.getElementById("betCard");
-
-  if (startBtn) startBtn.style.display = "none";
   if (betCard) betCard.style.display = "none";
 
-  const deck = [...cards];
-  deck.sort(() => Math.random() - 0.5);
+  document.getElementById("resultText").innerText = "กำลังแจกไพ่...";
 
+  const deck = shuffleDeck();
   const dealOrder = [];
-  const bankerPlayer = players.find(p => p.role === "banker");
 
   for (let round = 0; round < 2; round++) {
-    normalPlayers.forEach(p => {
-      dealOrder.push(p.name);
-    });
-
-    if (bankerPlayer) {
-      dealOrder.push(bankerPlayer.name);
-    }
+    normalPlayers.forEach(p => dealOrder.push(p.name));
+    if (bankerPlayer) dealOrder.push(bankerPlayer.name);
   }
 
   const dealtCards = {};
-  players.forEach(p => {
-    dealtCards[p.name] = [];
+  players.forEach(p => dealtCards[p.name] = []);
+
+  db.ref("rooms/" + currentRoom.id).update({ status: "dealing" }).then(() => {
+    let index = 0;
+
+    function dealNextCard() {
+      if (index >= dealOrder.length) {
+        const updates = {};
+        updates["rooms/" + currentRoom.id + "/status"] = "playing";
+
+        players.forEach(p => {
+          updates["rooms/" + currentRoom.id + "/players/" + p.name + "/actionDone"] = false;
+        });
+
+        db.ref().update(updates).then(() => {
+          document.getElementById("resultText").innerText = "แจกไพ่แล้ว";
+
+          setTimeout(() => {
+            isDealing = false;
+            renderPlayers();
+            updateDeckRemain();
+            updateActionButtons();
+          }, 500);
+        });
+
+        return;
+      }
+
+      const playerName = dealOrder[index];
+      const card = deck.pop();
+
+      dealtCards[playerName].push(card);
+
+      db.ref("rooms/" + currentRoom.id + "/players/" + playerName + "/cards")
+        .set(dealtCards[playerName])
+        .then(() => {
+          index++;
+          setTimeout(dealNextCard, 500);
+        });
+    }
+
+    dealNextCard();
   });
-
-  db.ref("rooms/" + currentRoom.id + "/status").set("playing");
-
-  let index = 0;
-
-  function dealNextCard() {
-    if (index >= dealOrder.length) {
-    document.getElementById("resultText").innerText = "แจกไพ่แล้ว";
-    updateDeckRemain();
-
-      setTimeout(() => {
-  renderPlayers();
-  updateActionButtons();
-}, 1000);
-
-    return;
-}
-
-    const playerName = dealOrder[index];
-    const card = randomCard();
-
-    dealtCards[playerName].push(card);
-
-    db.ref("rooms/" + currentRoom.id + "/players/" + playerName + "/cards")
-      .set(dealtCards[playerName])
-      .then(() => {
-        updateDeckRemain();
-        index++;
-        setTimeout(dealNextCard, 700);
-      });
-  }
-
-  dealNextCard();
 }
 
 function updateDeckRemain() {
   let usedCards = 0;
-
   players.forEach(p => {
-    if (p.cards) {
-      usedCards += Object.values(p.cards).length;
-    }
+    if (p.cards) usedCards += Object.values(p.cards).length;
   });
 
-  const remain = 52 - usedCards;
   const el = document.getElementById("deckRemainCount");
+  if (el) el.innerText = 52 - usedCards;
+}
 
-  if (el) el.innerText = remain;
+function updateActionButtons() {
+  const playerDrawBtn = document.getElementById("playerDrawBtn");
+  const playerStandBtn = document.getElementById("playerStandBtn");
+  const bankerDrawBtn = document.getElementById("bankerDrawBtn");
+  const bankerStandBtn = document.getElementById("bankerStandBtn");
+
+  [playerDrawBtn, playerStandBtn, bankerDrawBtn, bankerStandBtn].forEach(btn => {
+    if (btn) btn.style.display = "none";
+  });
+
+  if (!currentRoom || currentRoom.status !== "playing") return;
+
+  const me = players.find(p => String(p.name) === String(myPlayerId));
+  if (!me || !me.cards) return;
+
+  const myCards = Object.values(me.cards);
+  const point = getPoint(myCards);
+
+  if (myCards.length >= 3) {
+    if (me.role === "player" && me.actionDone !== true) {
+      db.ref("rooms/" + currentRoom.id + "/players/" + myPlayerId).update({ actionDone: true });
+    }
+    return;
+  }
+
+  if (me.role === "player") {
+    if (point >= 8) {
+      if (me.actionDone !== true) {
+        db.ref("rooms/" + currentRoom.id + "/players/" + myPlayerId).update({ actionDone: true });
+      }
+      return;
+    }
+
+    document.getElementById("resultText").innerText = "เลือกจั่วหรืออยู่";
+    if (playerDrawBtn) playerDrawBtn.style.display = "block";
+    if (playerStandBtn) playerStandBtn.style.display = "block";
+    return;
+  }
+
+  if (me.role === "banker") {
+    const normalPlayers = players.filter(p => p.role === "player");
+
+    const allPlayersDone = normalPlayers.every(p => {
+      if (!p.cards) return false;
+      const cardsNow = Object.values(p.cards);
+      const pPoint = getPoint(cardsNow);
+      return cardsNow.length >= 3 || pPoint >= 8 || p.actionDone === true;
+    });
+
+    if (!allPlayersDone) {
+      document.getElementById("resultText").innerText = "รอผู้เล่นจั่ว/อยู่";
+      return;
+    }
+
+    if (point >= 8) {
+      finishGame();
+      return;
+    }
+
+    document.getElementById("resultText").innerText = "เจ้ามือเลือกจั่วหรืออยู่";
+    if (bankerDrawBtn) bankerDrawBtn.style.display = "block";
+    if (bankerStandBtn) bankerStandBtn.style.display = "block";
+  }
+}
+
+function checkPlayersDoneThenBanker() {
+  const normalPlayers = players.filter(p => p.role === "player");
+
+  const allDone = normalPlayers.every(p => {
+    if (!p.cards) return false;
+    const cardsNow = Object.values(p.cards);
+    const point = getPoint(cardsNow);
+    return cardsNow.length >= 3 || point >= 8 || p.actionDone === true;
+  });
+
+  if (allDone) {
+    setTimeout(nextBankerTurn, 500);
+  }
+}
+
+function playerDraw() {
+  const me = players.find(p => String(p.name) === String(myPlayerId));
+  if (!me || !me.cards) return;
+
+  const currentCards = Object.values(me.cards);
+  if (currentCards.length >= 3 || me.actionDone === true) return;
+
+  document.getElementById("resultText").innerText = "ผู้เล่นกำลังจั่ว...";
+
+  currentCards.push(drawOneCard());
+
+  db.ref("rooms/" + currentRoom.id + "/players/" + myPlayerId).update({
+    cards: currentCards,
+    actionDone: true
+  }).then(() => {
+    document.getElementById("playerDrawBtn").style.display = "none";
+    document.getElementById("playerStandBtn").style.display = "none";
+
+    players = players.map(p => String(p.name) === String(myPlayerId)
+      ? { ...p, cards: currentCards, actionDone: true }
+      : p
+    );
+
+    updateDeckRemain();
+    checkPlayersDoneThenBanker();
+  });
+}
+
+function playerStand() {
+  document.getElementById("playerDrawBtn").style.display = "none";
+  document.getElementById("playerStandBtn").style.display = "none";
+
+  db.ref("rooms/" + currentRoom.id + "/players/" + myPlayerId).update({
+    actionDone: true
+  }).then(() => {
+    document.getElementById("resultText").innerText = "ผู้เล่นอยู่";
+
+    players = players.map(p => String(p.name) === String(myPlayerId)
+      ? { ...p, actionDone: true }
+      : p
+    );
+
+    checkPlayersDoneThenBanker();
+  });
+}
+
+function nextBankerTurn() {
+  const banker = players.find(p => p.role === "banker");
+  if (!banker || !banker.cards) return;
+
+  const bankerCardsNow = Object.values(banker.cards);
+  const point = getPoint(bankerCardsNow);
+
+  if (bankerCardsNow.length >= 3 || point >= 8) {
+    finishGame();
+    return;
+  }
+
+  document.getElementById("resultText").innerText = "เจ้ามือเลือกจั่วหรืออยู่";
+  document.getElementById("bankerDrawBtn").style.display = "block";
+  document.getElementById("bankerStandBtn").style.display = "block";
+}
+
+function bankerDraw() {
+  const banker = players.find(p => p.role === "banker");
+  if (!banker || !banker.cards) return;
+
+  const currentCards = Object.values(banker.cards);
+  if (currentCards.length >= 3) return;
+
+  document.getElementById("resultText").innerText = "เจ้ามือกำลังจั่ว...";
+
+  currentCards.push(drawOneCard());
+
+  db.ref("rooms/" + currentRoom.id + "/players/" + banker.name).update({
+    cards: currentCards,
+    actionDone: true
+  }).then(() => {
+    document.getElementById("bankerDrawBtn").style.display = "none";
+    document.getElementById("bankerStandBtn").style.display = "none";
+    setTimeout(finishGame, 500);
+  });
+}
+
+function bankerStand() {
+  document.getElementById("bankerDrawBtn").style.display = "none";
+  document.getElementById("bankerStandBtn").style.display = "none";
+  finishGame();
+}
+
+function finishGame() {
+  document.getElementById("resultText").innerText = "จบตาแล้ว";
+
+  ["playerDrawBtn", "playerStandBtn", "bankerDrawBtn", "bankerStandBtn"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
+  });
+
+  const newRoundBtn = document.getElementById("newRoundBtn");
+  if (newRoundBtn) newRoundBtn.style.display = "block";
+
+  if (currentRoom && currentRoom.id && currentRoom.status !== "finished") {
+    db.ref("rooms/" + currentRoom.id).update({ status: "finished" });
+  }
 }
 
 function newRound() {
@@ -508,6 +651,8 @@ function newRound() {
   const betAmount = document.getElementById("betAmount");
   if (betAmount) betAmount.value = "";
 
+  isDealing = false;
+
   const updates = {};
   updates["rooms/" + currentRoom.id + "/status"] = "waiting";
 
@@ -521,185 +666,10 @@ function newRound() {
   db.ref().update(updates).then(() => {
     const deckRemain = document.getElementById("deckRemainCount");
     if (deckRemain) deckRemain.innerText = 52;
+
+    const startBtn = document.getElementById("startGameBtn");
+    if (startBtn) startBtn.disabled = false;
   });
-  window.autoDrawLock = false;
-window.autoBankerLock = false;
-  window.lastAutoDrawKey = "";
-}
-
-function cardValue(card) {
-  let v = card;
-
-  if (typeof card !== "string") {
-    v = card.value;
-  } else {
-    const last = card.slice(-1);
-    if (["♠", "♥", "♦", "♣"].includes(last)) {
-      v = card.slice(0, -1);
-    }
-  }
-
-  if (["J", "Q", "K"].includes(v)) return 0;
-  if (v === "A") return 1;
-
-  return Number(v) % 10;
-}
-
-function getPoint(cardList) {
-  if (!cardList) return 0;
-
-  let total = 0;
-  Object.values(cardList).forEach(card => {
-    total += cardValue(card);
-  });
-
-  return total % 10;
-}
-
-function randomCard() {
-  return cards[Math.floor(Math.random() * cards.length)];
-}
-
-function checkPlayersDoneThenBanker() {
-  const normalPlayers = players.filter(p => p.role === "player");
-
-  const allDone = normalPlayers.every(p => {
-    if (!p.cards) return false;
-
-    const cards = Object.values(p.cards);
-    const point = getPoint(cards);
-
-    return (
-      cards.length >= 3 ||
-      point >= 8 ||
-      p.actionDone === true
-    );
-  });
-
-  if (allDone) {
-    setTimeout(() => {
-      nextBankerTurn();
-    }, 800);
-  }
-}
-
-function playerDraw() {
-  document.getElementById("resultText").innerText = "ผู้เล่นกำลังจั่ว...";
-
-  setTimeout(() => {
-    const me = players.find(p => String(p.name) === String(myPlayerId));
-    if (!me) return;
-
-    const currentCards = me.cards ? Object.values(me.cards) : [];
-    const card = randomCard();
-
-    currentCards.push(card);
-
-    db.ref(
-      "rooms/" + currentRoom.id + "/players/" + myPlayerId
-    ).update({
-      cards: currentCards,
-      actionDone: true
-    }).then(() => {
-players = players.map(p => {
-  if (String(p.name) === String(myPlayerId)) {
-    return { ...p, cards: currentCards, actionDone: true };
-  }
-  return p;
-});
-      updateDeckRemain();
-
-      document.getElementById("playerDrawBtn").style.display = "none";
-      document.getElementById("playerStandBtn").style.display = "none";
-
-      checkPlayersDoneThenBanker();
-    });
-  }, 800);
-}
-
-function playerStand() {
-  document.getElementById("playerDrawBtn").style.display = "none";
-  document.getElementById("playerStandBtn").style.display = "none";
-
-  db.ref(
-    "rooms/" + currentRoom.id + "/players/" + myPlayerId
-  ).update({
-    actionDone: true
-  }).then(() => {
-    document.getElementById("resultText").innerText = "ผู้เล่นอยู่";
-    checkPlayersDoneThenBanker();
-  });
-}
-
-function nextBankerTurn() {
-  const banker = players.find(p => p.role === "banker");
-  if (!banker || !banker.cards) return;
-
-  const bankerCardsNow = Object.values(banker.cards);
-  const point = getPoint(bankerCardsNow);
-
-  if (bankerCardsNow.length >= 3) {
-    finishGame();
-    return;
-  }
-
-  if (point <= 3) {
-    bankerDraw();
-    return;
-  }
-
-  if (point >= 4 && point <= 7) {
-    document.getElementById("bankerDrawBtn").style.display = "block";
-    document.getElementById("bankerStandBtn").style.display = "block";
-    return;
-  }
-
-  finishGame();
-}
-
-function bankerDraw() {
-  document.getElementById("resultText").innerText = "เจ้ามือกำลังจั่ว...";
-
-  setTimeout(() => {
-    const banker = players.find(p => p.role === "banker");
-    if (!banker) return;
-
-    const currentCards = banker.cards ? Object.values(banker.cards) : [];
-    const card = randomCard();
-
-    currentCards.push(card);
-
-    db.ref("rooms/" + currentRoom.id + "/players/" + banker.name + "/cards")
-      .set(currentCards)
-      .then(() => {
-        updateDeckRemain();
-
-        document.getElementById("bankerDrawBtn").style.display = "none";
-        document.getElementById("bankerStandBtn").style.display = "none";
-
-        setTimeout(() => {
-          finishGame();
-        }, 800);
-      });
-  }, 1000);
-}
-
-function bankerStand() {
-  document.getElementById("bankerDrawBtn").style.display = "none";
-  document.getElementById("bankerStandBtn").style.display = "none";
-  finishGame();
-}
-
-function finishGame() {
-  document.getElementById("resultText").innerText = "จบตาแล้ว";
-
-  document.getElementById("playerDrawBtn").style.display = "none";
-  document.getElementById("playerStandBtn").style.display = "none";
-  document.getElementById("bankerDrawBtn").style.display = "none";
-  document.getElementById("bankerStandBtn").style.display = "none";
-
-  const newRoundBtn = document.getElementById("newRoundBtn");
-  if (newRoundBtn) newRoundBtn.style.display = "block";
 }
 
 function loadBetOptions(room) {
@@ -728,10 +698,7 @@ function updateMaxLose() {
 }
 
 function copyInviteLink() {
-  if (!currentRoom || !currentRoom.id) {
-    alert("ยังไม่มีห้อง");
-    return;
-  }
+  if (!currentRoom || !currentRoom.id) return alert("ยังไม่มีห้อง");
 
   const link = "https://chaisaksing-dot.github.io/pokdeng-live/?room=" + currentRoom.id;
 
@@ -744,15 +711,8 @@ function topUp() {
   const playerName = document.getElementById("playerName").value.trim();
   const amount = Number(document.getElementById("amount").value);
 
-  if (!playerName) {
-    alert("กรอกชื่อผู้เล่น");
-    return;
-  }
-
-  if (!amount || amount <= 0) {
-    alert("กรอกจำนวนเงิน");
-    return;
-  }
+  if (!playerName) return alert("กรอกชื่อผู้เล่น");
+  if (!amount || amount <= 0) return alert("กรอกจำนวนเงิน");
 
   db.ref("wallet/" + playerName).once("value").then(snap => {
     const oldMoney = Number(snap.val()) || 0;
@@ -770,23 +730,12 @@ function withdraw() {
   const playerName = document.getElementById("playerName").value.trim();
   const amount = Number(document.getElementById("amount").value);
 
-  if (!playerName) {
-    alert("กรอกชื่อผู้เล่น");
-    return;
-  }
-
-  if (!amount || amount <= 0) {
-    alert("กรอกจำนวนเงิน");
-    return;
-  }
+  if (!playerName) return alert("กรอกชื่อผู้เล่น");
+  if (!amount || amount <= 0) return alert("กรอกจำนวนเงิน");
 
   db.ref("wallet/" + playerName).once("value").then(snap => {
     const oldMoney = Number(snap.val()) || 0;
-
-    if (oldMoney < amount) {
-      alert("ยอดเงินไม่พอถอน");
-      return;
-    }
+    if (oldMoney < amount) return alert("ยอดเงินไม่พอถอน");
 
     const newMoney = oldMoney - amount;
 
@@ -813,6 +762,7 @@ window.bankerDraw = bankerDraw;
 window.bankerStand = bankerStand;
 window.finishGame = finishGame;
 window.updateMaxLose = updateMaxLose;
+window.updateActionButtons = updateActionButtons;
 window.topUp = topUp;
 window.withdraw = withdraw;
 
@@ -828,124 +778,3 @@ window.onload = function () {
     showPage("loginPage");
   }
 };
-function updateActionButtons() {
-  const playerDrawBtn = document.getElementById("playerDrawBtn");
-  const playerStandBtn = document.getElementById("playerStandBtn");
-  const bankerDrawBtn = document.getElementById("bankerDrawBtn");
-  const bankerStandBtn = document.getElementById("bankerStandBtn");
-
-  [playerDrawBtn, playerStandBtn, bankerDrawBtn, bankerStandBtn].forEach(btn => {
-    if (btn) btn.style.display = "none";
-  });
-
-  if (!currentRoom || currentRoom.status !== "playing") return;
-
-  const me = players.find(p => String(p.name) === String(myPlayerId));
-  if (!me || !me.cards) return;
-
-  const myCards = Object.values(me.cards);
-  const point = getPoint(myCards);
-
-  if (myCards.length >= 3) return;
-
-  if (me.role === "player") {
-    if (point >= 8) {
-      db.ref("rooms/" + currentRoom.id + "/players/" + myPlayerId).update({
-        actionDone: true
-      });
-      return;
-    }
-
-    if (point <= 3) {
-      document.getElementById("resultText").innerText = "ผู้เล่นกำลังจั่ว...";
-      setTimeout(() => {
-        playerDraw();
-      }, 500);
-      return;
-    }
-
-    if (point >= 4 && point <= 7) {
-      document.getElementById("resultText").innerText = "เลือกจั่วหรืออยู่";
-      if (playerDrawBtn) playerDrawBtn.style.display = "block";
-      if (playerStandBtn) playerStandBtn.style.display = "block";
-      return;
-    }
-  }
-
-  if (me.role === "banker") {
-    const normalPlayers = players.filter(p => p.role === "player");
-
-    const allPlayersDone = normalPlayers.every(p => {
-      if (!p.cards) return false;
-      const cards = Object.values(p.cards);
-      const pPoint = getPoint(cards);
-      return cards.length >= 3 || pPoint >= 8 || p.actionDone === true;
-    });
-
-    if (!allPlayersDone) {
-      document.getElementById("resultText").innerText = "รอผู้เล่นจั่ว/อยู่";
-      return;
-    }
-
-    if (point >= 8) {
-      finishGame();
-      return;
-    }
-
-    if (point <= 3) {
-      if (window.autoBankerLock) return;
-      window.autoBankerLock = true;
-      setTimeout(() => {
-        bankerDraw();
-      }, 800);
-      return;
-    }
-
-    if (point >= 4 && point <= 7) {
-      if (bankerDrawBtn) bankerDrawBtn.style.display = "block";
-      if (bankerStandBtn) bankerStandBtn.style.display = "block";
-    }
-  }
-}
-
-window.updateActionButtons = updateActionButtons;
-
-function forcePlayerTurn() {
-  if (!currentRoom || currentRoom.status !== "playing") return;
-
-  const me = players.find(p => String(p.name) === String(myPlayerId));
-  if (!me || me.role !== "player" || !me.cards) return;
-
-  const playerDrawBtn = document.getElementById("playerDrawBtn");
-  const playerStandBtn = document.getElementById("playerStandBtn");
-
-  const myCards = Object.values(me.cards);
-  const point = getPoint(myCards);
-
-  if (myCards.length >= 3 ) return;
-
-  if (point >= 8) {
-    db.ref("rooms/" + currentRoom.id + "/players/" + myPlayerId).update({
-      actionDone: true
-    });
-    return;
-  }
-
-  if (point <= 3) {
-    const key = currentRoom.id + "-" + myPlayerId + "-" + myCards.join(",");
-    if (window.forceDrawKey === key) return;
-    window.forceDrawKey = key;
-
-    document.getElementById("resultText").innerText = "ผู้เล่นกำลังจั่ว...";
-    setTimeout(() => playerDraw(), 500);
-    return;
-  }
-
-  if (point >= 4 && point <= 7) {
-    document.getElementById("resultText").innerText = "เลือกจั่วหรืออยู่";
-    if (playerDrawBtn) playerDrawBtn.style.display = "block";
-    if (playerStandBtn) playerStandBtn.style.display = "block";
-  }
-}
-
-setInterval(forcePlayerTurn, 500);
