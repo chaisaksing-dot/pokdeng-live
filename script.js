@@ -385,17 +385,21 @@ function leaveRoom() {
 }
 
 function copyInviteLink() {
+
   if (!currentRoom || !currentRoom.id) {
     alert("ยังไม่มีห้อง");
     return;
   }
 
-  const link = location.origin + location.pathname + "?room=" + currentRoom.id;
+  const link =
+    "https://chaisaksing-dot.github.io/pokdeng-live/?room=" +
+    currentRoom.id;
 
   navigator.clipboard.writeText(link)
     .then(() => alert("คัดลอกลิงก์เชิญแล้ว:\n" + link))
     .catch(() => prompt("คัดลอกลิงก์นี้ส่งให้เพื่อน", link));
 }
+
 // ===========================
 // ระบบไพ่ / สำรับกลาง Firebase
 // ===========================
