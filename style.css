@@ -1,212 +1,202 @@
-*{
-  box-sizing:border-box;
-  font-family:Arial, sans-serif;
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
 }
 
-body{
-  margin:0;
-  background:#101820;
-  color:white;
+body {
+  margin: 0;
+  background: #101820;
+  color: white;
 }
 
-.app{
-  max-width:430px;
-  margin:auto;
-  min-height:100vh;
-  padding:15px;
+.app {
+  max-width: 430px;
+  margin: auto;
+  min-height: 100vh;
+  padding: 15px;
 }
 
-.page{
-  display:none;
+.page {
+  display: none;
 }
 
-#loginPage{
-  display:block;
+.card {
+  background: #1f2d3a;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 15px;
 }
 
-.card{
-  background:#1f2d3a;
-  border-radius:16px;
-  padding:16px;
-  margin-bottom:15px;
+.center {
+  text-align: center;
+  margin-top: 100px;
 }
 
-.center{
-  text-align:center;
-  margin-top:120px;
+h1, h2, h3 {
+  margin-top: 0;
 }
 
-.btn{
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:12px;
-  background:#06c755;
-  color:white;
-  font-size:16px;
-  transition:.2s;
-  box-shadow:0 0 15px rgba(0,255,100,.4);
+.muted {
+  color: #b7c0c9;
+  font-size: 14px;
 }
 
-.btn:active{
-  transform:scale(.96);
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
 }
 
-.danger{
-  background:#d9534f;
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #06c755;
+  color: white;
+  font-size: 16px;
+  margin-top: 8px;
+  box-shadow: 0 0 12px rgba(0,255,100,0.25);
 }
 
-.casino-table{
-  position:relative;
-  width:92vw;
-  max-width:520px;
-  height:520px;
-  margin:40px auto 120px;
-  border-radius:50%;
-  background:radial-gradient(circle,#078b32 0%,#026b25 70%);
-  border:8px solid #ffd21f;
-  box-shadow:0 0 25px #ffd21f;
+.btn.secondary {
+  background: #2979ff;
 }
 
-.table-center{
-  position:absolute;
-  top:42%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  text-align:center;
+.btn.danger {
+  background: #e53935;
 }
 
-#resultText{
-  font-size:18px;
-  font-weight:bold;
-  color:#ffd166;
+.btn.small {
+  width: auto;
+  padding: 8px 12px;
+  font-size: 14px;
 }
 
-.banker-seat{
-  position:absolute;
-  top:-60px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:5;
-  text-align:center;
+.btn:active {
+  transform: scale(0.96);
 }
 
-.player-seat{
-  position:absolute;
-  width:95px;
-  font-size:10px;
-  line-height:1.25;
-  text-align:center;
-  color:white;
-  z-index:5;
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
-.player1{ top:8%; left:-5%; }
-.player2{ top:36%; left:-12%; }
-.player3{ bottom:15%; left:2%; }
-.player4{ bottom:-8%; left:28%; }
-.player5{ bottom:-8%; right:28%; }
-.player6{ bottom:15%; right:2%; }
-.player7{ top:36%; right:-12%; }
-.player8{ top:8%; right:-5%; }
-
-#betCard{
-  width:300px;
-  max-width:90%;
-  padding:12px;
-  font-size:14px;
-  z-index:5;
-  margin:20px auto;
+.creditText {
+  color: #ffcc00;
+  font-size: 18px;
+  font-weight: bold;
 }
 
-#betCard h3{
-  font-size:16px;
-  margin:0 0 8px;
+.hidden-admin-btn {
+  opacity: 0.05;
+  width: 60px;
+  height: 30px;
+  background: transparent;
+  border: none;
+  color: white;
 }
 
-#betCard .btn,
-#betCard button{
-  padding:8px 10px;
-  font-size:14px;
+.room-item {
+  background: #162331;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
-#deckPile{
-  width:48px;
-  height:68px;
-  margin:0 auto 10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+.casino-table {
+  position: relative;
+  width: 92vw;
+  max-width: 520px;
+  height: 520px;
+  margin: 35px auto 130px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #078b32 0%, #026b25 70%);
+  border: 8px solid #ffd21f;
+  box-shadow: 0 0 25px #ffd21f;
 }
 
-#deckRemain{
-  color:#ffd54f;
-  font-size:14px;
-  font-weight:bold;
-  text-align:center;
-  margin-top:6px;
+.table-center {
+  position: absolute;
+  top: 43%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  width: 170px;
+  color: white;
 }
 
-.mini-card{
-  width:48px;
-  height:68px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:white;
-  border-radius:8px;
-  border:1px solid #ddd;
-  font-size:20px;
-  font-weight:bold;
-  box-shadow:0 3px 6px rgba(0,0,0,.4);
+#deckPile {
+  margin: 0 auto 6px;
 }
 
-.banker-cards{
-  display:flex;
-  flex-direction:row;
-  justify-content:center;
-  align-items:center;
-  gap:8px;
+#deckRemain {
+  color: #ffd54f;
+  font-size: 14px;
+  font-weight: bold;
 }
 
-.red-card{
-  color:#e53935;
+#turnTimer {
+  color: #ffeb3b;
+  font-size: 13px;
+  margin-top: 4px;
 }
 
-.black-card{
-  color:#111;
+#resultText {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffd166;
+  line-height: 1.5;
+  margin-top: 8px;
 }
 
-.mini-card.back{
-  background:repeating-linear-gradient(
-    45deg,
-    #ffffff 0 3px,
-    #16324a 3px 7px
-  );
-  border:2px solid #ffffff;
-  color:transparent;
-  font-size:0;
-  overflow:hidden;
+.player-seat {
+  position: absolute;
+  width: 95px;
+  text-align: center;
+  z-index: 5;
+  font-size: 10px;
+  color: #fff;
 }
 
-.room-buttons{
-  position:fixed;
-  right:12px;
-  bottom:12px;
-  width:170px;
-  z-index:9999;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+.banker-seat {
+  top: -62px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-.room-buttons .btn{
-  width:100%;
+.player1 { top: 8%; left: -5%; }
+.player2 { top: 36%; left: -12%; }
+.player3 { bottom: 15%; left: 2%; }
+.player4 { bottom: -8%; left: 28%; }
+.player5 { bottom: -8%; right: 28%; }
+.player6 { bottom: 15%; right: 2%; }
+.player7 { top: 36%; right: -12%; }
+.player8 { top: 8%; right: -5%; }
+
+.banker-cards {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 4px;
 }
 
-.fly-card{
-  position:fixed;
-  font-size:36px;
-  z-index:9999;
-  transition:all .6s ease;
-}
+.mini-card {
+  width: 38px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 7px;
+  border: 1p
