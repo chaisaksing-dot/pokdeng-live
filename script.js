@@ -192,10 +192,15 @@ function listenRoom(roomId) {
     const room = snap.val();
     if (!room) return;
 
-    currentRoom = room;
+    currentRoom = {
+  ...room,
+  id: roomId
+};
 
     const data = room.players || {};
     players = Object.values(data);
+    console.log("MY ID =", myPlayerId);
+    console.log("PLAYERS =", players);
 
     document.getElementById("roomIdText").innerText = room.id;
     document.getElementById("bankerMoneyText").innerText = room.bankerMoney;
@@ -203,7 +208,11 @@ function listenRoom(roomId) {
     document.getElementById("maxBetText").innerText = room.maxBet;
 
     renderPlayers();
-    updateDeckRemain();
+updateDeckRemain();
+setTimeout(updateActionButtons, 300);
+setTimeout(updateActionButtons, 1000);
+setTimeout(updateActionButtons, 1500);
+
   });
 }
 
@@ -249,6 +258,14 @@ function renderCards(cardList, isOpen) {
   `;
 }
 
+function isPok(cards) {
+  if (!cards) return false;
+  const arr = Object.values(cards);
+  if (arr.length !== 2) return false;
+  const point = getPoint(arr);
+  return point === 8 || point === 9;
+}
+
 function renderPlayers() {
   for (let i = 1; i <= 8; i++) {
     const seat = document.getElementById("player" + i);
@@ -261,9 +278,8 @@ function renderPlayers() {
     const seat = document.getElementById("player" + (index + 1));
     if (!seat) return;
 
-    const isMe = player.name === myPlayerId;
-    const cardText = renderCards(player.cards, isMe);
-
+    const isMe = String(player.name) === String(myPlayerId);
+    const cardText = renderCards(player.cards, isMe || isPok(player.cards));
     seat.innerHTML = `
       <b>🙂 ${player.name}</b><br>
       เงิน: ${player.money}<br>
@@ -277,8 +293,9 @@ function renderPlayers() {
   const bankerPlayer = players.find(p => p.role === "banker");
 
   if (bankerBox && bankerPlayer) {
-    const isBankerMe = bankerPlayer.name === myPlayerId;
-    const bankerCardsText = renderCards(bankerPlayer.cards, isBankerMe);
+    const isBankerMe = String(bankerPlayer.name) === String(myPlayerId);
+    const bankerCardsText = renderCards(bankerPlayer.cards, isBankerMe || isPok(bankerPlayer.cards));
+
 
     bankerBox.innerHTML = `
       <b>👑 เจ้ามือ</b><br>
@@ -290,6 +307,7 @@ function renderPlayers() {
 
   renderBetBox();
   checkAllReady();
+  updateActionButtons();
 }
 
 function renderBetBox() {
@@ -433,13 +451,19 @@ function dealCards() {
 
   function dealNextCard() {
     if (index >= dealOrder.length) {
-      document.getElementById("resultText").innerText = "แจกไพ่แล้ว";
-      updateDeckRemain();
-      return;
-    }
+    document.getElementById("resultText").innerText = "แจกไพ่แล้ว";
+    updateDeckRemain();
+
+      setTimeout(() => {
+  renderPlayers();
+  updateActionButtons();
+}, 1000);
+
+    return;
+}
 
     const playerName = dealOrder[index];
-    const card = deck.pop();
+    const card = randomCard();
 
     dealtCards[playerName].push(card);
 
@@ -491,12 +515,16 @@ function newRound() {
     updates["rooms/" + currentRoom.id + "/players/" + p.name + "/ready"] = false;
     updates["rooms/" + currentRoom.id + "/players/" + p.name + "/bet"] = 0;
     updates["rooms/" + currentRoom.id + "/players/" + p.name + "/cards"] = null;
+    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/actionDone"] = false;
   });
 
   db.ref().update(updates).then(() => {
     const deckRemain = document.getElementById("deckRemainCount");
     if (deckRemain) deckRemain.innerText = 52;
   });
+  window.autoDrawLock = false;
+window.autoBankerLock = false;
+  window.lastAutoDrawKey = "";
 }
 
 function cardValue(card) {
@@ -532,78 +560,146 @@ function randomCard() {
   return cards[Math.floor(Math.random() * cards.length)];
 }
 
-function playerDraw() {
+function checkPlayersDoneThenBanker() {
+  const normalPlayers = players.filter(p => p.role === "player");
 
-  document.getElementById("resultText").innerText = "ผู้เล่นกำลังจั่ว...";
+  const allDone = normalPlayers.every(p => {
+    if (!p.cards) return false;
 
-  setTimeout(() => {
+    const cards = Object.values(p.cards);
+    const point = getPoint(cards);
 
-    const card = deck.pop();
+    return (
+      cards.length >= 3 ||
+      point >= 8 ||
+      p.actionDone === true
+    );
+  });
 
-    playerCards.push(card);
-
-    db.ref(
-      "rooms/" +
-      currentRoom.id +
-      "/players/" +
-      myPlayerId +
-      "/cards"
-    ).set(playerCards);
-
-    updateDeckRemain();
-
-    document.getElementById("playerDrawBtn").style.display = "none";
-    document.getElementById("playerStandBtn").style.display = "none";
-
+  if (allDone) {
     setTimeout(() => {
       nextBankerTurn();
     }, 800);
+  }
+}
 
-  }, 1000);
+function playerDraw() {
+  document.getElementById("resultText").innerText = "ผู้เล่นกำลังจั่ว...";
+
+  setTimeout(() => {
+    const me = players.find(p => String(p.name) === String(myPlayerId));
+    if (!me) return;
+
+    const currentCards = me.cards ? Object.values(me.cards) : [];
+    const card = randomCard();
+
+    currentCards.push(card);
+
+    db.ref(
+      "rooms/" + currentRoom.id + "/players/" + myPlayerId
+    ).update({
+      cards: currentCards,
+      actionDone: true
+    }).then(() => {
+players = players.map(p => {
+  if (String(p.name) === String(myPlayerId)) {
+    return { ...p, cards: currentCards, actionDone: true };
+  }
+  return p;
+});
+      updateDeckRemain();
+
+      document.getElementById("playerDrawBtn").style.display = "none";
+      document.getElementById("playerStandBtn").style.display = "none";
+
+      checkPlayersDoneThenBanker();
+    });
+  }, 800);
 }
 
 function playerStand() {
-  alert("ระบบอยู่ จะจัดต่อหลังจากระบบแจก 2 ใบนิ่งแล้ว");
+  document.getElementById("playerDrawBtn").style.display = "none";
+  document.getElementById("playerStandBtn").style.display = "none";
+
+  db.ref(
+    "rooms/" + currentRoom.id + "/players/" + myPlayerId
+  ).update({
+    actionDone: true
+  }).then(() => {
+    document.getElementById("resultText").innerText = "ผู้เล่นอยู่";
+    checkPlayersDoneThenBanker();
+  });
+}
+
+function nextBankerTurn() {
+  const banker = players.find(p => p.role === "banker");
+  if (!banker || !banker.cards) return;
+
+  const bankerCardsNow = Object.values(banker.cards);
+  const point = getPoint(bankerCardsNow);
+
+  if (bankerCardsNow.length >= 3) {
+    finishGame();
+    return;
+  }
+
+  if (point <= 3) {
+    bankerDraw();
+    return;
+  }
+
+  if (point >= 4 && point <= 7) {
+    document.getElementById("bankerDrawBtn").style.display = "block";
+    document.getElementById("bankerStandBtn").style.display = "block";
+    return;
+  }
+
+  finishGame();
 }
 
 function bankerDraw() {
-
   document.getElementById("resultText").innerText = "เจ้ามือกำลังจั่ว...";
 
   setTimeout(() => {
-
     const banker = players.find(p => p.role === "banker");
+    if (!banker) return;
 
-    const card = deck.pop();
+    const currentCards = banker.cards ? Object.values(banker.cards) : [];
+    const card = randomCard();
 
-    bankerCards.push(card);
+    currentCards.push(card);
 
-    db.ref(
-      "rooms/" +
-      currentRoom.id +
-      "/players/" +
-      banker.name +
-      "/cards"
-    ).set(bankerCards);
+    db.ref("rooms/" + currentRoom.id + "/players/" + banker.name + "/cards")
+      .set(currentCards)
+      .then(() => {
+        updateDeckRemain();
 
-    updateDeckRemain();
+        document.getElementById("bankerDrawBtn").style.display = "none";
+        document.getElementById("bankerStandBtn").style.display = "none";
 
-    document.getElementById("bankerDrawBtn").style.display = "none";
-    document.getElementById("bankerStandBtn").style.display = "none";
-
-    setTimeout(() => {
-      finishGame();
-    }, 800);
-
+        setTimeout(() => {
+          finishGame();
+        }, 800);
+      });
   }, 1000);
 }
 
 function bankerStand() {
-  alert("ระบบเจ้ามืออยู่ จะจัดต่อหลังจากระบบแจก 2 ใบนิ่งแล้ว");
+  document.getElementById("bankerDrawBtn").style.display = "none";
+  document.getElementById("bankerStandBtn").style.display = "none";
+  finishGame();
 }
 
 function finishGame() {
-  alert("ระบบสรุปผล จะจัดต่อหลังจากระบบจั่วไพ่เสร็จ");
+  document.getElementById("resultText").innerText = "จบตาแล้ว";
+
+  document.getElementById("playerDrawBtn").style.display = "none";
+  document.getElementById("playerStandBtn").style.display = "none";
+  document.getElementById("bankerDrawBtn").style.display = "none";
+  document.getElementById("bankerStandBtn").style.display = "none";
+
+  const newRoundBtn = document.getElementById("newRoundBtn");
+  if (newRoundBtn) newRoundBtn.style.display = "block";
 }
 
 function loadBetOptions(room) {
@@ -732,3 +828,124 @@ window.onload = function () {
     showPage("loginPage");
   }
 };
+function updateActionButtons() {
+  const playerDrawBtn = document.getElementById("playerDrawBtn");
+  const playerStandBtn = document.getElementById("playerStandBtn");
+  const bankerDrawBtn = document.getElementById("bankerDrawBtn");
+  const bankerStandBtn = document.getElementById("bankerStandBtn");
+
+  [playerDrawBtn, playerStandBtn, bankerDrawBtn, bankerStandBtn].forEach(btn => {
+    if (btn) btn.style.display = "none";
+  });
+
+  if (!currentRoom || currentRoom.status !== "playing") return;
+
+  const me = players.find(p => String(p.name) === String(myPlayerId));
+  if (!me || !me.cards) return;
+
+  const myCards = Object.values(me.cards);
+  const point = getPoint(myCards);
+
+  if (myCards.length >= 3) return;
+
+  if (me.role === "player") {
+    if (point >= 8) {
+      db.ref("rooms/" + currentRoom.id + "/players/" + myPlayerId).update({
+        actionDone: true
+      });
+      return;
+    }
+
+    if (point <= 3) {
+      document.getElementById("resultText").innerText = "ผู้เล่นกำลังจั่ว...";
+      setTimeout(() => {
+        playerDraw();
+      }, 500);
+      return;
+    }
+
+    if (point >= 4 && point <= 7) {
+      document.getElementById("resultText").innerText = "เลือกจั่วหรืออยู่";
+      if (playerDrawBtn) playerDrawBtn.style.display = "block";
+      if (playerStandBtn) playerStandBtn.style.display = "block";
+      return;
+    }
+  }
+
+  if (me.role === "banker") {
+    const normalPlayers = players.filter(p => p.role === "player");
+
+    const allPlayersDone = normalPlayers.every(p => {
+      if (!p.cards) return false;
+      const cards = Object.values(p.cards);
+      const pPoint = getPoint(cards);
+      return cards.length >= 3 || pPoint >= 8 || p.actionDone === true;
+    });
+
+    if (!allPlayersDone) {
+      document.getElementById("resultText").innerText = "รอผู้เล่นจั่ว/อยู่";
+      return;
+    }
+
+    if (point >= 8) {
+      finishGame();
+      return;
+    }
+
+    if (point <= 3) {
+      if (window.autoBankerLock) return;
+      window.autoBankerLock = true;
+      setTimeout(() => {
+        bankerDraw();
+      }, 800);
+      return;
+    }
+
+    if (point >= 4 && point <= 7) {
+      if (bankerDrawBtn) bankerDrawBtn.style.display = "block";
+      if (bankerStandBtn) bankerStandBtn.style.display = "block";
+    }
+  }
+}
+
+window.updateActionButtons = updateActionButtons;
+
+function forcePlayerTurn() {
+  if (!currentRoom || currentRoom.status !== "playing") return;
+
+  const me = players.find(p => String(p.name) === String(myPlayerId));
+  if (!me || me.role !== "player" || !me.cards) return;
+
+  const playerDrawBtn = document.getElementById("playerDrawBtn");
+  const playerStandBtn = document.getElementById("playerStandBtn");
+
+  const myCards = Object.values(me.cards);
+  const point = getPoint(myCards);
+
+  if (myCards.length >= 3 ) return;
+
+  if (point >= 8) {
+    db.ref("rooms/" + currentRoom.id + "/players/" + myPlayerId).update({
+      actionDone: true
+    });
+    return;
+  }
+
+  if (point <= 3) {
+    const key = currentRoom.id + "-" + myPlayerId + "-" + myCards.join(",");
+    if (window.forceDrawKey === key) return;
+    window.forceDrawKey = key;
+
+    document.getElementById("resultText").innerText = "ผู้เล่นกำลังจั่ว...";
+    setTimeout(() => playerDraw(), 500);
+    return;
+  }
+
+  if (point >= 4 && point <= 7) {
+    document.getElementById("resultText").innerText = "เลือกจั่วหรืออยู่";
+    if (playerDrawBtn) playerDrawBtn.style.display = "block";
+    if (playerStandBtn) playerStandBtn.style.display = "block";
+  }
+}
+
+setInterval(forcePlayerTurn, 500);
