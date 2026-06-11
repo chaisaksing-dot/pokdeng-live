@@ -124,12 +124,19 @@ function loginWithId(playerId, roomIdAfterLogin) {
 
 function checkAdminRole(playerId) {
   return db.ref("admins/" + playerId).once("value").then(snap => {
-    if (playerId === OWNER_ID && !snap.exists()) {
+    if (String(playerId) === OWNER_ID && !snap.exists()) {
       db.ref("admins/" + playerId).set("owner");
       myAdminRole = "owner";
     } else {
       myAdminRole = snap.val() || null;
     }
+
+    const adminBtn = el("adminBtn");
+    if (adminBtn) {
+      adminBtn.style.display = myAdminRole ? "inline-block" : "none";
+    }
+
+    return myAdminRole;
   });
 }
 
@@ -312,10 +319,34 @@ function listenRoom(roomId) {
 
   roomListenerRef.on("value", snap => {
     const room = snap.val();
-    if (!room) return;
+
+    if (!room) {
+      stopTimer();
+      currentRoom = null;
+      players = [];
+      showPage("lobbyPage");
+      return;
+    }
 
     currentRoom = { ...room, id: roomId };
     players = Object.values(room.players || {});
+
+    if (players.length === 0) {
+      db.ref("rooms/" + roomId).remove();
+      return;
+    }
+
+    const playerId = localStorage.getItem("playerId") || myPlayerId;
+    const stillInRoom = players.some(p => String(p.name) === String(playerId));
+
+    if (!stillInRoom) {
+      stopTimer();
+      currentRoom = null;
+      players = [];
+      alert("คุณถูกนำออกจากห้อง");
+      showPage("lobbyPage");
+      return;
+    }
 
     if (el("roomIdText")) el("roomIdText").innerText = roomId;
     if (el("bankerMoneyText")) el("bankerMoneyText").innerText = getBanker()?.money || room.bankerMoney || 0;
@@ -327,15 +358,47 @@ function listenRoom(roomId) {
     checkAllReady();
     updateDeckRemain();
     updateActionButtons();
+
+    if (
+      currentRoom.status === "playing" &&
+      currentRoom.turnDeadline > 0 &&
+      !timerInterval
+    ) {
+      startTimer();
+    }
+
     updateTurnTimer();
   });
 }
 
 function leaveRoom() {
+  if (!currentRoom || !currentRoom.id) {
+    showPage("lobbyPage");
+    return;
+  }
+
+  const roomId = currentRoom.id;
+  const playerId = myPlayerId || localStorage.getItem("playerId");
+
   stopTimer();
+
+  db.ref("rooms/" + roomId + "/players/" + playerId)
+    .remove()
+    .then(() => {
+      db.ref("rooms/" + roomId + "/players")
+        .once("value")
+        .then(snap => {
+          if (!snap.exists() || Object.keys(snap.val() || {}).length === 0) {
+            db.ref("rooms/" + roomId).remove();
+          }
+        });
+    });
+
   if (roomListenerRef) roomListenerRef.off();
+
   currentRoom = null;
   players = [];
+
   showPage("lobbyPage");
 }
 
@@ -604,26 +667,28 @@ function renderPlayers() {
     const point = getPoint(p.cards || []);
     const open = isMe || point >= 8 || finished || showAll;
 
-seat.innerHTML = `
-  <b>🙂 ผู้เล่น ${p.name}</b><br>
-  เงิน: ${p.money || 0}<br>
-  แทง: ${p.bet || 0}<br>
-  แต้ม: ${p.cards ? point : "-"}<br>
-  ${p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม"}<br>
+    const canKick =
+      getBanker()?.name === myPlayerId &&
+      currentRoom?.status === "waiting";
 
-  ${
-    getBanker()?.name === myPlayerId
-      ? `<button onclick="kickPlayer('${p.name}')"
-           style="font-size:10px;padding:3px 6px;margin:2px;
-                  border-radius:6px;border:none;
-                  background:#e53935;color:white;">
-           ❌ เตะ
-         </button><br>`
-      : ""
-  }
-
-  ${renderCards(p.cards, open)}
-`;
+    seat.innerHTML = `
+      <b>🙂 ผู้เล่น ${p.name}</b><br>
+      เงิน: ${p.money || 0}<br>
+      แทง: ${p.bet || 0}<br>
+      แต้ม: ${open ? point : "-"}<br>
+      ${p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม"}<br>
+      ${
+        canKick
+          ? `<button onclick="kickPlayer('${p.name}')"
+               style="font-size:10px;padding:3px 6px;margin:2px;
+                      border-radius:6px;border:none;
+                      background:#e53935;color:white;">
+               ❌ เตะ
+             </button><br>`
+          : ""
+      }
+      ${renderCards(p.cards, open)}
+    `;
   });
 
   const bankerBox = el("banker");
@@ -637,7 +702,7 @@ seat.innerHTML = `
     bankerBox.innerHTML = `
       <b>👑 เจ้ามือ ${banker.name}</b><br>
       เงิน: ${banker.money || 0}<br>
-      แต้ม: ${banker.cards ? point : "-"}
+      แต้ม: ${open ? point : "-"}
       ${renderCards(banker.cards, open)}
     `;
   }
