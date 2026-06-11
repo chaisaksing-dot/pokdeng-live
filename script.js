@@ -1000,8 +1000,11 @@ const isJQK =
     !straightFlush;
 
   const isPair =
-    arr.length === 2 &&
-    values[0] === values[1];
+  arr.length === 2 &&
+  (
+    values[0] === values[1] ||
+    suits[0] === suits[1]
+  );
 
   if (isThreeSame) {
     return { type: "tong", label: "ตอง", point, multiplier: 5, autoRank: 3 };
