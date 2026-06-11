@@ -311,3 +311,47 @@ input, select {
 .black-card {
   color: #111 !important;
 }
+.rule-btn{
+  background:#ff9800;
+  color:white;
+  border:none;
+  border-radius:10px;
+  padding:8px 12px;
+}
+
+.rule-box{
+  position:fixed;
+  top:120px;
+  right:10px;
+
+  width:280px;
+  max-height:70vh;
+  overflow:auto;
+
+  background:#0f172a;
+  color:white;
+
+  padding:12px;
+  border-radius:12px;
+
+  z-index:9999;
+}
+.room-menu{
+  position:fixed;
+  top:70px;
+  right:10px;
+
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+
+  z-index:9999;
+}
+
+.menu-btn{
+  background:#22c55e;
+  color:white;
+  border:none;
+  border-radius:10px;
+  padding:8px 12px;
+}
