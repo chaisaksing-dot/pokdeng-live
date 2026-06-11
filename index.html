@@ -80,6 +80,9 @@
         <p id="userInfo" class="creditText"></p>
       </div>
       <button onclick="logout()" class="btn small danger">ออก</button>
+      <button id="adminBtn" onclick="openAdmin()" class="btn small">
+  🔧 แอดมิน
+</button>
     </div>
 
     <div class="card">
@@ -146,6 +149,69 @@
       </div>
     </div>
 
+    <div class="room-menu">
+
+  <button class="menu-btn" onclick="copyInviteLink()">
+    🔗 คัดลอกลิงก์เชิญ
+  </button>
+
+  <button id="ruleBtn" class="rule-btn" onclick="toggleRules()">
+    📜 กติกาโต๊ะ
+  </button>
+
+</div>
+
+<div id="ruleBox" class="rule-box" style="display:none;">
+
+<h3>📜 กติกาโต๊ะ</h3>
+
+<b>การนับไพ่พิเศษ</b><br>
+
+🏆 ตอง = x5<br>
+🏆 เรียงฟลัด = x4<br>
+🏆 3 ใบอักษร (JQK) = x3<br>
+🏆 ฟลัด = x3<br>
+🏆 2 เด้ง = x2<br>
+
+<br>
+
+<b>2 เด้ง คือ</b><br>
+
+• ไพ่ 2 ใบ ดอกเดียวกัน<br>
+เช่น 4♠ 8♠<br>
+
+หรือ
+
+• ไพ่ 2 ใบ หน้าเดียวกัน<br>
+เช่น 7♠ 7♥<br>
+
+<br>
+
+<b>การเปรียบเทียบ</b><br>
+
+ตอง > เรียงฟลัด > 3 ใบอักษร > ฟลัด > ไพ่ปกติ
+
+<br><br>
+
+ถ้าพิเศษเหมือนกัน<br>
+ให้เสมอ ไม่มีได้เสีย
+
+<br><br>
+
+<b>ป๊อก</b><br>
+
+• ผู้เล่นป๊อก 8/9 → จบเฉพาะคนนั้น<br>
+• เจ้ามือยังเล่นกับคนอื่นได้<br>
+• เจ้ามือป๊อก 8/9 → จบทันทีทั้งโต๊ะ
+
+<br><br>
+
+<b>ค่าต๋ง</b><br>
+
+หัก 5% เมื่อผู้ชนะได้ x2 ขึ้นไป
+
+</div>
+    
     <div class="casino-table">
 
       <div class="player-seat banker-seat">
@@ -198,7 +264,6 @@
     </div>
 
     <div class="room-buttons">
-      <button class="btn" onclick="copyInviteLink()">คัดลอกลิงก์เชิญ</button>
       <button class="btn danger" onclick="leaveRoom()">ออกห้อง</button>
     </div>
   </section>
