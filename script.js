@@ -665,7 +665,7 @@ function renderPlayers() {
 
     const isMe = String(p.name) === String(myPlayerId);
     const point = getPoint(p.cards || []);
-    const open = isMe || point >= 8 || finished || showAll;
+    const open = isMe || finished || showAll;
 
     const canKick =
       getBanker()?.name === myPlayerId &&
@@ -697,7 +697,7 @@ function renderPlayers() {
   if (bankerBox && banker) {
     const isMe = String(banker.name) === String(myPlayerId);
     const point = getPoint(banker.cards || []);
-    const open = isMe || point >= 8 || finished || showAll;
+    const open = isMe || finished || showAll;
 
     bankerBox.innerHTML = `
       <b>👑 เจ้ามือ ${banker.name}</b><br>
