@@ -488,17 +488,15 @@ function startTurnQueue() {
     latestPlayers
       .filter(p => p.role === "player")
       .forEach(p => {
-        if (getPoint(p.cards || []) < 8) turnOrder.push(p.name);
+        if (getPoint(p.cards || []) < 8) {
+          turnOrder.push(p.name);
+        }
       });
 
     const banker = latestPlayers.find(p => p.role === "banker");
+
     if (banker && getPoint(banker.cards || []) < 8) {
       turnOrder.push(banker.name);
-    }
-
-    if (turnOrder.length === 0) {
-      finishGame();
-      return;
     }
 
     db.ref("rooms/" + currentRoom.id).update({
@@ -739,15 +737,32 @@ function finishTurn(playerId) {
 
   const nextIndex = Number(currentRoom.turnIndex || 0) + 1;
 
-  if (nextIndex >= currentRoom.turnOrder.length) {
-    finishGame();
+  if (nextIndex < currentRoom.turnOrder.length) {
+    db.ref("rooms/" + currentRoom.id).update({
+      turnIndex: nextIndex,
+      turnDeadline: Date.now() + TURN_SECONDS * 1000
+    });
     return;
   }
 
-  db.ref("rooms/" + currentRoom.id).update({
-    turnIndex: nextIndex,
-    turnDeadline: Date.now() + TURN_SECONDS * 1000
-  });
+  const banker = getBanker();
+
+  if (
+    banker &&
+    banker.cards &&
+    getPoint(banker.cards) < 8 &&
+    Object.values(banker.cards).length < 3 &&
+    String(playerId) !== String(banker.name)
+  ) {
+    db.ref("rooms/" + currentRoom.id).update({
+      turnOrder: [...currentRoom.turnOrder, banker.name],
+      turnIndex: nextIndex,
+      turnDeadline: Date.now() + TURN_SECONDS * 1000
+    });
+    return;
+  }
+
+  finishGame();
 }
 
 function autoStand(playerId) {
