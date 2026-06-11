@@ -1,4 +1,4 @@
-script = r'''const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyD2huyYMc8TD0oA7SJ1sfaejgpcb2H7x0U",
   authDomain: "kang-card-game.firebaseapp.com",
   databaseURL: "https://kang-card-game-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -1089,8 +1089,3 @@ window.onload = function () {
     showPage("loginPage");
   }
 };
-'''
-path = "/mnt/data/pokdeng_script_fixed.js"
-with open(path, "w", encoding="utf-8") as f:
-    f.write(script)
-print(path)
