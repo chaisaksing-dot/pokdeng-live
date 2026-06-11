@@ -265,18 +265,12 @@ function joinRoom() {
   const playerId = localStorage.getItem("playerId") || myPlayerId;
 
   if (!roomId) return alert("กรุณาใส่เลขห้อง");
-  if (!playerId) {
-    alert("กรุณาเข้าสู่ระบบก่อน");
-    showPage("loginPage");
-    return;
-  }
+  if (!playerId) return showPage("loginPage");
 
   db.ref("rooms/" + roomId).once("value").then(roomSnap => {
     if (!roomSnap.exists()) return alert("ไม่พบห้องนี้");
 
     const room = roomSnap.val();
-    if (room.status !== "waiting") return alert("ห้องนี้เริ่มเล่นแล้ว");
-
     const roomPlayers = Object.values(room.players || {});
     const normalPlayers = roomPlayers.filter(p => p.role === "player");
 
@@ -284,7 +278,7 @@ function joinRoom() {
       return alert("ห้องเต็มแล้ว");
     }
 
-    loadBetOptions(room);
+    const joinRole = room.status === "waiting" ? "player" : "waiting";
 
     db.ref("wallet/" + playerId).once("value").then(moneySnap => {
       const money = Number(moneySnap.val()) || 0;
@@ -297,13 +291,13 @@ function joinRoom() {
             money,
             bet: 0,
             ready: false,
-            role: "player",
+            role: joinRole,
             cards: null,
             actionDone: false,
-            result: null
+            result: null,
+            settled: false,
+            pokLocked: false
           });
-        } else {
-          db.ref(playerPath).update({ money });
         }
 
         listenRoom(roomId);
@@ -516,31 +510,115 @@ function checkPokImmediately() {
   db.ref("rooms/" + currentRoom.id + "/players").once("value").then(snap => {
     const latestPlayers = Object.values(snap.val() || {});
     const banker = latestPlayers.find(p => p.role === "banker");
-
     if (!banker || !banker.cards) return;
 
-    const bankerPoint = getPoint(banker.cards);
+    const bankerCards = Object.values(banker.cards || {});
+    const bankerPoint = getPoint(bankerCards);
 
-    if (bankerPoint >= 8) {
+    const bankerPok =
+      bankerCards.length === 2 &&
+      bankerPoint >= 8;
+
+    if (bankerPok) {
       db.ref("rooms/" + currentRoom.id + "/showAllCards").set(true).then(() => {
         finishGame();
       });
       return;
     }
 
-    const updates = {};
-    latestPlayers.forEach(p => {
-      if (p.role === "player") {
-        const pPoint = getPoint(p.cards || []);
-        if (pPoint >= 8) {
-          updates["rooms/" + currentRoom.id + "/players/" + p.name + "/actionDone"] = true;
-        }
-      }
+    const pokPlayers = latestPlayers.filter(p => {
+      if (p.role !== "player") return false;
+      if (p.settled === true) return false;
+
+      const cards = Object.values(p.cards || {});
+      return cards.length === 2 && getPoint(cards) >= 8;
     });
 
-    db.ref().update(updates).then(() => {
+    if (pokPlayers.length === 0) {
+      startTurnQueue();
+      return;
+    }
+
+    settlePokPlayers(pokPlayers, banker).then(() => {
       startTurnQueue();
     });
+  });
+}
+
+function settlePokPlayers(pokPlayers, banker) {
+  const bankerInfo = getHandInfo(banker.cards || []);
+  let bankerMoney = Number(banker.money || 0);
+  let tongTotal = 0;
+
+  const updates = {};
+
+  pokPlayers.forEach(p => {
+    const bet = Number(p.bet || 0);
+    const playerInfo = getHandInfo(p.cards || []);
+    const result = compareHands(playerInfo, bankerInfo);
+
+    let gross = 0;
+    let tong = 0;
+    let playerNet = 0;
+
+    if (result === "win") {
+      gross = bet * playerInfo.multiplier;
+      if (playerInfo.multiplier >= 2) {
+        tong = Math.floor(gross * 0.05);
+      }
+
+      playerNet = gross - tong;
+      bankerMoney -= gross;
+      tongTotal += tong;
+    }
+
+    if (result === "lose") {
+      gross = bet * bankerInfo.multiplier;
+
+      let bankerTong = 0;
+      if (bankerInfo.multiplier >= 2) {
+        bankerTong = Math.floor(gross * 0.05);
+      }
+
+      playerNet = -gross;
+      bankerMoney += gross - bankerTong;
+      tongTotal += bankerTong;
+    }
+
+    const playerMoney = Number(p.money || 0) + playerNet;
+
+    updates[`rooms/${currentRoom.id}/players/${p.name}/money`] = playerMoney;
+    updates[`wallet/${p.name}`] = playerMoney;
+
+    updates[`rooms/${currentRoom.id}/players/${p.name}/settled`] = true;
+    updates[`rooms/${currentRoom.id}/players/${p.name}/pokLocked`] = true;
+    updates[`rooms/${currentRoom.id}/players/${p.name}/actionDone`] = true;
+
+    updates[`rooms/${currentRoom.id}/players/${p.name}/result`] = {
+      result,
+      bet,
+      gross,
+      tong,
+      net: playerNet,
+      moneyAfter: playerMoney,
+      handLabel: playerInfo.label,
+      handPoint: playerInfo.point,
+      multiplier: playerInfo.multiplier,
+      bankerHandLabel: bankerInfo.label,
+      bankerPoint: bankerInfo.point,
+      bankerMultiplier: bankerInfo.multiplier,
+      earlyPok: true
+    };
+  });
+
+  updates[`rooms/${currentRoom.id}/players/${banker.name}/money`] = bankerMoney;
+  updates[`wallet/${banker.name}`] = bankerMoney;
+
+  return db.ref().update(updates).then(() => {
+    if (tongTotal > 0) {
+      return db.ref("system/tongBalance")
+        .transaction(v => (Number(v) || 0) + tongTotal);
+    }
   });
 }
 
@@ -550,7 +628,7 @@ function startTurnQueue() {
     const turnOrder = [];
 
     latestPlayers
-      .filter(p => p.role === "player")
+      .filter(p => p.role === "player" && p.settled !== true)
       .forEach(p => {
         if (getPoint(p.cards || []) < 8) {
           turnOrder.push(p.name);
@@ -658,7 +736,7 @@ function renderPlayers() {
 
   const finished = currentRoom?.status === "finished";
   const showAll = currentRoom?.showAllCards === true;
-  const normalPlayers = players.filter(p => p.role === "player");
+  const normalPlayers = players.filter(p => p.role === "player" || p.role === "waiting");
 
   normalPlayers.forEach((p, i) => {
     const seat = el("player" + (i + 1));
@@ -677,7 +755,7 @@ function renderPlayers() {
       เงิน: ${p.money || 0}<br>
       แทง: ${p.bet || 0}<br>
       แต้ม: ${open ? point : "-"}<br>
-      ${p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม"}<br>
+      ${p.role === "waiting" ? "🪑 รอรอบหน้า" : (p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม")}<br>
       ${
         canKick
           ? `<button onclick="kickPlayer('${p.name}')"
@@ -1070,7 +1148,9 @@ function finishGame() {
     let bankerNet = 0;
     let tongTotal = 0;
 
-    latestPlayers.filter(p => p.role === "player").forEach(p => {
+    latestPlayers
+  .filter(p => p.role === "player" && p.settled !== true)
+  .forEach(p => {
       const bet = Number(p.bet || 0);
       const playerInfo = getHandInfo(p.cards || []);
       const result = compareHands(playerInfo, bankerInfo);
@@ -1244,11 +1324,16 @@ function newRound() {
   updates["rooms/" + currentRoom.id + "/showAllCards"] = false;
 
   players.forEach(p => {
+    if (p.role === "waiting") {
+  updates["rooms/" + currentRoom.id + "/players/" + p.name + "/role"] = "player";
+}
     updates["rooms/" + currentRoom.id + "/players/" + p.name + "/ready"] = false;
     updates["rooms/" + currentRoom.id + "/players/" + p.name + "/bet"] = 0;
     updates["rooms/" + currentRoom.id + "/players/" + p.name + "/cards"] = null;
     updates["rooms/" + currentRoom.id + "/players/" + p.name + "/actionDone"] = false;
     updates["rooms/" + currentRoom.id + "/players/" + p.name + "/result"] = null;
+    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/settled"] = false;
+updates["rooms/" + currentRoom.id + "/players/" + p.name + "/pokLocked"] = false;
   });
 
   db.ref().update(updates).then(() => {
@@ -1437,3 +1522,12 @@ window.onload = function () {
   }
 };
 
+function toggleRules(){
+  const box = document.getElementById("ruleBox");
+
+  if(box.style.display === "none"){
+    box.style.display = "block";
+  }else{
+    box.style.display = "none";
+  }
+}
