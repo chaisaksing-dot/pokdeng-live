@@ -368,6 +368,7 @@ function listenRoom(roomId) {
     }
 
     updateTurnTimer();
+    showRoundResult();
   });
 }
 
@@ -929,6 +930,126 @@ function getMultiplier(cardList) {
   return 1;
 }
 
+function getCardRank(card) {
+  const v = card.slice(0, -1);
+  if (v === "A") return 1;
+  if (v === "J") return 11;
+  if (v === "Q") return 12;
+  if (v === "K") return 13;
+  return Number(v);
+}
+
+function isStraightFlush(arr) {
+  if (arr.length !== 3) return false;
+
+  const suits = arr.map(c => c.slice(-1));
+  const sameSuit = suits.every(s => s === suits[0]);
+  if (!sameSuit) return false;
+
+  const ranks = arr.map(getCardRank).sort((a, b) => a - b).join(",");
+
+  return [
+    "1,2,3",
+    "2,3,4",
+    "3,4,5",
+    "4,5,6",
+    "5,6,7",
+    "6,7,8",
+    "7,8,9",
+    "8,9,10",
+    "9,10,11",
+    "10,11,12",
+    "11,12,13",
+    "1,12,13"
+  ].includes(ranks);
+}
+
+function getHandInfo(cardList) {
+  const arr = Object.values(cardList || []);
+  const point = getPoint(arr);
+
+  if (arr.length === 0) {
+    return {
+      type: "normal",
+      label: "ปกติ",
+      point,
+      multiplier: 1,
+      autoRank: 0
+    };
+  }
+
+  const values = arr.map(c => c.slice(0, -1));
+  const suits = arr.map(c => c.slice(-1));
+
+  const isThreeSame =
+    arr.length === 3 &&
+    values[0] === values[1] &&
+    values[1] === values[2];
+
+  const pictureCards = ["J", "Q", "K"];
+
+const isJQK =
+  arr.length === 3 &&
+  values.every(v => pictureCards.includes(v));
+
+  const straightFlush = isStraightFlush(arr);
+
+  const isFlush =
+    arr.length === 3 &&
+    suits.every(s => s === suits[0]) &&
+    !straightFlush;
+
+  const isPair =
+    arr.length === 2 &&
+    values[0] === values[1];
+
+  if (isThreeSame) {
+    return { type: "tong", label: "ตอง", point, multiplier: 5, autoRank: 3 };
+  }
+
+  if (straightFlush) {
+    return { type: "straightFlush", label: "เรียงฟลัด", point, multiplier: 4, autoRank: 2 };
+  }
+
+  if (isJQK) {
+    return { type: "letters", label: "3 ใบอักษร", point, multiplier: 3, autoRank: 1 };
+  }
+
+  if (isFlush) {
+    return { type: "flush", label: "ฟลัด", point, multiplier: 3, autoRank: 0 };
+  }
+
+  if (isPair) {
+    return { type: "pair", label: "2 เด้ง", point, multiplier: 2, autoRank: 0 };
+  }
+
+  return { type: "normal", label: "ปกติ", point, multiplier: 1, autoRank: 0 };
+}
+
+function getMultiplier(cardList) {
+  return getHandInfo(cardList).multiplier;
+}
+
+function compareHands(playerInfo, bankerInfo) {
+  if (playerInfo.autoRank > 0 || bankerInfo.autoRank > 0) {
+    if (playerInfo.autoRank > 0 && bankerInfo.autoRank > 0) {
+      if (playerInfo.type === bankerInfo.type) return "draw";
+      return playerInfo.autoRank > bankerInfo.autoRank ? "win" : "lose";
+    }
+
+    return playerInfo.autoRank > bankerInfo.autoRank ? "win" : "lose";
+  }
+
+  if (playerInfo.point > bankerInfo.point) return "win";
+  if (playerInfo.point < bankerInfo.point) return "lose";
+  return "draw";
+}
+
+function moneyText(n) {
+  const num = Number(n || 0);
+  return num > 0 ? "+" + num : String(num);
+}
+
 function finishGame() {
   if (!currentRoom || currentRoom.status === "finished") return;
 
@@ -939,53 +1060,97 @@ function finishGame() {
     const banker = latestPlayers.find(p => p.role === "banker");
     if (!banker) return;
 
-    const bankerPoint = getPoint(banker.cards || []);
+    const bankerInfo = getHandInfo(banker.cards || []);
     const updates = {};
-    let bankerMoney = Number(banker.money) || 0;
+
+    let bankerMoney = Number(banker.money || 0);
+    let bankerNet = 0;
     let tongTotal = 0;
 
     latestPlayers.filter(p => p.role === "player").forEach(p => {
       const bet = Number(p.bet || 0);
-      const point = getPoint(p.cards || []);
-      const multi = getMultiplier(p.cards || []);
+      const playerInfo = getHandInfo(p.cards || []);
+      const result = compareHands(playerInfo, bankerInfo);
 
-      let win = 0;
-      let result = "draw";
-
-      if (point > bankerPoint) {
-        win = bet * multi;
-        result = "win";
-      } else if (point < bankerPoint) {
-        win = -bet * multi;
-        result = "lose";
-      }
-
+      let gross = 0;
       let tong = 0;
+      let playerNet = 0;
 
-      if (win > 0 && multi >= 2) {
-        tong = Math.floor(win * 0.05);
+      if (result === "win") {
+        gross = bet * playerInfo.multiplier;
+
+        if (playerInfo.multiplier >= 2) {
+          tong = Math.floor(gross * 0.05);
+        }
+
+        playerNet = gross - tong;
+        bankerMoney -= gross;
+        bankerNet -= gross;
         tongTotal += tong;
-        win -= tong;
       }
 
-      const playerMoney = Number(p.money || 0) + win;
-      bankerMoney -= win;
+      if (result === "lose") {
+        gross = bet * bankerInfo.multiplier;
+
+        let bankerTong = 0;
+        if (bankerInfo.multiplier >= 2) {
+          bankerTong = Math.floor(gross * 0.05);
+        }
+
+        playerNet = -gross;
+        bankerMoney += gross - bankerTong;
+        bankerNet += gross - bankerTong;
+        tongTotal += bankerTong;
+        tong = 0;
+      }
+
+      if (result === "draw") {
+        gross = 0;
+        tong = 0;
+        playerNet = 0;
+      }
+
+      const playerMoney = Number(p.money || 0) + playerNet;
 
       updates["rooms/" + currentRoom.id + "/players/" + p.name + "/money"] = playerMoney;
-      updates["rooms/" + currentRoom.id + "/players/" + p.name + "/result"] = {
-        point,
-        bankerPoint,
-        multiplier: multi,
-        win,
-        tong,
-        result
-      };
-
       updates["wallet/" + p.name] = playerMoney;
+
+      updates["rooms/" + currentRoom.id + "/players/" + p.name + "/result"] = {
+        result,
+        bet,
+        gross,
+        tong,
+        net: playerNet,
+        moneyAfter: playerMoney,
+        handLabel: playerInfo.label,
+        handPoint: playerInfo.point,
+        multiplier: playerInfo.multiplier,
+        bankerHandLabel: bankerInfo.label,
+        bankerPoint: bankerInfo.point,
+        bankerMultiplier: bankerInfo.multiplier
+      };
     });
 
     updates["rooms/" + currentRoom.id + "/players/" + banker.name + "/money"] = bankerMoney;
     updates["wallet/" + banker.name] = bankerMoney;
+
+    updates["rooms/" + currentRoom.id + "/players/" + banker.name + "/result"] = {
+      result: bankerNet > 0 ? "win" : bankerNet < 0 ? "lose" : "draw",
+      net: bankerNet,
+      tongTotal,
+      moneyAfter: bankerMoney,
+      handLabel: bankerInfo.label,
+      handPoint: bankerInfo.point,
+      multiplier: bankerInfo.multiplier
+    };
+
+    updates["rooms/" + currentRoom.id + "/roundSummary"] = {
+      banker: banker.name,
+      bankerNet,
+      tongTotal,
+      finishedAt: Date.now()
+    };
+
     updates["rooms/" + currentRoom.id + "/status"] = "finished";
     updates["rooms/" + currentRoom.id + "/showAllCards"] = true;
     updates["rooms/" + currentRoom.id + "/finishedAt"] = Date.now();
@@ -995,10 +1160,69 @@ function finishGame() {
         db.ref("system/tongBalance").transaction(v => (Number(v) || 0) + tongTotal);
       }
 
-      const resultBox = el("resultText");
-      if (resultBox) resultBox.innerText = "จบตาแล้ว";
+      showRoundResult();
     });
   });
+}
+
+function showRoundResult() {
+  if (!currentRoom || currentRoom.status !== "finished") return;
+
+  const me = players.find(p => String(p.name) === String(myPlayerId));
+  const resultBox = el("resultText");
+  if (!resultBox || !me || !me.result) return;
+
+  if (me.role === "banker") {
+    let html = "📊 สรุปรอบนี้<br>";
+
+    players
+      .filter(p => p.role === "player")
+      .forEach(p => {
+        const r = p.result;
+        if (!r) return;
+
+        const label =
+          r.result === "win" ? "ชนะ" :
+          r.result === "lose" ? "แพ้" :
+          "เสมอ";
+
+        html += `
+          <br>ผู้เล่น ${p.name}: ${label}
+          <br>ไพ่: ${r.handLabel} / แต้ม ${r.handPoint}
+          <br>ได้เสีย: ${moneyText(r.net)}
+          <br>ค่าต๋ง: ${r.tong || 0}<br>
+        `;
+      });
+
+    html += `
+      <br>👑 เจ้ามือสุทธิ: ${moneyText(me.result.net)}
+      <br>ค่าต๋งรวม: ${me.result.tongTotal || 0}
+      <br>เครดิตคงเหลือ: ${me.result.moneyAfter}
+    `;
+
+    resultBox.innerHTML = html;
+    return;
+  }
+
+  const r = me.result;
+
+  const label =
+    r.result === "win" ? "🏆 ชนะ" :
+    r.result === "lose" ? "❌ แพ้" :
+    "🤝 เสมอ";
+
+  resultBox.innerHTML = `
+    ${label}<br>
+    ไพ่คุณ: ${r.handLabel}<br>
+    แต้มคุณ: ${r.handPoint}<br>
+    ไพ่เจ้ามือ: ${r.bankerHandLabel}<br>
+    แต้มเจ้ามือ: ${r.bankerPoint}<br>
+    เดิมพัน: ${r.bet}<br>
+    ยอดก่อนหัก: ${moneyText(r.gross)}<br>
+    ค่าต๋ง: ${r.tong || 0}<br>
+    สุทธิ: ${moneyText(r.net)}<br>
+    เครดิตคงเหลือ: ${r.moneyAfter}
+  `;
 }
 
 function newRound() {
