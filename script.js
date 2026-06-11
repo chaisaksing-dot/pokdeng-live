@@ -24,7 +24,7 @@ let myAdminRole = null;
 
 const OWNER_ID = "0001";
 const MAX_PLAYERS = 8;
-const TURN_SECONDS = 15;
+const TURN_SECONDS = 60;
 
 const cards = [
   "A♠","2♠","3♠","4♠","5♠","6♠","7♠","8♠","9♠","10♠","J♠","Q♠","K♠",
