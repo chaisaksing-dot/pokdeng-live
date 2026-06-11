@@ -606,14 +606,26 @@ function renderPlayers() {
     const point = getPoint(p.cards || []);
     const open = isMe || point >= 8 || finished || showAll;
 
-    seat.innerHTML = `
-      <b>🙂 ผู้เล่น ${p.name}</b><br>
-      เงิน: ${p.money || 0}<br>
-      แทง: ${p.bet || 0}<br>
-      แต้ม: ${p.cards ? point : "-"}<br>
-      ${p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม"}
-      ${renderCards(p.cards, open)}
-    `;
+seat.innerHTML = `
+  <b>🙂 ผู้เล่น ${p.name}</b><br>
+  เงิน: ${p.money || 0}<br>
+  แทง: ${p.bet || 0}<br>
+  แต้ม: ${p.cards ? point : "-"}<br>
+  ${p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม"}<br>
+
+  ${
+    getBanker()?.name === myPlayerId
+      ? `<button onclick="kickPlayer('${p.name}')"
+           style="font-size:10px;padding:3px 6px;margin:2px;
+                  border-radius:6px;border:none;
+                  background:#e53935;color:white;">
+           ❌ เตะ
+         </button><br>`
+      : ""
+  }
+
+  ${renderCards(p.cards, open)}
+`;
   });
 
   const bankerBox = el("banker");
@@ -1042,6 +1054,34 @@ function loadAdminData() {
     if (box) box.innerHTML = "ค่าต๋งสะสม: " + (Number(snap.val()) || 0);
   });
 }
+function kickPlayer(playerId) {
+  const me = players.find(p => String(p.name) === String(myPlayerId));
+
+  if (!me || me.role !== "banker") {
+    alert("เฉพาะเจ้ามือเท่านั้น");
+    return;
+  }
+
+  if (String(playerId) === String(myPlayerId)) {
+    alert("เตะตัวเองไม่ได้");
+    return;
+  }
+
+  db.ref(
+    "rooms/" +
+    currentRoom.id +
+    "/players/" +
+    playerId
+  ).remove();
+}
+
+window.kickPlayer = kickPlayer;
+
+
+// =====================
+// เริ่มต้นระบบ
+// =====================
+
 
 window.autoLogin = autoLogin;
 window.showOldIdBox = showOldIdBox;
@@ -1089,3 +1129,4 @@ window.onload = function () {
     showPage("loginPage");
   }
 };
+
