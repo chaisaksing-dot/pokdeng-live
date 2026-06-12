@@ -113,7 +113,7 @@ function loginWithId(playerId, roomIdAfterLogin) {
 
   const walletRef = db.ref("wallet/" + myPlayerId);
   walletRef.once("value").then(snap => {
-    if (!snap.exists()) walletRef.set(0);
+    if (!snap.exists()) walletRef.set(10000);
 
     db.ref("users/" + myPlayerId).once("value").then(userSnap => {
       if (!userSnap.exists()) {
