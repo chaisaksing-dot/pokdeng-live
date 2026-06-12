@@ -1547,3 +1547,12 @@ function toggleRules(){
     box.style.display = "none";
   }
 }
+function setBet(amount){
+  document.getElementById("betAmount").value = amount;
+  updateMaxLose();
+
+  document.querySelectorAll("#betButtons button")
+    .forEach(btn => btn.classList.remove("active-bet"));
+
+  event.target.classList.add("active-bet");
+}
