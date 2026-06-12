@@ -246,7 +246,25 @@
         <div id="myMoneyText"></div>
 
         <label>เลือกจำนวนเดิมพัน:</label>
-        <select id="betAmount" onchange="updateMaxLose()"></select>
+        <div id="betButtons" class="bet-buttons">
+  <button type="button" onclick="setBet(10)">10</button>
+  <button type="button" onclick="setBet(20)">20</button>
+  <button type="button" onclick="setBet(30)">30</button>
+
+  <button type="button" onclick="setBet(50)">50</button>
+  <button type="button" onclick="setBet(100)">100</button>
+  <button type="button" onclick="setBet(200)">200</button>
+
+  <button type="button" onclick="setBet(300)">300</button>
+  <button type="button" onclick="setBet(500)">500</button>
+  <button type="button" onclick="setBet(1000)">1000</button>
+</div>
+
+<input
+  id="betAmount"
+  type="hidden"
+  value="0"
+/>
 
         <p>เสียสูงสุดกรณีตอง x5: <b id="maxLoseText">0</b></p>
 
@@ -267,7 +285,7 @@
       <button id="newRoundBtn" class="btn action-main" onclick="newRound()" style="display:none;">
         เริ่มตาใหม่
       </button>
-    </div>
+    </div
 
     <div class="room-buttons">
       <button class="btn danger" onclick="leaveRoom()">ออกห้อง</button>
