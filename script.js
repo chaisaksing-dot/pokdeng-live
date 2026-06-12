@@ -1363,22 +1363,42 @@ updates["rooms/" + currentRoom.id + "/players/" + p.name + "/pokLocked"] = false
 }
 
 function loadBetOptions(room) {
-  const select = el("betAmount");
-  if (!select) return;
-
-  select.innerHTML = "";
   const min = Number(room.minBet || 10);
   const max = Number(room.maxBet || 50);
-  const options = [10,20,30,50,100,200,300,500,1000,2000,5000];
+  const buttons = document.querySelectorAll("#betButtons button");
 
-  options.forEach(v => {
-    if (v >= min && v <= max) {
-      select.innerHTML += `<option value="${v}">${v}</option>`;
+  buttons.forEach(btn => {
+    const value = Number(btn.innerText);
+    if (value >= min && value <= max) {
+      btn.style.display = "block";
+    } else {
+      btn.style.display = "none";
+    }
+
+    btn.classList.remove("active-bet");
+  });
+
+  const betInput = el("betAmount");
+  if (betInput) betInput.value = 0;
+
+  updateMaxLose();
+}
+
+function setBet(amount) {
+  const betInput = el("betAmount");
+  if (betInput) betInput.value = amount;
+
+  document.querySelectorAll("#betButtons button").forEach(btn => {
+    btn.classList.remove("active-bet");
+    if (Number(btn.innerText) === Number(amount)) {
+      btn.classList.add("active-bet");
     }
   });
 
   updateMaxLose();
 }
+
+window.setBet = setBet;
 
 function updateMaxLose() {
   const bet = Number(el("betAmount")?.value) || 0;
