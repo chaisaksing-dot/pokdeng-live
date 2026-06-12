@@ -62,19 +62,37 @@ function showOldIdBox() {
 }
 
 function autoLogin() {
-  const savedId = localStorage.getItem("playerId");
-  if (savedId) {
-    loginWithId(savedId, null);
-  } else {
-    createNewPlayerId(null);
-  }
+  showPage("loginPage");
 }
 
 function loginLine() {
-  const input = el("playerId");
-  const playerId = input ? input.value.trim() : "";
+  const playerId = el("playerId")?.value.trim();
+  const pin = el("playerPin")?.value.trim();
+
   if (!playerId) return alert("กรุณาใส่รหัสผู้เล่น");
-  loginWithId(playerId, null);
+  if (!pin) return alert("กรุณาใส่ PIN");
+
+  db.ref("users/" + playerId).once("value").then(snap => {
+    if (!snap.exists()) return alert("ไม่พบรหัสนี้");
+
+    const user = snap.val();
+
+    // ผู้เล่นเก่ายังไม่มี PIN ให้ตั้งครั้งแรก
+    if (!user.pin) {
+      db.ref("users/" + playerId + "/pin").set(pin).then(() => {
+        alert("ตั้ง PIN สำเร็จแล้ว");
+        loginWithId(playerId, null);
+      });
+      return;
+    }
+
+    // ถ้ามี PIN แล้ว ต้องตรงเท่านั้น
+    if (String(user.pin) !== String(pin)) {
+      return alert("PIN ไม่ถูกต้อง");
+    }
+
+    loginWithId(playerId, null);
+  });
 }
 
 function createNewPlayerId(roomIdAfterLogin) {
@@ -102,6 +120,7 @@ function loginWithId(playerId, roomIdAfterLogin) {
         db.ref("users/" + myPlayerId).set({
           id: myPlayerId,
           name: "ผู้เล่น " + myPlayerId,
+          pin: "1234",
           createdAt: Date.now()
         });
       }
@@ -1515,11 +1534,8 @@ window.onload = function () {
     return;
   }
 
-  if (savedId) {
-    loginWithId(savedId, null);
-  } else {
     showPage("loginPage");
-  }
+  
 };
 
 function toggleRules(){
