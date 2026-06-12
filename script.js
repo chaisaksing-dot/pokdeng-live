@@ -862,7 +862,7 @@ function updateActionButtons() {
   const cardCount = Object.values(me.cards).length;
 
   if (point >= 8 || cardCount >= 3) {
-    finishTurn(myPlayerId);
+
     return;
   }
 
