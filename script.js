@@ -1600,10 +1600,29 @@ async function loginLine() {
 }
 
 function loginWithOldId() {
-  const id = document.getElementById("playerId").value.trim();
-  const pin = document.getElementById("playerPin").value.trim();
+  const id = el("playerId").value.trim();
+  const pin = el("playerPin").value.trim();
 
-  alert("ID = " + id + " PIN = " + pin);
+  if (!id || !pin) {
+    alert("กรอกรหัสผู้เล่นและ PIN");
+    return;
+  }
+
+  db.ref("users/" + id).once("value").then(snap => {
+    if (!snap.exists()) {
+      alert("ไม่พบรหัสผู้เล่นนี้");
+      return;
+    }
+
+    const user = snap.val();
+
+    if (String(user.pin) !== String(pin)) {
+      alert("PIN ไม่ถูกต้อง");
+      return;
+    }
+
+    loginWithId(id, null);
+  });
 }
 
 window.loginWithOldId = loginWithOldId;
