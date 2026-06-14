@@ -1583,7 +1583,9 @@ function setBet(amount){
   event.target.classList.add("active-bet");
 }
 async function loginLine() {
-
+  
+alert("เข้า loginLine แล้ว");
+  
   await liff.init({
     liffId: LIFF_ID
   });
