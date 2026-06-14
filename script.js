@@ -1583,32 +1583,36 @@ function setBet(amount){
   event.target.classList.add("active-bet");
 }
 async function loginLine() {
-  
-alert("เข้า loginLine แล้ว");
-  
+
+  alert("1");
+
   await liff.init({
     liffId: LIFF_ID
   });
 
+  alert("2");
+
   if (!liff.isLoggedIn()) {
+    alert("3");
     liff.login();
     return;
   }
 
+  alert("4");
+
   const profile = await liff.getProfile();
+
+  alert("5");
 
   localStorage.setItem("playerName", profile.displayName);
   localStorage.setItem("playerPic", profile.pictureUrl);
   localStorage.setItem("playerId", profile.userId);
 
-  console.log("LINE PROFILE", profile);
-  loginWithId(profile.userId, null, {
-  name: profile.displayName,
-  photo: profile.pictureUrl || ""
-});
-  
+  loginWithId(profile.userId, null);
 
-  return profile;
+  alert("6");
+}
+
 }
 function loginWithOldId() {
   const playerId = el("playerId")?.value.trim();
