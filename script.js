@@ -67,7 +67,8 @@ function autoLogin() {
   showPage("loginPage");
 }
 
-function loginLine() {
+function loginLineOld() {
+
   const playerId = el("playerId")?.value.trim();
   const pin = el("playerPin")?.value.trim();
 
