@@ -1600,6 +1600,7 @@ async function loginLine() {
   localStorage.setItem("playerId", profile.userId);
 
   console.log("LINE PROFILE", profile);
+  loginWithId(profile.userId, null);
 
   return profile;
 }
