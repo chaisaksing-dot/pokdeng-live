@@ -772,7 +772,10 @@ function renderPlayers() {
       getBanker()?.name === myPlayerId &&
       currentRoom?.status === "waiting";
 
+    const photoHtml = p.photo ? `<img src="${p.photo}" class="player-photo">` : "";
+
     seat.innerHTML = `
+      ${photoHtml}
       <b>🙂 ผู้เล่น ${p.name}</b><br>
       เงิน: ${p.money || 0}<br>
       แทง: ${p.bet || 0}<br>
