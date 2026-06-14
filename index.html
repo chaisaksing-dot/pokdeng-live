@@ -19,9 +19,11 @@
 
       <button onclick="autoLogin()" class="btn">เริ่มเล่น</button>
 
-      <button onclick="showOldIdBox()" class="btn secondary">
-        ใช้รหัสเดิม
-      </button>
+      <button
+  onclick="document.getElementById('oldIdBox').style.display='block'"
+  class="btn secondary">
+  ใช้รหัสเดิม
+</button>
 
       <div id="oldIdBox" style="display:none; margin-top:12px;">
         <input id="playerId"  placeholder="รหัสผู้เล่น">
