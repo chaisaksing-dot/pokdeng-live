@@ -1599,11 +1599,11 @@ async function loginLine() {
   return profile;
 }
 
-function showOldIdBox() {
-  const box = el("oldIdBox");
-  if (box) {
-    box.style.display = "block";
-  }
+function loginWithOldId() {
+  const id = document.getElementById("playerId").value.trim();
+  const pin = document.getElementById("playerPin").value.trim();
+
+  alert("ID = " + id + " PIN = " + pin);
 }
 
-window.showOldIdBox = showOldIdBox;
+window.loginWithOldId = loginWithOldId;
