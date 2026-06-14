@@ -307,7 +307,9 @@ function joinRoom() {
       db.ref(playerPath).once("value").then(playerSnap => {
         if (!playerSnap.exists()) {
           db.ref(playerPath).set({
-            name: playerId,
+            id: playerId,
+name: localStorage.getItem("playerName") || playerId,
+photo: localStorage.getItem("playerPic") || "",
             money,
             bet: 0,
             ready: false,
