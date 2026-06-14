@@ -10,6 +10,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const LIFF_ID = "2010387758-ZiMGYm5E";
 
 let currentRoom = null;
 let myPlayerId = null;
@@ -1575,4 +1576,25 @@ function setBet(amount){
     .forEach(btn => btn.classList.remove("active-bet"));
 
   event.target.classList.add("active-bet");
+}
+async function loginLine() {
+
+  await liff.init({
+    liffId: LIFF_ID
+  });
+
+  if (!liff.isLoggedIn()) {
+    liff.login();
+    return;
+  }
+
+  const profile = await liff.getProfile();
+
+  localStorage.setItem("playerName", profile.displayName);
+  localStorage.setItem("playerPic", profile.pictureUrl);
+  localStorage.setItem("playerId", profile.userId);
+
+  console.log("LINE PROFILE", profile);
+
+  return profile;
 }
