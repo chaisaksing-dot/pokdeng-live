@@ -1598,3 +1598,12 @@ async function loginLine() {
 
   return profile;
 }
+
+function showOldIdBox() {
+  const box = el("oldIdBox");
+  if (box) {
+    box.style.display = "block";
+  }
+}
+
+window.showOldIdBox = showOldIdBox;
