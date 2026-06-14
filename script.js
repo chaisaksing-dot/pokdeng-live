@@ -8,6 +8,7 @@ const firebaseConfig = {
   appId: "1:400713700794:web:726cb6e525026a90a53983"
 };
 
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const LIFF_ID = "2010387758-ZiMGYm5E";
