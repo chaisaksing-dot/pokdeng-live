@@ -1599,10 +1599,32 @@ async function loginLine() {
   return profile;
 }
 function loginWithOldId() {
-  const id = document.getElementById("playerId").value.trim();
-  const pin = document.getElementById("playerPin").value.trim();
+  const playerId = el("playerId")?.value.trim();
+  const pin = el("playerPin")?.value.trim();
 
-  alert("ID = " + id + " PIN = " + pin);
+  if (!playerId) return alert("กรุณาใส่รหัสผู้เล่น");
+  if (!pin) return alert("กรุณาใส่ PIN");
+
+  db.ref("users/" + playerId).once("value").then(snap => {
+    if (!snap.exists()) return alert("ไม่พบรหัสนี้");
+
+    const user = snap.val();
+
+    if (!user.pin) {
+      db.ref("users/" + playerId + "/pin").set(pin).then(() => {
+        alert("ตั้ง PIN สำเร็จแล้ว");
+        loginWithId(playerId, null);
+      });
+      return;
+    }
+
+    if (String(user.pin) !== String(pin)) {
+      return alert("PIN ไม่ถูกต้อง");
+    }
+
+    loginWithId(playerId, null);
+  });
 }
 
 window.loginWithOldId = loginWithOldId;
+เ
