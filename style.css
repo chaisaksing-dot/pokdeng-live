@@ -384,3 +384,40 @@ input, select {
   display:block;
   margin:0 auto 4px;
 }
+/* เพิ่มส่วนนี้ที่ท้ายไฟล์ style.css */
+.player-box-ui {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 5px;
+  border-radius: 10px;
+  min-width: 60px;
+}
+
+.player-photo {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ffd21f;
+  margin-bottom: 4px;
+}
+
+.player-info-text {
+  text-align: center;
+  line-height: 1.2;
+}
+
+.player-name {
+  font-size: 11px;
+  font-weight: bold;
+  white-space: nowrap;
+  color: #fff;
+}
+
+.player-money {
+  font-size: 10px;
+  color: #ffcc00;
+}
