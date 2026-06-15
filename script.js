@@ -1617,7 +1617,6 @@ async function loginLine() {
   alert("6");
 }
 
-}
 function loginWithOldId() {
   const playerId = el("playerId")?.value.trim();
   const pin = el("playerPin")?.value.trim();
