@@ -782,6 +782,7 @@ function renderPlayers() {
         <div class="player-info-text">
           <div class="player-name">${p.name}</div>
           <div class="player-money">เงิน: ${p.money || 0}</div>
+          <div class="player-money">แต้ม: ${open ? point : "-"}</div>
         </div>
       </div>
       <div style="font-size: 10px; margin-top: 2px;">
@@ -807,6 +808,7 @@ function renderPlayers() {
         <div class="player-info-text">
           <div class="player-name">👑 ${banker.name}</div>
           <div class="player-money">เงิน: ${banker.money || 0}</div>
+          <div class="player-money">แต้ม: ${open ? point : "-"}</div>
         </div>
       </div>
       ${renderCards(banker.cards, open)}
