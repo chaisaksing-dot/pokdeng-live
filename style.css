@@ -375,14 +375,6 @@ input, select {
   background:#22c55e;
   transform:scale(1.05);
 }
-
-.player-photo{
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  object-fit:cover;
-  display:block;
-  margin:0 auto 4px;
 }
 /* เพิ่มส่วนนี้ที่ท้ายไฟล์ style.css */
 .player-box-ui {
