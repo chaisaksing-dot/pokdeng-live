@@ -753,6 +753,7 @@ function getBanker() {
 }
 
 function renderPlayers() {
+  // เคลียร์ที่นั่งทั้งหมดก่อนแสดงผล
   for (let i = 1; i <= 8; i++) {
     const seat = el("player" + i);
     if (seat) seat.innerHTML = "";
@@ -762,6 +763,7 @@ function renderPlayers() {
   const showAll = currentRoom?.showAllCards === true;
   const normalPlayers = players.filter(p => p.role === "player" || p.role === "waiting");
 
+  // แสดงผลผู้เล่น 1-8
   normalPlayers.forEach((p, i) => {
     const seat = el("player" + (i + 1));
     if (!seat) return;
@@ -769,46 +771,44 @@ function renderPlayers() {
     const isMe = String(p.name) === String(myPlayerId);
     const point = getPoint(p.cards || []);
     const open = isMe || finished || showAll;
-
-    const canKick =
-      getBanker()?.name === myPlayerId &&
-      currentRoom?.status === "waiting";
-
-    const photoHtml = p.photo ? `<img src="${p.photo}" class="player-photo">` : "";
+    const canKick = getBanker()?.name === myPlayerId && currentRoom?.status === "waiting";
+    
+    // ดึงรูปโปรไฟล์
+    const photoUrl = p.photo || 'https://via.placeholder.com/50';
 
     seat.innerHTML = `
-      ${photoHtml}
-      <b>🙂 ผู้เล่น ${p.name}</b><br>
-      เงิน: ${p.money || 0}<br>
-      แทง: ${p.bet || 0}<br>
-      แต้ม: ${open ? point : "-"}<br>
-      ${p.role === "waiting" ? "🪑 รอรอบหน้า" : (p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม")}<br>
-      ${
-        canKick
-          ? `<button onclick="kickPlayer('${p.name}')"
-               style="font-size:10px;padding:3px 6px;margin:2px;
-                      border-radius:6px;border:none;
-                      background:#e53935;color:white;">
-               ❌ เตะ
-             </button><br>`
-          : ""
-      }
+      <div class="player-box-ui">
+        <img src="${photoUrl}" class="player-photo">
+        <div class="player-info-text">
+          <div class="player-name">${p.name}</div>
+          <div class="player-money">เงิน: ${p.money || 0}</div>
+        </div>
+      </div>
+      <div style="font-size: 10px; margin-top: 2px;">
+        ${p.role === "waiting" ? "🪑 รอรอบหน้า" : (p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม")}
+      </div>
+      ${canKick ? `<button onclick="kickPlayer('${p.name}')" style="font-size:9px; background:#e53935; color:white; border:none; border-radius:4px; margin-top:2px;">❌ เตะ</button>` : ""}
       ${renderCards(p.cards, open)}
     `;
   });
 
+  // แสดงผลเจ้ามือ
   const bankerBox = el("banker");
   const banker = getBanker();
-
   if (bankerBox && banker) {
     const isMe = String(banker.name) === String(myPlayerId);
     const point = getPoint(banker.cards || []);
     const open = isMe || finished || showAll;
+    const photoUrl = banker.photo || 'https://via.placeholder.com/50';
 
     bankerBox.innerHTML = `
-      <b>👑 เจ้ามือ ${banker.name}</b><br>
-      เงิน: ${banker.money || 0}<br>
-      แต้ม: ${open ? point : "-"}
+      <div class="player-box-ui">
+        <img src="${photoUrl}" class="player-photo">
+        <div class="player-info-text">
+          <div class="player-name">👑 ${banker.name}</div>
+          <div class="player-money">เงิน: ${banker.money || 0}</div>
+        </div>
+      </div>
       ${renderCards(banker.cards, open)}
     `;
   }
