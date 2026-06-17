@@ -1609,21 +1609,8 @@ async function loginLine() {
 try {
   profile = await liff.getProfile();
 } catch (err) {
-  alert("ดึงโปรไฟล์ไม่ได้: " + err.message);
-  liff.logout();
-  return;
-}
-
-  alert("5");
-
-  localStorage.setItem("playerName", profile.displayName);
-  localStorage.setItem("playerPic", profile.pictureUrl || "");
-  localStorage.setItem("playerId", profile.userId);
-
-  loginWithId(profile.userId, null);
-
-  alert("6");
-}
+  const token = liff.getDecodedIDToken();
+  profile = {
 
 function loginWithOldId() {
   const playerId = el("playerId")?.value.trim();
