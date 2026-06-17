@@ -1616,13 +1616,12 @@ async function loginLine() {
 
 try {
   profile = await liff.getProfile();
-  alert("PROFILE OK = " + JSON.stringify(profile));
+  
 } catch (err) {
-  alert("PROFILE ERROR = " + (err.message || JSON.stringify(err)));
+ 
 
   const token = liff.getDecodedIDToken();
-  alert("TOKEN = " + JSON.stringify(token));
-
+ 
   profile = {
     userId: token?.sub,
     displayName: token?.name || "LINE",
@@ -1631,7 +1630,7 @@ try {
 }
 
    
-alert(JSON.stringify(profile));
+
 
 localStorage.setItem("playerName", profile.displayName);
 localStorage.setItem("playerPic", profile.pictureUrl || "");
