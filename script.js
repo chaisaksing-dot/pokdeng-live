@@ -1623,8 +1623,8 @@ async function loginLine() {
 
       profile = {
         userId: token.sub,
-        displayName: token.name || "LINE",
-        pictureUrl: token.picture || ""
+        displayName: localStorage.getItem("playerName") || token.name || "LINE",
+        pictureUrl: localStorage.getItem("playerPic") || token.picture || ""
       };
     }
 
