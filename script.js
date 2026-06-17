@@ -1588,44 +1588,56 @@ function setBet(amount){
 }
 
 async function loginLine() {
-  alert("1");
+  try {
+    alert("1");
 
-  await liff.init({
-    liffId: LIFF_ID
-  });
+    await liff.init({
+      liffId: LIFF_ID
+    });
 
-  alert("2");
+    alert("2");
 
-  if (!liff.isLoggedIn()) {
-    alert("3");
-    liff.login();
-    return;
+    if (!liff.isLoggedIn()) {
+      alert("3");
+      liff.login();
+      return;
+    }
+
+    alert("4");
+
+    let profile = null;
+
+    try {
+      profile = await liff.getProfile();
+    } catch (err) {
+      const token = liff.getDecodedIDToken();
+
+      if (!token || !token.sub) {
+        alert("ดึงข้อมูล LINE ไม่ได้");
+        return;
+      }
+
+      profile = {
+        userId: token.sub,
+        displayName: token.name || "LINE",
+        pictureUrl: token.picture || ""
+      };
+    }
+
+    alert("5");
+
+    localStorage.setItem("playerName", profile.displayName);
+    localStorage.setItem("playerPic", profile.pictureUrl || "");
+    localStorage.setItem("playerId", profile.userId);
+
+    loginWithId(profile.userId, null);
+
+    alert("6");
+
+  } catch (err) {
+    alert("ERROR: " + err.message);
   }
-
-  alert("4");
-
-let profile;
-
-try {
-  profile = await liff.getProfile();
-} catch (err) {
-  const token = liff.getDecodedIDToken();
-  profile = {
-    userId: token.sub,
-    displayName: token.name || "LINE " + token.sub.slice(-4),
-    pictureUrl: token.picture || ""
-  };
 }
-
-alert("5");
-
-localStorage.setItem("playerName", profile.displayName);
-localStorage.setItem("playerPic", profile.pictureUrl || "");
-localStorage.setItem("playerId", profile.userId);
-
-loginWithId(profile.userId, null);
-
-alert("6");
 
 function loginWithOldId() {
   const playerId = el("playerId")?.value.trim();
