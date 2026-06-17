@@ -357,7 +357,7 @@ function listenRoom(roomId) {
     }
 
     const playerId = localStorage.getItem("playerId") || myPlayerId;
-    const stillInRoom = players.some(p => String(p.name) === String(playerId));
+    const stillInRoom = players.some(p => String(p.id || p.name) === String(playerId));
 
     if (!stillInRoom) {
       stopTimer();
