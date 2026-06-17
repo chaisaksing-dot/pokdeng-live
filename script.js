@@ -770,10 +770,10 @@ function renderPlayers() {
     const seat = el("player" + (i + 1));
     if (!seat) return;
 
-    const isMe = String(p.name) === String(myPlayerId);
+    const isMe = String(p.id || p.name) === String(myPlayerId);
     const point = getPoint(p.cards || []);
     const open = isMe || finished || showAll;
-    const canKick = getBanker()?.name === myPlayerId && currentRoom?.status === "waiting";
+    const canKick = String(getBanker()?.id || getBanker()?.name) === String(myPlayerId) && currentRoom?.status === "waiting";
     
     // ดึงรูปโปรไฟล์
     const photoUrl = p.photo || 'https://via.placeholder.com/50';
@@ -799,7 +799,7 @@ function renderPlayers() {
   const bankerBox = el("banker");
   const banker = getBanker();
   if (bankerBox && banker) {
-    const isMe = String(banker.name) === String(myPlayerId);
+    const isMe = String(banker.id || banker.name) === String(myPlayerId);
     const point = getPoint(banker.cards || []);
     const open = isMe || finished || showAll;
     const photoUrl = banker.photo || 'https://via.placeholder.com/50';
