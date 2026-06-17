@@ -1285,64 +1285,25 @@ function finishGame() {
   });
 }
 
-function showRoundResult() {
+unction showRoundResult() {
   if (!currentRoom || currentRoom.status !== "finished") return;
 
   const me = players.find(p => String(p.id || p.name) === String(myPlayerId));
   const resultBox = el("resultText");
   if (!resultBox || !me || !me.result) return;
 
-  if (me.role === "banker") {
-    let html = "📊 สรุปรอบนี้<br>";
+  const totalBet = players
+    .filter(p => p.role === "player")
+    .reduce((sum, p) => sum + (Number(p.result?.bet || p.bet || 0)), 0);
 
-    players
-      .filter(p => p.role === "player")
-      .forEach(p => {
-        const r = p.result;
-        if (!r) return;
-
-        const label =
-          r.result === "win" ? "ชนะ" :
-          r.result === "lose" ? "แพ้" :
-          "เสมอ";
-
-        html += `
-          <br>ผู้เล่น ${p.displayName || p.name}: ${label}
-          <br>ไพ่: ${r.handLabel} / แต้ม ${r.handPoint}
-          <br>เดิมพัน: ${r.bet}
-          <br>ได้เสีย: ${moneyText(r.net)}
-          <br>ค่าต๋ง: ${r.tong || 0}<br>
-        `;
-      });
-
-    html += `
-      <br>👑 เจ้ามือสุทธิ: ${moneyText(me.result.net)}
-      <br>ค่าต๋งรวม: ${me.result.tongTotal || 0}
-      <br>เครดิตคงเหลือ: ${me.result.moneyAfter}
-    `;
-
-    resultBox.innerHTML = html;
-    return;
-  }
-
-  const r = me.result;
-
-  const label =
-    r.result === "win" ? "🏆 ชนะ" :
-    r.result === "lose" ? "❌ แพ้" :
-    "🤝 เสมอ";
+  const banker = getBanker();
+  const bankerResult = banker?.result || me.result;
 
   resultBox.innerHTML = `
-    ${label}<br>
-    ไพ่คุณ: ${r.handLabel}<br>
-    แต้มคุณ: ${r.handPoint}<br>
-    ไพ่เจ้ามือ: ${r.bankerHandLabel}<br>
-    แต้มเจ้ามือ: ${r.bankerPoint}<br>
-    เดิมพัน: ${r.bet}<br>
-    ยอดก่อนหัก: ${moneyText(r.gross)}<br>
-    ค่าต๋ง: ${r.tong || 0}<br>
-    สุทธิ: ${moneyText(r.net)}<br>
-    เครดิตคงเหลือ: ${r.moneyAfter}
+    📊 สรุปรอบนี้<br><br>
+    💰 ยอดเดิมพันรวม: ${totalBet}<br>
+    👑 เจ้ามือสุทธิ: ${moneyText(bankerResult.net || 0)}<br>
+    🧾 ค่าต๋งรวม: ${bankerResult.tongTotal || currentRoom.roundSummary?.tongTotal || 0}
   `;
 }
 
