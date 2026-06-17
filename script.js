@@ -223,17 +223,18 @@ function createRoom() {
       turnDeadline: 0,
       createdAt: Date.now(),
       players: {
-        [playerId]: {
-           id: playerId,
-           name: localStorage.getItem("playerName") || "ผู้เล่น",
-           photo: localStorage.getItem("playerPic") || "",
-           money,
-           bet: 0,
-           ready: false,
-           role: "banker",
-           cards: null,
-           actionDone: false
-           }       
+       [playerId]: {
+         id: playerId,
+        name: playerId,
+        displayName: localStorage.getItem("playerName") || "ผู้เล่น",
+        photo: localStorage.getItem("playerPic") || "",
+        money,
+        bet: 0,
+        ready: false,
+        role: "banker",
+        cards: null,
+        actionDone: false
+        }
        }
        };
 
