@@ -1596,21 +1596,20 @@ function setBet(amount){
 
 async function loginLine() {
   try {
-    alert("1");
+   
 
     await liff.init({
       liffId: LIFF_ID
     });
 
-    alert("2");
-
+   
     if (!liff.isLoggedIn()) {
-      alert("3");
+      
       liff.login();
       return;
     }
 
-    alert("4");
+    
     
     let profile = null;
 alert("ก่อน getProfile");
@@ -1631,8 +1630,7 @@ try {
   };
 }
 
-    alert("5");
-
+   
 alert(JSON.stringify(profile));
 
 localStorage.setItem("playerName", profile.displayName);
@@ -1641,8 +1639,7 @@ localStorage.setItem("playerPic", profile.pictureUrl || "");
 
     loginWithId(profile.userId, null);
 
-    alert("6");
-
+   
   } catch (err) {
     alert("ERROR: " + err.message);
   }
