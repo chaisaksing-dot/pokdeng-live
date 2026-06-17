@@ -233,9 +233,9 @@ function createRoom() {
            role: "banker",
            cards: null,
            actionDone: false,
-                     }
-                }
-           };
+           }       
+       }
+       };
 
     db.ref("rooms/" + roomId).set(roomData).then(() => {
       listenRoom(roomId);
