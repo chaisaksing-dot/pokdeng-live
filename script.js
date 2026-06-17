@@ -1604,13 +1604,28 @@ async function loginLine() {
 
   alert("4");
 
-  let profile;
+let profile;
 
 try {
   profile = await liff.getProfile();
 } catch (err) {
   const token = liff.getDecodedIDToken();
   profile = {
+    userId: token.sub,
+    displayName: token.name || "LINE " + token.sub.slice(-4),
+    pictureUrl: token.picture || ""
+  };
+}
+
+alert("5");
+
+localStorage.setItem("playerName", profile.displayName);
+localStorage.setItem("playerPic", profile.pictureUrl || "");
+localStorage.setItem("playerId", profile.userId);
+
+loginWithId(profile.userId, null);
+
+alert("6");
 
 function loginWithOldId() {
   const playerId = el("playerId")?.value.trim();
