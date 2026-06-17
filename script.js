@@ -1287,7 +1287,7 @@ function finishGame() {
 function showRoundResult() {
   if (!currentRoom || currentRoom.status !== "finished") return;
 
-  const me = players.find(p => String(p.name) === String(myPlayerId));
+  const me = players.find(p => String(p.id || p.name) === String(myPlayerId));
   const resultBox = el("resultText");
   if (!resultBox || !me || !me.result) return;
 
