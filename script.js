@@ -1631,7 +1631,8 @@ async function loginLine() {
     alert("5");
 
     localStorage.setItem("playerName", profile.displayName);
-    localStorage.setItem("playerPic", profile.pictureUrl || "");
+    const pic = profile.pictureUrl || profile.picture || "";
+localStorage.setItem("playerPic", pic);
     localStorage.setItem("playerId", profile.userId);
 
     loginWithId(profile.userId, null);
