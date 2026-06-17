@@ -309,19 +309,20 @@ function joinRoom() {
 
       db.ref(playerPath).once("value").then(playerSnap => {
         if (!playerSnap.exists()) {
+          
           db.ref(playerPath).set({
-            id: playerId,
-name: localStorage.getItem("playerName") || playerId,
-photo: localStorage.getItem("playerPic") || "",
-            money,
-            bet: 0,
-            ready: false,
-            role: joinRole,
-            cards: null,
-            actionDone: false,
-            result: null,
-            settled: false,
-            pokLocked: false
+          id: playerId,
+          name: localStorage.getItem("playerName") || "ผู้เล่น",
+          photo: localStorage.getItem("playerPic") || "",
+          money,
+          bet: 0,
+          ready: false,
+          role: joinRole,
+          cards: null,
+          actionDone: false,
+          result: null,
+          settled: false,
+          pokLocked: false
           });
         }
 
