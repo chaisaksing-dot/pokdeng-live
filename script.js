@@ -789,6 +789,7 @@ function renderPlayers() {
         <div class="player-info-text">
           <div class="player-name">${p.displayName || p.name}</div>
           <div class="player-money">เงิน: ${p.money || 0}</div>
+          <div class="player-money">เดิมพัน: ${p.bet || 0}</div>
           <div class="player-money">แต้ม: ${open ? point : "-"}</div>
         </div>
       </div>
