@@ -784,7 +784,7 @@ function renderPlayers() {
       <div class="player-box-ui">
         <img src="${photoUrl}" class="player-photo">
         <div class="player-info-text">
-          <div class="player-name">${p.name}</div>
+          <div class="player-name">${p.displayName || p.name}</div>
           <div class="player-money">เงิน: ${p.money || 0}</div>
           <div class="player-money">แต้ม: ${open ? point : "-"}</div>
         </div>
@@ -810,7 +810,7 @@ function renderPlayers() {
       <div class="player-box-ui">
         <img src="${photoUrl}" class="player-photo">
         <div class="player-info-text">
-          <div class="player-name">👑 ${banker.name}</div>
+          <div class="player-name">👑 ${banker.displayName || banker.name}</div>
           <div class="player-money">เงิน: ${banker.money || 0}</div>
           <div class="player-money">แต้ม: ${open ? point : "-"}</div>
         </div>
