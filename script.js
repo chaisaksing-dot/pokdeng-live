@@ -1614,6 +1614,7 @@ async function loginLine() {
     try {
       profile = await liff.getProfile();
     } catch (err) {
+      alert("PROFILE ERROR = " + JSON.stringify(err));
       const token = liff.getDecodedIDToken();
 
       if (!token || !token.sub) {
