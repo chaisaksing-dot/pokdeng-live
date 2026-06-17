@@ -782,6 +782,8 @@ function renderPlayers() {
     
     // ดึงรูปโปรไฟล์
     const photoUrl = p.photo || 'https://via.placeholder.com/50';
+    const resultLine = p.result
+    ? <div class="player-money">${p.result.result === "win" ? "🏆" : p.result.result === "lose" ? "❌" : "🤝"} ${moneyText(p.result.net)}</div>
 
     seat.innerHTML = `
       <div class="player-box-ui">
@@ -790,6 +792,7 @@ function renderPlayers() {
           <div class="player-name">${p.displayName || p.name}</div>
           <div class="player-money">เงิน: ${p.money || 0}</div>
           <div class="player-money">เดิมพัน: ${p.bet || 0}</div>
+          ${resultLine}
           <div class="player-money">แต้ม: ${open ? point : "-"}</div>
         </div>
       </div>
@@ -809,6 +812,9 @@ function renderPlayers() {
     const point = getPoint(banker.cards || []);
     const open = isMe || finished || showAll;
     const photoUrl = banker.photo || 'https://via.placeholder.com/50';
+    const bankerResultLine = banker.result
+    ? <div class="player-money">👑 ${moneyText(banker.result.net)}</div>
+    : "";
 
     bankerBox.innerHTML = `
       <div class="player-box-ui">
@@ -816,6 +822,7 @@ function renderPlayers() {
         <div class="player-info-text">
           <div class="player-name">👑 ${banker.displayName || banker.name}</div>
           <div class="player-money">เงิน: ${banker.money || 0}</div>
+          ${bankerResultLine}
           <div class="player-money">แต้ม: ${open ? point : "-"}</div>
         </div>
       </div>
