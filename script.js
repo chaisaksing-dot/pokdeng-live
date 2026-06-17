@@ -1306,7 +1306,7 @@ function showRoundResult() {
           "เสมอ";
 
         html += `
-          <br>ผู้เล่น ${p.name}: ${label}
+          <br>ผู้เล่น ${p.displayName || p.name}: ${label}
           <br>ไพ่: ${r.handLabel} / แต้ม ${r.handPoint}
           <br>ได้เสีย: ${moneyText(r.net)}
           <br>ค่าต๋ง: ${r.tong || 0}<br>
