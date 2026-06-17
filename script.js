@@ -1604,7 +1604,15 @@ async function loginLine() {
 
   alert("4");
 
-  const profile = await liff.getProfile();
+  let profile;
+
+try {
+  profile = await liff.getProfile();
+} catch (err) {
+  alert("ดึงโปรไฟล์ไม่ได้: " + err.message);
+  liff.logout();
+  return;
+}
 
   alert("5");
 
