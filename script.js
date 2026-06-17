@@ -702,7 +702,10 @@ function updateTurnTimer() {
   if (timerBox) timerBox.innerText = remain > 0 ? "เวลา: " + remain : "เวลา: 0";
 
   const resultBox = el("resultText");
-  if (resultBox) resultBox.innerText = "คิว " + turnPlayer + " (" + remain + " วินาที)";
+  const turnInfo = players.find(p => String(p.id || p.name) === String(turnPlayer));
+  const turnName = turnInfo ? (turnInfo.displayName || turnInfo.name) : turnPlayer;
+
+  if (resultBox) resultBox.innerText = "คิว " + shortName(turnName) + " (" + remain + " วินาที)";
 
   if (remain <= 0) {
     const banker = getBanker();
