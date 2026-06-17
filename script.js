@@ -1612,7 +1612,7 @@ async function loginLine() {
     
     
     let profile = null;
-alert("ก่อน getProfile");
+
 
 try {
   profile = await liff.getProfile();
