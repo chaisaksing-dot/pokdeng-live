@@ -1608,26 +1608,25 @@ async function loginLine() {
     }
 
     alert("4");
-
+    
     let profile = null;
+alert("ก่อน getProfile");
 
-    try {
-      profile = await liff.getProfile();
-    } catch (err) {
-      alert("PROFILE ERROR = " + JSON.stringify(err));
-      const token = liff.getDecodedIDToken();
+try {
+  profile = await liff.getProfile();
+  alert("PROFILE OK = " + JSON.stringify(profile));
+} catch (err) {
+  alert("PROFILE ERROR = " + (err.message || JSON.stringify(err)));
 
-      if (!token || !token.sub) {
-        alert("ดึงข้อมูล LINE ไม่ได้");
-        return;
-      }
+  const token = liff.getDecodedIDToken();
+  alert("TOKEN = " + JSON.stringify(token));
 
-      profile = {
-        userId: token.sub,
-        displayName: localStorage.getItem("playerName") || token.name || "LINE",
-        pictureUrl: localStorage.getItem("playerPic") || token.picture || ""
-      };
-    }
+  profile = {
+    userId: token?.sub,
+    displayName: token?.name || "LINE",
+    pictureUrl: token?.picture || ""
+  };
+}
 
     alert("5");
 
