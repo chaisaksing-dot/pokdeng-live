@@ -232,7 +232,7 @@ function createRoom() {
            ready: false,
            role: "banker",
            cards: null,
-           actionDone: false,
+           actionDone: false
            }       
        }
        };
