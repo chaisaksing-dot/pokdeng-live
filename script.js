@@ -834,7 +834,7 @@ function renderPlayers() {
     const photoUrl = banker.photo || "https://via.placeholder.com/50";
 
     const bankerResultLine = banker.result
-      ? <div class="player-money">👑 ${moneyText(banker.result.net)}</div>
+      ? `<div class="player-money">👑 ${moneyText(banker.result.net)}</div>`
       : "";
 
     bankerBox.innerHTML = `
