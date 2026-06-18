@@ -762,21 +762,6 @@ function getBanker() {
   return players.find(p => p.role === "banker")|| null;
 }
 
-
-
-function renderBetBox() {
-  const box = el("betCard");
-  if (!box || !currentRoom) return;
-
-  const me = players.find(p => String(p.name) === String(myPlayerId));
-
-  if (me && me.role === "player" && currentRoom.status === "waiting" && me.ready !== true) {
-    box.style.display = "block";
-  } else {
-    box.style.display = "none";
-  }
-}
-
 function renderPlayers() {
   for (let i = 1; i <= 8; i++) {
     const seat = el("player" + i);
@@ -833,6 +818,19 @@ function renderPlayers() {
       </div>
       ${renderCards(banker.cards, open)}
     `;
+  }
+}
+
+function renderBetBox() {
+  const box = el("betCard");
+  if (!box || !currentRoom) return;
+
+  const me = players.find(p => String(p.name) === String(myPlayerId));
+
+  if (me && me.role === "player" && currentRoom.status === "waiting" && me.ready !== true) {
+    box.style.display = "block";
+  } else {
+    box.style.display = "none";
   }
 }
 
