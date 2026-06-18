@@ -817,11 +817,11 @@ function renderPlayers() {
         </div>
       </div>
       <div style="font-size: 10px; margin-top: 2px;">
-        ${p.role === "waiting" ? "🪑 รอรอบหน้า" : (p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม")}
-      </div>
-    ${canKick ? `<button onclick="kickPlayer('${p.id || p.name}')" style="font-size:9px;background:#e53935;color:white;border:none;border-radius:4px;margin-top:2px;">❌ เตะ</button>` : ""}
-      ${renderCards(p.cards, open)}
-    `;
+  ${p.role === "waiting" ? "🪑 รอรอบหน้า" : (p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม")}
+</div>
+${canKick ? `<button onclick="kickPlayer('${p.id || p.name}')" style="font-size:9px;background:#e53935;color:white;border:none;border-radius:4px;margin-top:2px;">❌ เตะ</button>` : ""}
+${renderCards(p.cards, open)}
+`;
   });
 
   const bankerBox = el("banker");
