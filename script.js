@@ -759,78 +759,7 @@ function getBanker() {
   return players.find(p => p.role === "banker");
 }
 
-function renderPlayers() {
-  // เคลียร์ที่นั่งทั้งหมดก่อนแสดงผล
-  for (let i = 1; i <= 8; i++) {
-    const seat = el("player" + i);
-    if (seat) seat.innerHTML = "";
-  }
 
-  const finished = currentRoom?.status === "finished";
-  const showAll = currentRoom?.showAllCards === true;
-  const normalPlayers = players.filter(p => p.role === "player" || p.role === "waiting");
-
-  // แสดงผลผู้เล่น 1-8
-  normalPlayers.forEach((p, i) => {
-    const seat = el("player" + (i + 1));
-    if (!seat) return;
-
-    const isMe = String(p.id || p.name) === String(myPlayerId);
-    const point = getPoint(p.cards || []);
-    const open = isMe || finished || showAll;
-    const canKick = String(getBanker()?.id || getBanker()?.name) === String(myPlayerId) && currentRoom?.status === "waiting";
-    
-    // ดึงรูปโปรไฟล์
-    const photoUrl = p.photo || 'https://via.placeholder.com/50';
-    const resultLine = p.result
-    ? <div class="player-money">${p.result.result === "win" ? "🏆" : p.result.result === "lose" ? "❌" : "🤝"} ${moneyText(p.result.net)}</div>
-    : "";
-  
-    seat.innerHTML = `
-      <div class="player-box-ui">
-        <img src="${photoUrl}" class="player-photo">
-        <div class="player-info-text">
-          <div class="player-name">${p.displayName || p.name}</div>
-          <div class="player-money">เงิน: ${p.money || 0}</div>
-          <div class="player-money">เดิมพัน: ${p.bet || 0}</div>
-          ${resultLine}
-          <div class="player-money">แต้ม: ${open ? point : "-"}</div>
-        </div>
-      </div>
-      <div style="font-size: 10px; margin-top: 2px;">
-        ${p.role === "waiting" ? "🪑 รอรอบหน้า" : (p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม")}
-      </div>
-      ${canKick ? `<button onclick="kickPlayer('${p.name}')" style="font-size:9px; background:#e53935; color:white; border:none; border-radius:4px; margin-top:2px;">❌ เตะ</button>` : ""}
-      ${renderCards(p.cards, open)}
-    `;
-  });
-
-  // แสดงผลเจ้ามือ
-  const bankerBox = el("banker");
-  const banker = getBanker();
-  if (bankerBox && banker) {
-    const isMe = String(banker.id || banker.name) === String(myPlayerId);
-    const point = getPoint(banker.cards || []);
-    const open = isMe || finished || showAll;
-    const photoUrl = banker.photo || 'https://via.placeholder.com/50';
-    const bankerResultLine = banker.result
-    ? <div class="player-money">👑 ${moneyText(banker.result.net)}</div>
-    : "";
-
-    bankerBox.innerHTML = `
-      <div class="player-box-ui">
-        <img src="${photoUrl}" class="player-photo">
-        <div class="player-info-text">
-          <div class="player-name">👑 ${banker.displayName || banker.name}</div>
-          <div class="player-money">เงิน: ${banker.money || 0}</div>
-          ${bankerResultLine}
-          <div class="player-money">แต้ม: ${open ? point : "-"}</div>
-        </div>
-      </div>
-      ${renderCards(banker.cards, open)}
-    `;
-  }
-}
 
 function renderBetBox() {
   const box = el("betCard");
@@ -842,6 +771,84 @@ function renderBetBox() {
     box.style.display = "block";
   } else {
     box.style.display = "none";
+  }
+}
+
+function renderPlayers() {
+  for (let i = 1; i <= 8; i++) {
+    const seat = el("player" + i);
+    if (seat) seat.innerHTML = "";
+  }
+
+  const finished = currentRoom?.status === "finished";
+  const showAll = currentRoom?.showAllCards === true;
+  const normalPlayers = players.filter(p => p.role === "player" || p.role === "waiting");
+
+  normalPlayers.forEach((p, i) => {
+    const seat = el("player" + (i + 1));
+    if (!seat) return;
+
+    const isMe = String(p.id || p.name) === String(myPlayerId);
+    const point = getPoint(p.cards || []);
+    const open = isMe || finished || showAll;
+    const canKick =
+      String(getBanker()?.id || getBanker()?.name) === String(myPlayerId) &&
+      currentRoom?.status === "waiting";
+
+    const photoUrl = p.photo || "https://via.placeholder.com/50";
+
+    const resultLine = p.result
+      ? `<div class="player-money">${
+          p.result.result === "win" ? "🏆" :
+          p.result.result === "lose" ? "❌" :
+          "🤝"
+        } ${moneyText(p.result.net)}</div>`
+      : "";
+
+    seat.innerHTML = `
+      <div class="player-box-ui">
+        <img src="${photoUrl}" class="player-photo">
+        <div class="player-info-text">
+          <div class="player-name">${shortName(p.displayName || p.name)}</div>
+          <div class="player-money">เงิน: ${p.money || 0}</div>
+          <div class="player-money">เดิมพัน: ${p.bet || 0}</div>
+          ${resultLine}
+          <div class="player-money">แต้ม: ${open ? point : "-"}</div>
+        </div>
+      </div>
+      <div style="font-size: 10px; margin-top: 2px;">
+        ${p.role === "waiting" ? "🪑 รอรอบหน้า" : (p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม")}
+      </div>
+      ${canKick ? <button onclick="kickPlayer('${p.id || p.name}')" style="font-size:9px; background:#e53935; color:white; border:none; border-radius:4px; margin-top:2px;">❌ เตะ</button> : ""}
+      ${renderCards(p.cards, open)}
+    `;
+  });
+
+  const bankerBox = el("banker");
+  const banker = getBanker();
+
+  if (bankerBox && banker) {
+    const isMe = String(banker.id || banker.name) === String(myPlayerId);
+    const point = getPoint(banker.cards || []);
+    const open = isMe || finished || showAll;
+    const photoUrl = banker.photo || "https://via.placeholder.com/50";
+
+    const bankerResultLine = banker.result
+      ? <div class="player-money">👑 ${moneyText(banker.result.net)}</div>
+      : "";
+
+    bankerBox.innerHTML = `
+      <div class="player-box-ui">
+        <img src="${photoUrl}" class="player-photo">
+        <div class="player-info-text">
+          <div class="player-name">👑 ${shortName(banker.displayName || banker.name)}</div>
+          <div class="player-money">เงิน: ${banker.money || 0}</div>
+          ${bankerResultLine}
+          <div class="player-money">แต้ม: ${open ? point : "-"}</div>
+        </div>
+      </div>
+      ${renderCards(banker.cards, open)}
+    `;
   }
 }
 
