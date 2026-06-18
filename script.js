@@ -783,11 +783,11 @@ function renderPlayers() {
     const photoUrl = p.photo || "https://via.placeholder.com/50";
 
     const resultLine = p.result
-      ? '<div class="player-money">${
+      ? `<div class="player-money">${
           p.result.result === "win" ? "🏆" :
           p.result.result === "lose" ? "❌" :
           "🤝"
-        } ${moneyText(p.result.net)}</div>'
+        } ${moneyText(p.result.net)}</div>`
       : "";
 
     seat.innerHTML = '
