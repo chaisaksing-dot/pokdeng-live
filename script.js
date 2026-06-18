@@ -791,19 +791,7 @@ function renderPlayers() {
     const isMe = String(p.id || p.name) === String(myPlayerId);
     const point = getPoint(p.cards || []);
     const open = isMe || finished || showAll;
-    const canKick =
-      String(getBanker()?.id || getBanker()?.name) === String(myPlayerId) &&
-      currentRoom?.status === "waiting";
-
     const photoUrl = p.photo || "https://via.placeholder.com/50";
-
-    const resultLine = p.result
-      ? `<div class="player-money">${
-          p.result.result === "win" ? "🏆" :
-          p.result.result === "lose" ? "❌" :
-          "🤝"
-        } ${moneyText(p.result.net)}</div>`
-      : "";
 
     seat.innerHTML = `
       <div class="player-box-ui">
@@ -812,16 +800,14 @@ function renderPlayers() {
           <div class="player-name">${shortName(p.displayName || p.name)}</div>
           <div class="player-money">เงิน: ${p.money || 0}</div>
           <div class="player-money">เดิมพัน: ${p.bet || 0}</div>
-          ${resultLine}
           <div class="player-money">แต้ม: ${open ? point : "-"}</div>
         </div>
       </div>
-      <div style="font-size: 10px; margin-top: 2px;">
-  ${p.role === "waiting" ? "🪑 รอรอบหน้า" : (p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม")}
-</div>
-${canKick ? `<button onclick="kickPlayer('${p.id || p.name}')" style="font-size:9px;background:#e53935;color:white;border:none;border-radius:4px;margin-top:2px;">❌ เตะ</button>` : ""}
-${renderCards(p.cards, open)}
-`;
+      <div style="font-size:10px;margin-top:2px;">
+        ${p.role === "waiting" ? "🪑 รอรอบหน้า" : (p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม")}
+      </div>
+      ${renderCards(p.cards, open)}
+    `;
   });
 
   const bankerBox = el("banker");
@@ -833,17 +819,12 @@ ${renderCards(p.cards, open)}
     const open = isMe || finished || showAll;
     const photoUrl = banker.photo || "https://via.placeholder.com/50";
 
-    const bankerResultLine = banker.result
-      ? `<div class="player-money">👑 ${moneyText(banker.result.net)}</div>`
-      : "";
-
     bankerBox.innerHTML = `
       <div class="player-box-ui">
         <img src="${photoUrl}" class="player-photo">
         <div class="player-info-text">
           <div class="player-name">👑 ${shortName(banker.displayName || banker.name)}</div>
           <div class="player-money">เงิน: ${banker.money || 0}</div>
-          ${bankerResultLine}
           <div class="player-money">แต้ม: ${open ? point : "-"}</div>
         </div>
       </div>
