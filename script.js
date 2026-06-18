@@ -756,7 +756,7 @@ function renderCards(cardList, open) {
 }
 
 function getBanker() {
-  return players.find(p => p.role === "banker");
+  return players.find(p => p.role === "banker")|| null;
 }
 
 
