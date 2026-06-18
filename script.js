@@ -351,10 +351,7 @@ function listenRoom(roomId) {
     }
 
     currentRoom = { ...room, id: roomId };
-    players = Object.entries(room.players || {}).map(([key, p]) => ({
-  id: p.id || key,
-  ...p
-}));
+    players = Object.values(room.players || {});
 
     if (players.length === 0) {
       db.ref("rooms/" + roomId).remove();
@@ -759,7 +756,7 @@ function renderCards(cardList, open) {
 }
 
 function getBanker() {
-  return players.find(p => p.role === "banker")|| null;
+  return players.find(p => p.role === "banker");
 }
 
 function renderPlayers() {
@@ -779,47 +776,42 @@ function renderPlayers() {
     const isMe = String(p.id || p.name) === String(myPlayerId);
     const point = getPoint(p.cards || []);
     const open = isMe || finished || showAll;
+    const canKick =
+      String(getBanker()?.id || getBanker()?.name) === String(myPlayerId) &&
+      currentRoom?.status === "waiting";
+
     const photoUrl = p.photo || "https://via.placeholder.com/50";
 
-    seat.innerHTML = `
+    const resultLine = p.result
+      ? '<div class="player-money">${
+          p.result.result === "win" ? "🏆" :
+          p.result.result === "lose" ? "❌" :
+          "🤝"
+        } ${moneyText(p.result.net)}</div>'
+      : "";
+
+    seat.innerHTML = '
       <div class="player-box-ui">
         <img src="${photoUrl}" class="player-photo">
         <div class="player-info-text">
           <div class="player-name">${shortName(p.displayName || p.name)}</div>
           <div class="player-money">เงิน: ${p.money || 0}</div>
           <div class="player-money">เดิมพัน: ${p.bet || 0}</div>
+          ${resultLine}
           <div class="player-money">แต้ม: ${open ? point : "-"}</div>
         </div>
       </div>
-      <div style="font-size:10px;margin-top:2px;">
+      <div style="font-size: 10px; margin-top: 2px;">
         ${p.role === "waiting" ? "🪑 รอรอบหน้า" : (p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม")}
       </div>
+      ${canKick ? <button onclick="kickPlayer('${p.id || p.name}')" style="font-size:9px; background:#e53935; color:white; border:none; border-radius:4px; margin-top:2px;">❌ เตะ</button> : ""}
       ${renderCards(p.cards, open)}
-    `;
+    ';
   });
 
   const bankerBox = el("banker");
   const banker = getBanker();
 
-  if (bankerBox && banker) {
-    const isMe = String(banker.id || banker.name) === String(myPlayerId);
-    const point = getPoint(banker.cards || []);
-    const open = isMe || finished || showAll;
-    const photoUrl = banker.photo || "https://via.placeholder.com/50";
-
-    bankerBox.innerHTML = `
-      <div class="player-box-ui">
-        <img src="${photoUrl}" class="player-photo">
-        <div class="player-info-text">
-          <div class="player-name">👑 ${shortName(banker.displayName || banker.name)}</div>
-          <div class="player-money">เงิน: ${banker.money || 0}</div>
-          <div class="player-money">แต้ม: ${open ? point : "-"}</div>
-        </div>
-      </div>
-      ${renderCards(banker.cards, open)}
-    `;
-  }
-}
 
 function renderBetBox() {
   const box = el("betCard");
@@ -831,6 +823,31 @@ function renderBetBox() {
     box.style.display = "block";
   } else {
     box.style.display = "none";
+  }
+}
+
+  if (bankerBox && banker) {
+    const isMe = String(banker.id || banker.name) === String(myPlayerId);
+    const point = getPoint(banker.cards || []);
+    const open = isMe || finished || showAll;
+    const photoUrl = banker.photo || "https://via.placeholder.com/50";
+
+    const bankerResultLine = banker.result
+      ? '<div class="player-money">👑 ${moneyText(banker.result.net)}</div>'
+      : "";
+
+    bankerBox.innerHTML = '
+      <div class="player-box-ui">
+        <img src="${photoUrl}" class="player-photo">
+        <div class="player-info-text">
+          <div class="player-name">👑 ${shortName(banker.displayName || banker.name)}</div>
+          <div class="player-money">เงิน: ${banker.money || 0}</div>
+          ${bankerResultLine}
+          <div class="player-money">แต้ม: ${open ? point : "-"}</div>
+        </div>
+      </div>
+      ${renderCards(banker.cards, open)}
+    ';
   }
 }
 
@@ -1282,7 +1299,7 @@ function finishGame() {
   });
 }
 
-function showRoundResult() {
+unction showRoundResult() {
   if (!currentRoom || currentRoom.status !== "finished") return;
 
   const me = players.find(p => String(p.id || p.name) === String(myPlayerId));
@@ -1633,4 +1650,3 @@ function loginWithOldId() {
 }
 
 window.loginWithOldId = loginWithOldId;
-
