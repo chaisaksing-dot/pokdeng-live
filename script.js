@@ -351,7 +351,10 @@ function listenRoom(roomId) {
     }
 
     currentRoom = { ...room, id: roomId };
-    players = Object.values(room.players || {});
+    players = Object.entries(room.players || {}).map(([key, p]) => ({
+  id: p.id || key,
+  ...p
+}));
 
     if (players.length === 0) {
       db.ref("rooms/" + roomId).remove();
