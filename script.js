@@ -855,7 +855,7 @@ function checkAllReady() {
   const btn = el("startGameBtn");
   if (!btn || !currentRoom) return;
 
-  const me = players.find(p => String(p.name) === String(myPlayerId));
+  const me = players.find(p => String(p.id || p.name) === String(myPlayerId));
   const ps = players.filter(p => p.role === "player");
 
   if (currentRoom.status === "waiting" && me && me.role === "banker" && ps.length > 0 && ps.every(p => p.ready === true)) {
