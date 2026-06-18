@@ -1281,7 +1281,7 @@ function finishGame() {
   });
 }
 
-unction showRoundResult() {
+function showRoundResult() {
   if (!currentRoom || currentRoom.status !== "finished") return;
 
   const me = players.find(p => String(p.id || p.name) === String(myPlayerId));
