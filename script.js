@@ -1259,7 +1259,6 @@ function finishGame() {
 
     updates["rooms/" + currentRoom.id + "/players/" + banker.name + "/money"] = bankerMoney;
     updates["wallet/" + banker.name] = bankerMoney;
-
     updates["rooms/" + currentRoom.id + "/players/" + banker.name + "/result"] = {
       result: bankerNet > 0 ? "win" : bankerNet < 0 ? "lose" : "draw",
       net: bankerNet,
@@ -1291,7 +1290,7 @@ function finishGame() {
   });
 }
 
-unction showRoundResult() {
+function showRoundResult() {
   if (!currentRoom || currentRoom.status !== "finished") return;
 
   const me = players.find(p => String(p.id || p.name) === String(myPlayerId));
