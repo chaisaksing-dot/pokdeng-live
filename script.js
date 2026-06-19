@@ -826,30 +826,9 @@ function renderBetBox() {
   }
 }
 
-  if (bankerBox && banker) {
-    const isMe = String(banker.id || banker.name) === String(myPlayerId);
-    const point = getPoint(banker.cards || []);
-    const open = isMe || finished || showAll;
-    const photoUrl = banker.photo || "https://via.placeholder.com/50";
 
-    const bankerResultLine = banker.result
-      ? `<div class="player-money">👑 ${moneyText(banker.result.net)}</div>`
-      : "";
-
-    bankerBox.innerHTML = `
-      <div class="player-box-ui">
-        <img src="${photoUrl}" class="player-photo">
-        <div class="player-info-text">
-          <div class="player-name">👑 ${shortName(banker.displayName || banker.name)}</div>
-          <div class="player-money">เงิน: ${banker.money || 0}</div>
-          ${bankerResultLine}
-          <div class="player-money">แต้ม: ${open ? point : "-"}</div>
-        </div>
-      </div>
-      ${renderCards(banker.cards, open)}
-    `;
-  }
 }
+
 
 function checkAllReady() {
   const btn = el("startGameBtn");
