@@ -1511,7 +1511,7 @@ function kickPlayer(playerId) {
 
 window.kickPlayer = kickPlayer;
 
-
+}
 // =====================
 // เริ่มต้นระบบ
 // =====================
