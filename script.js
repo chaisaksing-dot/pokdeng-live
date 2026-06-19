@@ -848,12 +848,6 @@ function renderBetBox() {
     box.style.display = "none";
   }
 }
-if (bankerBox && banker) {
-  const isMe = String(banker.id || banker.name) === String(myPlayerId);
-  const point = getPoint(banker.cards || []);
-  const open = isMe || finished || showAll;
-  const photoUrl = banker.photo || "https://via.placeholder.com/50";
-
   bankerBox.innerHTML = `
     <div class="player-box-ui">
       <img src="${photoUrl}" class="player-photo">
