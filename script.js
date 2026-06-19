@@ -826,10 +826,6 @@ function renderBetBox() {
   }
 }
 
-
-}
-
-
 function checkAllReady() {
   const btn = el("startGameBtn");
   if (!btn || !currentRoom) return;
