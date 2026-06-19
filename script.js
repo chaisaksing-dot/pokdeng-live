@@ -833,10 +833,10 @@ function renderBetBox() {
     const photoUrl = banker.photo || "https://via.placeholder.com/50";
 
     const bankerResultLine = banker.result
-      ? '<div class="player-money">👑 ${moneyText(banker.result.net)}</div>'
+      ? `<div class="player-money">👑 ${moneyText(banker.result.net)}</div>`
       : "";
 
-    bankerBox.innerHTML = '
+    bankerBox.innerHTML = `
       <div class="player-box-ui">
         <img src="${photoUrl}" class="player-photo">
         <div class="player-info-text">
@@ -847,7 +847,7 @@ function renderBetBox() {
         </div>
       </div>
       ${renderCards(banker.cards, open)}
-    ';
+    `;
   }
 }
 
