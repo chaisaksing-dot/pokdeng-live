@@ -759,6 +759,11 @@ function getBanker() {
   return players.find(p => p.role === "banker");
 }
 
+function shortName(name) {
+  if (!name) return "";
+  return String(name).length > 12 ? String(name).substring(0, 12) + "..." : String(name);
+}
+
 function renderPlayers() {
   for (let i = 1; i <= 8; i++) {
     const seat = el("player" + i);
@@ -923,14 +928,14 @@ function playerReady() {
   const bet = Number(el("betAmount")?.value) || 0;
   if (!currentRoom) return;
 
-  const me = players.find(p => String(p.name) === String(myPlayerId));
+  const me = players.find(p => String(p.id || p.name) === String(myPlayerId));
   if (!me) return;
 
   if (bet <= 0) return alert("กรุณาเลือกเงินแทง");
   if (bet > Number(currentRoom.maxBet)) return alert("แทงเกินสูงสุด");
   if ((Number(me.money) || 0) < bet * 5) return alert("เครดิตไม่พอ");
 
-  db.ref("rooms/" + currentRoom.id + "/players/" + myPlayerId).update({
+  db.ref("rooms/" + currentRoom.id + "/players/" + (me.id || me.name)).update({
     bet,
     ready: true,
     actionDone: false
