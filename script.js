@@ -1497,7 +1497,7 @@ window.kickPlayer = kickPlayer;
 // =====================
 // เริ่มต้นระบบ
 // =====================
-
+}
 
 window.autoLogin = autoLogin;
 window.showOldIdBox = showOldIdBox;
