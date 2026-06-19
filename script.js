@@ -811,7 +811,25 @@ function renderPlayers() {
 
   const bankerBox = el("banker");
   const banker = getBanker();
+if (bankerBox && banker) {
+  const isMe = String(banker.id || banker.name) === String(myPlayerId);
+  const point = getPoint(banker.cards || []);
+  const open = isMe || finished || showAll;
+  const photoUrl = banker.photo || "https://via.placeholder.com/50";
 
+  bankerBox.innerHTML = `
+    <div class="player-box-ui">
+      <img src="${photoUrl}" class="player-photo">
+      <div class="player-info-text">
+        <div class="player-name">👑 ${shortName(banker.displayName || banker.name)}</div>
+        <div class="player-money">เงิน: ${banker.money || 0}</div>
+        <div class="player-money">แต้ม: ${open ? point : "-"}</div>
+      </div>
+    </div>
+    ${renderCards(banker.cards, open)}
+  `;
+}
+}
 
 function renderBetBox() {
   const box = el("betCard");
