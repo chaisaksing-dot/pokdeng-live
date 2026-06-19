@@ -790,7 +790,7 @@ function renderPlayers() {
         } ${moneyText(p.result.net)}</div>`
       : "";
 
-    seat.innerHTML = '
+    seat.innerHTML = `
       <div class="player-box-ui">
         <img src="${photoUrl}" class="player-photo">
         <div class="player-info-text">
@@ -806,7 +806,7 @@ function renderPlayers() {
       </div>
       ${canKick ? <button onclick="kickPlayer('${p.id || p.name}')" style="font-size:9px; background:#e53935; color:white; border:none; border-radius:4px; margin-top:2px;">❌ เตะ</button> : ""}
       ${renderCards(p.cards, open)}
-    ';
+    `;
   });
 
   const bankerBox = el("banker");
