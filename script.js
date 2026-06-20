@@ -859,7 +859,7 @@ function renderBetBox() {
     </div>
     ${renderCards(banker.cards, open)}
   `;
-}
+
 function checkAllReady() {
   const btn = el("startGameBtn");
   if (!btn || !currentRoom) return;
