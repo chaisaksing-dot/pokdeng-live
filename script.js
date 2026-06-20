@@ -848,18 +848,7 @@ function renderBetBox() {
     box.style.display = "none";
   }
 }
-  bankerBox.innerHTML = `
-    <div class="player-box-ui">
-      <img src="${photoUrl}" class="player-photo">
-      <div class="player-info-text">
-        <div class="player-name">👑 ${shortName(banker.displayName || banker.name)}</div>
-        <div class="player-money">เงิน: ${banker.money || 0}</div>
-        <div class="player-money">แต้ม: ${open ? point : "-"}</div>
-      </div>
-    </div>
-    ${renderCards(banker.cards, open)}
-  `;
-
+ 
 function checkAllReady() {
   const btn = el("startGameBtn");
   if (!btn || !currentRoom) return;
