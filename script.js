@@ -1540,13 +1540,13 @@ window.onload = function () {
     if (savedId) {
       loginWithId(savedId, roomId);
     } else {
-      createNewPlayerId(roomId);
+      showPage("loginPage");
+      alert("กรุณาเข้าสู่ระบบด้วย LINE ก่อนเข้าห้อง");
     }
     return;
   }
 
-    showPage("loginPage");
-  
+  showPage("loginPage");
 };
 
 function toggleRules(){
