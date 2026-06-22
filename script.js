@@ -98,18 +98,6 @@ function loginLineOld() {
   });
 }
 
-function createNewPlayerId(roomIdAfterLogin) {
-  db.ref("system/lastPlayerNo").transaction(v => (Number(v) || 0) + 1, (error, committed, snap) => {
-    if (error || !committed) {
-      alert("สร้างรหัสผู้เล่นไม่สำเร็จ");
-      return;
-    }
-
-    const newId = String(snap.val()).padStart(4, "0");
-    loginWithId(newId, roomIdAfterLogin);
-  });
-}
-
 function loginWithId(playerId, roomIdAfterLogin) {
   myPlayerId = String(playerId);
   localStorage.setItem("playerId", myPlayerId);
