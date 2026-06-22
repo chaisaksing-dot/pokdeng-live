@@ -445,8 +445,9 @@ if (bankerMoney < bankerNeed) {
   db.ref().update(updates).then(() => {
     const order = [];
     for (let r = 0; r < 2; r++) {
-      normalPlayers.forEach(p => order.push(p.name));
-      order.push(banker.name);
+      normalPlayers.forEach(p => order.push(p.id || p.name));
+order.push(banker.id || banker.name);
+    
     }
 
     let index = 0;
