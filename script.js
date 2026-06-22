@@ -1537,7 +1537,7 @@ async function loginLine() {
   }
 }
 
-window.addEventListener("load", function () {
+(function startApp() {
   const params = new URLSearchParams(window.location.search);
   const roomId = params.get("room");
   const savedId = localStorage.getItem("playerId");
@@ -1547,4 +1547,5 @@ window.addEventListener("load", function () {
   } else {
     showPage("loginPage");
   }
-});
+})();
+
