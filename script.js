@@ -1516,42 +1516,35 @@ function setBet(amount){
 
 async function loginLine() {
   try {
-   
-    await liff.init({
-      liffId: LIFF_ID
-    });
+    await liff.init({ liffId: LIFF_ID });
 
     if (!liff.isLoggedIn()) {
-      
       liff.login();
       return;
     }
-   
+
     let profile = null;
 
-try {
-  profile = await liff.getProfile();
-  
-} catch (err) {
- 
-  const token = liff.getDecodedIDToken();
- 
-  profile = {
-    userId: token?.sub,
-    displayName: token?.name || "LINE",
-    pictureUrl: token?.picture || ""
-  };
-}
+    try {
+      profile = await liff.getProfile();
+    } catch (err) {
+      const token = liff.getDecodedIDToken();
+      profile = {
+        userId: token?.sub,
+        displayName: token?.name || "LINE",
+        pictureUrl: token?.picture || ""
+      };
+    }
 
-localStorage.setItem("playerName", profile.displayName);
-localStorage.setItem("playerPic", profile.pictureUrl || "");
+    localStorage.setItem("playerName", profile.displayName || "LINE");
+    localStorage.setItem("playerPic", profile.pictureUrl || "");
     localStorage.setItem("playerId", profile.userId);
 
-   const params = new URLSearchParams(window.location.search);
-const roomId = params.get("room");
+    const params = new URLSearchParams(window.location.search);
+    const roomId = params.get("room");
 
-loginWithId(profile.userId, roomId || null);
-   
+    loginWithId(profile.userId, roomId || null);
+
   } catch (err) {
     alert("ERROR: " + err.message);
   }
