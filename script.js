@@ -410,7 +410,16 @@ function dealCards() {
 
   if (!banker) return alert("ไม่พบเจ้ามือ");
   if (normalPlayers.length === 0) return alert("ต้องมีผู้เล่นก่อนเริ่มเกม");
-  if (!normalPlayers.every(p => p.ready === true)) return alert("ผู้เล่นต้องกดพร้อมทุกคนก่อน");
+  const totalBet = normalPlayers.reduce((sum, p) => {
+  return sum + Number(p.bet || 0);
+}, 0);
+
+const bankerNeed = totalBet * 5;
+const bankerMoney = Number(banker.money || 0);
+
+if (bankerMoney < bankerNeed) {
+  return alert("เงินเจ้ามือไม่พอ ต้องมีอย่างน้อย " + bankerNeed + " บาท");
+}
 
   isDealing = true;
   const deck = createShuffledDeck();
