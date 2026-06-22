@@ -74,17 +74,6 @@ function loginWithId(playerId, roomIdAfterLogin) {
   const walletRef = db.ref("wallet/" + myPlayerId);
   walletRef.once("value").then(snap => {
     if (!snap.exists()) walletRef.set(10000);
-
-    db.ref("users/" + myPlayerId).once("value").then(userSnap => {
-      if (!userSnap.exists()) {
-        db.ref("users/" + myPlayerId).set({
-          id: myPlayerId,
-          name: "ผู้เล่น " + myPlayerId,
-          pin: "1234",
-          createdAt: Date.now()
-        });
-      }
-
       checkAdminRole(myPlayerId).then(() => {
         if (roomIdAfterLogin) {
           showPage("lobbyPage");
