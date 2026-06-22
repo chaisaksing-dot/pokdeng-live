@@ -1547,7 +1547,10 @@ localStorage.setItem("playerName", profile.displayName);
 localStorage.setItem("playerPic", profile.pictureUrl || "");
     localStorage.setItem("playerId", profile.userId);
 
-    loginWithId(profile.userId, null);
+   const params = new URLSearchParams(window.location.search);
+const roomId = params.get("room");
+
+loginWithId(profile.userId, roomId || null);
    
   } catch (err) {
     alert("ERROR: " + err.message);
