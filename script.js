@@ -72,20 +72,25 @@ function loginWithId(playerId, roomIdAfterLogin) {
   localStorage.setItem("playerId", myPlayerId);
 
   const walletRef = db.ref("wallet/" + myPlayerId);
+
   walletRef.once("value").then(snap => {
-    if (!snap.exists()) walletRef.set(10000);
-      checkAdminRole(myPlayerId).then(() => {
-        if (roomIdAfterLogin) {
-          showPage("lobbyPage");
-          setTimeout(() => {
-            const joinInput = el("joinRoomId");
-            if (joinInput) joinInput.value = roomIdAfterLogin;
-            joinRoom();
-          }, 500);
-        } else {
-          showPage("lobbyPage");
-        }
-      });
+    if (!snap.exists()) {
+      walletRef.set(0);
+    }
+
+    checkAdminRole(myPlayerId).then(() => {
+      if (roomIdAfterLogin) {
+        showPage("lobbyPage");
+
+        setTimeout(() => {
+          const joinInput = el("joinRoomId");
+          if (joinInput) joinInput.value = roomIdAfterLogin;
+          joinRoom();
+        }, 500);
+
+      } else {
+        showPage("lobbyPage");
+      }
     });
   });
 }
