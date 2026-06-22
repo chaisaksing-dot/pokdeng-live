@@ -867,8 +867,12 @@ function playerReady() {
 
   if (bet <= 0) return alert("กรุณาเลือกเงินแทง");
   if (bet > Number(currentRoom.maxBet)) return alert("แทงเกินสูงสุด");
-  if ((Number(me.money) || 0) < bet * 5) return alert("เครดิตไม่พอ");
+  const maxLose = bet * 5;
+const myMoney = Number(me.money || 0);
 
+if (myMoney < maxLose) {
+  return alert("เครดิตไม่พอ ต้องมีอย่างน้อย " + maxLose + " บาท");
+}
   db.ref("rooms/" + currentRoom.id + "/players/" + (me.id || me.name)).update({
     bet,
     ready: true,
