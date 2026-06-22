@@ -432,10 +432,12 @@ if (bankerMoney < bankerNeed) {
   updates["rooms/" + currentRoom.id + "/turnDeadline"] = 0;
 
   players.forEach(p => {
-    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/cards"] = [];
-    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/actionDone"] = false;
-    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/result"] = null;
-  });
+  const key = p.id || p.name;
+
+  updates["rooms/" + currentRoom.id + "/players/" + key + "/cards"] = [];
+  updates["rooms/" + currentRoom.id + "/players/" + key + "/actionDone"] = false;
+  updates["rooms/" + currentRoom.id + "/players/" + key + "/result"] = null;
+});
 
   const startBtn = el("startGameBtn");
   if (startBtn) startBtn.style.display = "none";
