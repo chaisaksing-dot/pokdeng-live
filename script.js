@@ -1487,13 +1487,8 @@ window.onload = function () {
   const roomId = params.get("room");
   const savedId = localStorage.getItem("playerId");
 
-  if (roomId) {
-    if (savedId) {
-      loginWithId(savedId, roomId);
-    } else {
-      showPage("loginPage");
-      alert("กรุณาเข้าสู่ระบบด้วย LINE ก่อนเข้าห้อง");
-    }
+  if (savedId) {
+    loginWithId(savedId, roomId || null);
     return;
   }
 
@@ -1522,29 +1517,23 @@ function setBet(amount){
 async function loginLine() {
   try {
    
-
     await liff.init({
       liffId: LIFF_ID
     });
 
-   
     if (!liff.isLoggedIn()) {
       
       liff.login();
       return;
     }
-
-    
-    
+   
     let profile = null;
-
 
 try {
   profile = await liff.getProfile();
   
 } catch (err) {
  
-
   const token = liff.getDecodedIDToken();
  
   profile = {
@@ -1554,15 +1543,11 @@ try {
   };
 }
 
-   
-
-
 localStorage.setItem("playerName", profile.displayName);
 localStorage.setItem("playerPic", profile.pictureUrl || "");
     localStorage.setItem("playerId", profile.userId);
 
     loginWithId(profile.userId, null);
-
    
   } catch (err) {
     alert("ERROR: " + err.message);
