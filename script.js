@@ -885,6 +885,24 @@ const myMoney = Number(me.money || 0);
 if (myMoney < maxLose) {
   return alert("เครดิตไม่พอ ต้องมีอย่างน้อย " + maxLose + " บาท");
 }
+  const banker = getBanker();
+if (!banker) return alert("ไม่พบเจ้ามือ");
+
+const currentTotalBet = players
+  .filter(p => p.role === "player" && String(p.id || p.name) !== String(myPlayerId))
+  .reduce((sum, p) => sum + Number(p.bet || 0), 0);
+
+const newTotalBet = currentTotalBet + bet;
+const bankerNeed = newTotalBet * 5;
+const bankerMoney = Number(banker.money || 0);
+
+if (bankerMoney <= 0) {
+  return alert("เงินเจ้ามือหมดแล้ว");
+}
+
+if (bankerMoney < bankerNeed) {
+  return alert("เงินเจ้ามือไม่พอ รับเดิมพันรวมได้ไม่เกิน " + Math.floor(bankerMoney / 5) + " บาท");
+}
   db.ref("rooms/" + currentRoom.id + "/players/" + (me.id || me.name)).update({
     bet,
     ready: true,
