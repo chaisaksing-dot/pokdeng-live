@@ -1482,19 +1482,6 @@ window.withdraw = withdraw;
 window.addAdmin = addAdmin;
 window.removeAdmin = removeAdmin;
 
-window.onload = function () {
-  const params = new URLSearchParams(window.location.search);
-  const roomId = params.get("room");
-  const savedId = localStorage.getItem("playerId");
-
-  if (savedId) {
-    loginWithId(savedId, roomId || null);
-    return;
-  }
-
-  showPage("loginPage");
-};
-
 function toggleRules(){
   const box = document.getElementById("ruleBox");
 
@@ -1549,3 +1536,15 @@ async function loginLine() {
     alert("ERROR: " + err.message);
   }
 }
+
+window.addEventListener("load", function () {
+  const params = new URLSearchParams(window.location.search);
+  const roomId = params.get("room");
+  const savedId = localStorage.getItem("playerId");
+
+  if (savedId) {
+    loginWithId(savedId, roomId || null);
+  } else {
+    showPage("loginPage");
+  }
+});
