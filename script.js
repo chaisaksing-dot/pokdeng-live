@@ -120,10 +120,14 @@ function refreshUserInfo() {
   const playerId = localStorage.getItem("playerId") || myPlayerId;
   if (!playerId) return;
 
-  db.ref("wallet/" + myPlayerId).on("value", snap => {
-  const money = Number(snap.val() || 0);
-  el("userCredit").textContent = money;
-});
+   db.ref("users/" + myPlayerId).once("value").then(userSnap => {
+      if (!userSnap.exists()) {
+        db.ref("users/" + myPlayerId).set({
+          id: myPlayerId,
+          name: "ผู้เล่น " + myPlayerId,
+          pin: "1234",
+          createdAt: Date.now()
+        });
 }
 
 function logout() {
