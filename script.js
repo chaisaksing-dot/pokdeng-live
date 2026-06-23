@@ -120,11 +120,10 @@ function refreshUserInfo() {
   const playerId = localStorage.getItem("playerId") || myPlayerId;
   if (!playerId) return;
 
-  db.ref("wallet/" + playerId).once("value").then(snap => {
-    const money = Number(snap.val()) || 0;
-    const box = el("userInfo");
-    if (box) box.innerText = "รหัส: " + playerId + " | เครดิต: " + money;
-  });
+  db.ref("wallet/" + myPlayerId).on("value", snap => {
+  const money = Number(snap.val() || 0);
+  el("userCredit").textContent = money;
+});
 }
 
 function logout() {
