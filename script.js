@@ -97,11 +97,14 @@ function loginWithId(playerId, roomIdAfterLogin) {
 
 function checkAdminRole(playerId) {
   return db.ref("admins/" + playerId).once("value").then(snap => {
-    if (String(playerId) === OWNER_ID && !snap.exists()) {
-      db.ref("admins/" + playerId).set("owner");
-      myAdminRole = "owner";
+    const data = snap.val();
+
+    if (!data) {
+      myAdminRole = null;
+    } else if (typeof data === "string") {
+      myAdminRole = data;
     } else {
-      myAdminRole = snap.val() || null;
+      myAdminRole = data.role || null;
     }
 
     const adminBtn = el("adminBtn");
