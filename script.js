@@ -24,7 +24,7 @@ let isDrawing = false;
 let moneyRequestType = "topup";
 let myAdminRole = null;
 
-const OWNER_ID = "U375ecfc0b60af85d8e5ed97e512cc76d";
+const OWNER_ID = "0001";
 const MAX_PLAYERS = 8;
 const TURN_SECONDS = 60;
 
@@ -67,44 +67,90 @@ function autoLogin() {
   showPage("loginPage");
 }
 
+function loginLineOld() {
+
+  const playerId = el("playerId")?.value.trim();
+  const pin = el("playerPin")?.value.trim();
+
+  if (!playerId) return alert("กรุณาใส่รหัสผู้เล่น");
+  if (!pin) return alert("กรุณาใส่ PIN");
+
+  db.ref("users/" + playerId).once("value").then(snap => {
+    if (!snap.exists()) return alert("ไม่พบรหัสนี้");
+
+    const user = snap.val();
+
+    // ผู้เล่นเก่ายังไม่มี PIN ให้ตั้งครั้งแรก
+    if (!user.pin) {
+      db.ref("users/" + playerId + "/pin").set(pin).then(() => {
+        alert("ตั้ง PIN สำเร็จแล้ว");
+        loginWithId(playerId, null);
+      });
+      return;
+    }
+
+    // ถ้ามี PIN แล้ว ต้องตรงเท่านั้น
+    if (String(user.pin) !== String(pin)) {
+      return alert("PIN ไม่ถูกต้อง");
+    }
+
+    loginWithId(playerId, null);
+  });
+}
+
+function createNewPlayerId(roomIdAfterLogin) {
+  db.ref("system/lastPlayerNo").transaction(v => (Number(v) || 0) + 1, (error, committed, snap) => {
+    if (error || !committed) {
+      alert("สร้างรหัสผู้เล่นไม่สำเร็จ");
+      return;
+    }
+
+    const newId = String(snap.val()).padStart(4, "0");
+    loginWithId(newId, roomIdAfterLogin);
+  });
+}
+
 function loginWithId(playerId, roomIdAfterLogin) {
   myPlayerId = String(playerId);
   localStorage.setItem("playerId", myPlayerId);
 
   const walletRef = db.ref("wallet/" + myPlayerId);
-
   walletRef.once("value").then(snap => {
-    if (!snap.exists()) {
-      walletRef.set(0);
-    }
+    if (!snap.exists()) walletRef.set(10000);
 
-    checkAdminRole(myPlayerId).then(() => {
-      if (roomIdAfterLogin) {
-        showPage("lobbyPage");
-
-        setTimeout(() => {
-          const joinInput = el("joinRoomId");
-          if (joinInput) joinInput.value = roomIdAfterLogin;
-          joinRoom();
-        }, 500);
-
-      } else {
-        showPage("lobbyPage");
+    db.ref("users/" + myPlayerId).once("value").then(userSnap => {
+      if (!userSnap.exists()) {
+        db.ref("users/" + myPlayerId).set({
+          id: myPlayerId,
+          name: "ผู้เล่น " + myPlayerId,
+          pin: "1234",
+          createdAt: Date.now()
+        });
       }
+
+      checkAdminRole(myPlayerId).then(() => {
+        if (roomIdAfterLogin) {
+          showPage("lobbyPage");
+          setTimeout(() => {
+            const joinInput = el("joinRoomId");
+            if (joinInput) joinInput.value = roomIdAfterLogin;
+            joinRoom();
+          }, 500);
+        } else {
+          showPage("lobbyPage");
+        }
+      });
     });
   });
 }
 
 function checkAdminRole(playerId) {
   return db.ref("admins/" + playerId).once("value").then(snap => {
-    const data = snap.val();
-
-    if (!data) {
-      myAdminRole = null;
-    } else if (typeof data === "string") {
-      myAdminRole = data;
+    if (String(playerId) === OWNER_ID && !snap.exists()) {
+      db.ref("admins/" + playerId).set("owner");
+      myAdminRole = "owner";
     } else {
-      myAdminRole = data.role || null;
+      myAdminRole = snap.val() || null;
     }
 
     const adminBtn = el("adminBtn");
@@ -120,14 +166,11 @@ function refreshUserInfo() {
   const playerId = localStorage.getItem("playerId") || myPlayerId;
   if (!playerId) return;
 
-   db.ref("users/" + myPlayerId).once("value").then(userSnap => {
-      if (!userSnap.exists()) {
-        db.ref("users/" + myPlayerId).set({
-          id: myPlayerId,
-          name: "ผู้เล่น " + myPlayerId,
-          pin: "1234",
-          createdAt: Date.now()
-        });
+  db.ref("wallet/" + playerId).once("value").then(snap => {
+    const money = Number(snap.val()) || 0;
+    const box = el("userInfo");
+    if (box) box.innerText = "รหัส: " + playerId + " | เครดิต: " + money;
+  });
 }
 
 function logout() {
@@ -416,16 +459,7 @@ function dealCards() {
 
   if (!banker) return alert("ไม่พบเจ้ามือ");
   if (normalPlayers.length === 0) return alert("ต้องมีผู้เล่นก่อนเริ่มเกม");
-  const totalBet = normalPlayers.reduce((sum, p) => {
-  return sum + Number(p.bet || 0);
-}, 0);
-
-const bankerNeed = totalBet * 5;
-const bankerMoney = Number(banker.money || 0);
-
-if (bankerMoney < bankerNeed) {
-  return alert("เงินเจ้ามือไม่พอ ต้องมีอย่างน้อย " + bankerNeed + " บาท");
-}
+  if (!normalPlayers.every(p => p.ready === true)) return alert("ผู้เล่นต้องกดพร้อมทุกคนก่อน");
 
   isDealing = true;
   const deck = createShuffledDeck();
@@ -438,12 +472,10 @@ if (bankerMoney < bankerNeed) {
   updates["rooms/" + currentRoom.id + "/turnDeadline"] = 0;
 
   players.forEach(p => {
-  const key = p.id || p.name;
-
-  updates["rooms/" + currentRoom.id + "/players/" + key + "/cards"] = [];
-  updates["rooms/" + currentRoom.id + "/players/" + key + "/actionDone"] = false;
-  updates["rooms/" + currentRoom.id + "/players/" + key + "/result"] = null;
-});
+    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/cards"] = [];
+    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/actionDone"] = false;
+    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/result"] = null;
+  });
 
   const startBtn = el("startGameBtn");
   if (startBtn) startBtn.style.display = "none";
@@ -451,9 +483,8 @@ if (bankerMoney < bankerNeed) {
   db.ref().update(updates).then(() => {
     const order = [];
     for (let r = 0; r < 2; r++) {
-      normalPlayers.forEach(p => order.push(p.id || p.name));
-order.push(banker.id || banker.name);
-    
+      normalPlayers.forEach(p => order.push(p.name));
+      order.push(banker.name);
     }
 
     let index = 0;
@@ -885,30 +916,8 @@ function playerReady() {
 
   if (bet <= 0) return alert("กรุณาเลือกเงินแทง");
   if (bet > Number(currentRoom.maxBet)) return alert("แทงเกินสูงสุด");
-  const maxLose = bet * 5;
-const myMoney = Number(me.money || 0);
+  if ((Number(me.money) || 0) < bet * 5) return alert("เครดิตไม่พอ");
 
-if (myMoney < maxLose) {
-  return alert("เครดิตไม่พอ ต้องมีอย่างน้อย " + maxLose + " บาท");
-}
-  const banker = getBanker();
-if (!banker) return alert("ไม่พบเจ้ามือ");
-
-const currentTotalBet = players
-  .filter(p => p.role === "player" && String(p.id || p.name) !== String(myPlayerId))
-  .reduce((sum, p) => sum + Number(p.bet || 0), 0);
-
-const newTotalBet = currentTotalBet + bet;
-const bankerNeed = newTotalBet * 5;
-const bankerMoney = Number(banker.money || 0);
-
-if (bankerMoney <= 0) {
-  return alert("เงินเจ้ามือหมดแล้ว");
-}
-
-if (bankerMoney < bankerNeed) {
-  return alert("เงินเจ้ามือไม่พอ รับเดิมพันรวมได้ไม่เกิน " + Math.floor(bankerMoney / 5) + " บาท");
-}
   db.ref("rooms/" + currentRoom.id + "/players/" + (me.id || me.name)).update({
     bet,
     ready: true,
@@ -1522,6 +1531,24 @@ window.withdraw = withdraw;
 window.addAdmin = addAdmin;
 window.removeAdmin = removeAdmin;
 
+window.onload = function () {
+  const params = new URLSearchParams(window.location.search);
+  const roomId = params.get("room");
+  const savedId = localStorage.getItem("playerId");
+
+  if (roomId) {
+    if (savedId) {
+      loginWithId(savedId, roomId);
+    } else {
+      createNewPlayerId(roomId);
+    }
+    return;
+  }
+
+    showPage("loginPage");
+  
+};
+
 function toggleRules(){
   const box = document.getElementById("ruleBox");
 
@@ -1543,49 +1570,80 @@ function setBet(amount){
 
 async function loginLine() {
   try {
-    await liff.init({ liffId: LIFF_ID });
+   
 
+    await liff.init({
+      liffId: LIFF_ID
+    });
+
+   
     if (!liff.isLoggedIn()) {
+      
       liff.login();
       return;
     }
 
+    
+    
     let profile = null;
 
-    try {
-      profile = await liff.getProfile();
-    } catch (err) {
-      const token = liff.getDecodedIDToken();
-      profile = {
-        userId: token?.sub,
-        displayName: token?.name || "LINE",
-        pictureUrl: token?.picture || ""
-      };
-    }
 
-    localStorage.setItem("playerName", profile.displayName || "LINE");
-    localStorage.setItem("playerPic", profile.pictureUrl || "");
+try {
+  profile = await liff.getProfile();
+  
+} catch (err) {
+ 
+
+  const token = liff.getDecodedIDToken();
+ 
+  profile = {
+    userId: token?.sub,
+    displayName: token?.name || "LINE",
+    pictureUrl: token?.picture || ""
+  };
+}
+
+   
+
+
+localStorage.setItem("playerName", profile.displayName);
+localStorage.setItem("playerPic", profile.pictureUrl || "");
     localStorage.setItem("playerId", profile.userId);
 
-    const params = new URLSearchParams(window.location.search);
-    const roomId = params.get("room");
+    loginWithId(profile.userId, null);
 
-    loginWithId(profile.userId, roomId || null);
-
+   
   } catch (err) {
     alert("ERROR: " + err.message);
   }
 }
 
-(function startApp() {
-  const params = new URLSearchParams(window.location.search);
-  const roomId = params.get("room");
-  const savedId = localStorage.getItem("playerId");
+function loginWithOldId() {
+  const playerId = el("playerId")?.value.trim();
+  const pin = el("playerPin")?.value.trim();
 
-  if (savedId) {
-    loginWithId(savedId, roomId || null);
-  } else {
-    showPage("loginPage");
-  }
-})();
-})();
+  if (!playerId) return alert("กรุณาใส่รหัสผู้เล่น");
+  if (!pin) return alert("กรุณาใส่ PIN");
+
+  db.ref("users/" + playerId).once("value").then(snap => {
+    if (!snap.exists()) return alert("ไม่พบรหัสนี้");
+
+    const user = snap.val();
+
+    if (!user.pin) {
+      db.ref("users/" + playerId + "/pin").set(pin).then(() => {
+        alert("ตั้ง PIN สำเร็จแล้ว");
+        loginWithId(playerId, null);
+      });
+      return;
+    }
+
+    if (String(user.pin) !== String(pin)) {
+      return alert("PIN ไม่ถูกต้อง");
+    }
+
+    loginWithId(playerId, null);
+  });
+}
+
+window.loginWithOldId = loginWithOldId;
