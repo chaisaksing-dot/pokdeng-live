@@ -24,7 +24,7 @@ let isDrawing = false;
 let moneyRequestType = "topup";
 let myAdminRole = null;
 
-const OWNER_ID = "0001";
+const OWNER_ID = "U375ecfc0b60af85d8e5ed97e512cc76d";
 const MAX_PLAYERS = 8;
 const TURN_SECONDS = 60;
 
