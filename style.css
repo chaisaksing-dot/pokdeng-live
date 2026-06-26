@@ -375,7 +375,6 @@ input, select {
   background:#22c55e;
   transform:scale(1.05);
 }
-}
 /* เพิ่มส่วนนี้ที่ท้ายไฟล์ style.css */
 .player-box-ui {
   display: flex;
@@ -412,4 +411,18 @@ input, select {
 .player-money {
   font-size: 10px;
   color: #ffcc00;
+}
+.banker-cards,
+.player-cards{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:4px;
+  flex-wrap:nowrap;
+}
+
+.mini-card{
+  width:32px;
+  height:48px;
+  font-size:13px;
 }
