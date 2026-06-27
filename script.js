@@ -295,10 +295,26 @@ function joinRoom() {
     if (!roomSnap.exists()) return alert("ไม่พบห้องนี้");
 
     const room = roomSnap.val();
+    const playerPath = "rooms/" + roomId + "/players/" + playerId;
+
+    // ถ้าเคยอยู่ในห้องแล้ว = กลับเข้าห้องเดิม ไม่สร้างซ้ำ
+    if (room.players && room.players[playerId]) {
+      db.ref(playerPath).update({
+        id: playerId,
+        name: playerId,
+        displayName: localStorage.getItem("playerName") || room.players[playerId].displayName || "ผู้เล่น",
+        photo: localStorage.getItem("playerPic") || room.players[playerId].photo || ""
+      });
+
+      listenRoom(roomId);
+      showPage("roomPage");
+      return;
+    }
+
     const roomPlayers = Object.values(room.players || {});
     const normalPlayers = roomPlayers.filter(p => p.role === "player");
 
-    if (!room.players?.[playerId] && normalPlayers.length >= MAX_PLAYERS) {
+    if (normalPlayers.length >= MAX_PLAYERS) {
       return alert("ห้องเต็มแล้ว");
     }
 
@@ -306,35 +322,28 @@ function joinRoom() {
 
     db.ref("wallet/" + playerId).once("value").then(moneySnap => {
       const money = Number(moneySnap.val()) || 0;
-      const playerPath = "rooms/" + roomId + "/players/" + playerId;
 
-      db.ref(playerPath).once("value").then(playerSnap => {
-        if (!playerSnap.exists()) {
-          
-         db.ref(playerPath).set({
-            id: playerId,
-            name: playerId,
-            displayName: localStorage.getItem("playerName") || "ผู้เล่น",
-            photo: localStorage.getItem("playerPic") || "",
-            money,
-            bet: 0,
-            ready: false,
-            role: joinRole,
-            cards: null,
-            actionDone: false,
-            result: null,
-            settled: false,
-            pokLocked: false
-          });
-        }
-
+      db.ref(playerPath).set({
+        id: playerId,
+        name: playerId,
+        displayName: localStorage.getItem("playerName") || "ผู้เล่น",
+        photo: localStorage.getItem("playerPic") || "",
+        money,
+        bet: 0,
+        ready: false,
+        role: joinRole,
+        cards: null,
+        actionDone: false,
+        result: null,
+        settled: false,
+        pokLocked: false
+      }).then(() => {
         listenRoom(roomId);
         showPage("roomPage");
       });
     });
   });
 }
-
 function listenRoom(roomId) {
   if (roomListenerRef) roomListenerRef.off();
   roomListenerRef = db.ref("rooms/" + roomId);
