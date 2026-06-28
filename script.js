@@ -889,8 +889,7 @@ function renderBetBox() {
   const box = el("betCard");
   if (!box || !currentRoom) return;
 
-  const me = players.find(p => String(p.name) === String(myPlayerId));
-
+  const me = players.find(p => String(p.id || p.name) === String(myPlayerId));
   if (me && me.role === "player" && currentRoom.status === "waiting" && me.ready !== true) {
     box.style.display = "block";
   } else {
