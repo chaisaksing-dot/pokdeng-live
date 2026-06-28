@@ -1686,7 +1686,7 @@ try {
 // เก็บชื่อสำรองให้ joinRoom ใช้ได้ทุกแบบ
 localStorage.setItem("lineName", profile.displayName);
 localStorage.setItem("linePicture", profile.pictureUrl || "");
-
+localStorage.setItem("playerId", profile.userId);
 const pendingRoomId = localStorage.getItem("pendingRoomId");
 if (pendingRoomId) {
   localStorage.removeItem("pendingRoomId");
