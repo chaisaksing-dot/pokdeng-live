@@ -513,7 +513,7 @@ function dealCards() {
     const order = [];
 
     for (let r = 0; r < 2; r++) {
-      normalPlayers.forEach(p => order.push(p.name));
+      normalPlayers.forEach(p => order.push(p.id));
       order.push(banker.name);
     }
 
@@ -657,14 +657,14 @@ function settlePokPlayers(pokPlayers, banker) {
 
     const playerMoney = Number(p.money || 0) + playerNet;
 
-    updates[`rooms/${currentRoom.id}/players/${p.name}/money`] = playerMoney;
+    updates[`rooms/${currentRoom.id}/players/${p.id}/money`] = playerMoney;
     updates[`wallet/${p.name}`] = playerMoney;
 
-    updates[`rooms/${currentRoom.id}/players/${p.name}/settled`] = true;
-    updates[`rooms/${currentRoom.id}/players/${p.name}/pokLocked`] = true;
-    updates[`rooms/${currentRoom.id}/players/${p.name}/actionDone`] = true;
+    updates[`rooms/${currentRoom.id}/players/${p.id}/settled`] = true;
+    updates[`rooms/${currentRoom.id}/players/${p.id}/pokLocked`] = true;
+    updates[`rooms/${currentRoom.id}/players/${p.id}/actionDone`] = true;
 
-    updates[`rooms/${currentRoom.id}/players/${p.name}/result`] = {
+    updates[`rooms/${currentRoom.id}/players/${p.id}/result`] = {
       result,
       bet,
       gross,
@@ -701,7 +701,7 @@ function startTurnQueue() {
       .filter(p => p.role === "player" && p.settled !== true)
       .forEach(p => {
         if (getPoint(p.cards || []) < 8) {
-          turnOrder.push(p.name);
+          turnOrder.push(p.id);
         }
       });
 
@@ -744,7 +744,7 @@ function updateTurnTimer() {
   if (timerBox) timerBox.innerText = remain > 0 ? "เวลา: " + remain : "เวลา: 0";
 
   const resultBox = el("resultText");
-  const turnInfo = players.find(p => String(p.id || p.name) === String(turnPlayer));
+  const turnInfo = players.find(p => String(p.id || p.id) === String(turnPlayer));
   const turnName = turnInfo ? (turnInfo.displayName || turnInfo.name) : turnPlayer;
 
   if (resultBox) resultBox.innerText = "คิว " + shortName(turnName) + " (" + remain + " วินาที)";
