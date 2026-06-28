@@ -556,3 +556,46 @@ body {
   font-size: 12px;
   padding: 7px;
 }
+/* ===== FIX SCROLL: ให้ Lobby/Admin เลื่อนได้ แต่ห้องเกมไม่เลื่อน ===== */
+
+html,
+body {
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.app {
+  min-height: 100dvh;
+  height: auto;
+  overflow-y: auto;
+}
+
+/* ซ่อน scroll เฉพาะหน้าโต๊ะเกม */
+body:has(#roomPage[style*="block"]) {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+#roomPage {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ให้หน้าอื่นเลื่อนได้ */
+#loginPage,
+#lobbyPage,
+#adminPage {
+  min-height: 100dvh;
+  overflow-y: auto;
+  padding-bottom: 90px;
+}
+
+/* ปุ่มแอดมิน/เมนูไม่โดนตัด */
+.room-buttons,
+.room-menu {
+  max-width: calc(100vw - 20px);
+  overflow: visible;
+}
