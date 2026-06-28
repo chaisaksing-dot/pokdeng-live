@@ -1041,7 +1041,7 @@ function playerDraw() {
 
 function bankerDraw() {
   const banker = getBanker();
-  if (banker) drawForPlayer(banker.name);
+  if (banker) drawForPlayer(banker.id);
 }
 
 function drawForPlayer(playerId) {
