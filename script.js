@@ -1099,7 +1099,7 @@ function playerStand() {
 
 function bankerStand() {
   const banker = getBanker();
-  if (banker) standForPlayer(banker.name);
+  if (banker) standForPlayer(banker.id);
 }
 
 function standForPlayer(playerId) {
