@@ -659,7 +659,7 @@ function settlePokPlayers(pokPlayers, banker) {
     const playerMoney = Number(p.money || 0) + playerNet;
 
     updates[`rooms/${currentRoom.id}/players/${p.id}/money`] = playerMoney;
-    updates[`wallet/${p.name}`] = playerMoney;
+    updates[`wallet/${p.id}`] = playerMoney;
 
     updates[`rooms/${currentRoom.id}/players/${p.id}/settled`] = true;
     updates[`rooms/${currentRoom.id}/players/${p.id}/pokLocked`] = true;
@@ -682,8 +682,8 @@ function settlePokPlayers(pokPlayers, banker) {
     };
   });
 
-  updates[`rooms/${currentRoom.id}/players/${banker.name}/money`] = bankerMoney;
-  updates[`wallet/${banker.name}`] = bankerMoney;
+  updates[`rooms/${currentRoom.id}/players/${banker.id}/money`] = bankerMoney;
+  updates[`wallet/${banker.id}`] = bankerMoney;
 
   return db.ref().update(updates).then(() => {
     if (tongTotal > 0) {
