@@ -1403,15 +1403,15 @@ function newRound() {
 
   players.forEach(p => {
     if (p.role === "waiting") {
-  updates["rooms/" + currentRoom.id + "/players/" + p.name + "/role"] = "player";
+  updates["rooms/" + currentRoom.id + "/players/" + p.id + "/role"] = "player";
 }
-    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/ready"] = false;
-    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/bet"] = 0;
-    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/cards"] = null;
-    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/actionDone"] = false;
-    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/result"] = null;
-    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/settled"] = false;
-updates["rooms/" + currentRoom.id + "/players/" + p.name + "/pokLocked"] = false;
+    updates["rooms/" + currentRoom.id + "/players/" + p.id + "/ready"] = false;
+    updates["rooms/" + currentRoom.id + "/players/" + p.id + "/bet"] = 0;
+    updates["rooms/" + currentRoom.id + "/players/" + p.id + "/cards"] = null;
+    updates["rooms/" + currentRoom.id + "/players/" + p.id + "/actionDone"] = false;
+    updates["rooms/" + currentRoom.id + "/players/" + p.id + "/result"] = null;
+    updates["rooms/" + currentRoom.id + "/players/" + p.id + "/settled"] = false;
+updates["rooms/" + currentRoom.id + "/players/" + p.id + "/pokLocked"] = false;
   });
 
   db.ref().update(updates).then(() => {
