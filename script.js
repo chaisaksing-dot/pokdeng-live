@@ -1054,7 +1054,7 @@ function drawForPlayer(playerId) {
 
   isDrawing = true;
 
-  const p = players.find(x => String(x.name) === String(playerId));
+  const p = players.find(x => String(x.id || x.name) === String(playerId));
   if (!p || !p.cards) {
     isDrawing = false;
     return;
