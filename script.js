@@ -291,8 +291,14 @@ function joinRoom() {
   if (!roomId) return alert("กรุณาใส่เลขห้อง");
 
   const playerId = localStorage.getItem("playerId");
-  const playerName = localStorage.getItem("lineName");
-  const pictureUrl = localStorage.getItem("linePicture");
+  const playerName =
+  localStorage.getItem("playerName") ||
+  localStorage.getItem("lineName");
+
+const pictureUrl =
+  localStorage.getItem("playerPic") ||
+  localStorage.getItem("linePicture") ||
+  "";
 
   if (!playerId || !playerName) {
     alert("กรุณาเข้าสู่ระบบด้วย LINE ก่อน");
