@@ -1313,10 +1313,10 @@ function finishGame() {
 
       const playerMoney = Number(p.money || 0) + playerNet;
 
-      updates["rooms/" + currentRoom.id + "/players/" + p.name + "/money"] = playerMoney;
+      updates["rooms/" + currentRoom.id + "/players/" + p.id + "/money"] = playerMoney;
       updates["wallet/" + p.name] = playerMoney;
 
-      updates["rooms/" + currentRoom.id + "/players/" + p.name + "/result"] = {
+      updates["rooms/" + currentRoom.id + "/players/" + p.id + "/result"] = {
         result,
         bet,
         gross,
@@ -1332,9 +1332,9 @@ function finishGame() {
       };
     });
 
-    updates["rooms/" + currentRoom.id + "/players/" + banker.name + "/money"] = bankerMoney;
+    updates["rooms/" + currentRoom.id + "/players/" + banker.id + "/money"] = bankerMoney;
     updates["wallet/" + banker.name] = bankerMoney;
-    updates["rooms/" + currentRoom.id + "/players/" + banker.name + "/result"] = {
+    updates["rooms/" + currentRoom.id + "/players/" + banker.id + "/result"] = {
       result: bankerNet > 0 ? "win" : bankerNet < 0 ? "lose" : "draw",
       net: bankerNet,
       tongTotal,
