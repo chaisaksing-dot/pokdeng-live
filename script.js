@@ -708,7 +708,7 @@ function startTurnQueue() {
     const banker = latestPlayers.find(p => p.role === "banker");
 
     if (banker && getPoint(banker.cards || []) < 8) {
-      turnOrder.push(banker.name);
+      turnOrder.push(banker.id);
     }
 
     db.ref("rooms/" + currentRoom.id).update({
