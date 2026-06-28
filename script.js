@@ -515,7 +515,7 @@ function dealCards() {
 
     for (let r = 0; r < 2; r++) {
       normalPlayers.forEach(p => order.push(p.id));
-      order.push(banker.name);
+      order.push(banker.id);
     }
 
     let index = 0;
