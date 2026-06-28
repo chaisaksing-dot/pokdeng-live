@@ -1611,14 +1611,16 @@ window.onload = function () {
   const roomId = params.get("room");
   const savedId = localStorage.getItem("playerId");
 
-  if (roomId) {
-    if (savedId) {
-      loginWithId(savedId, roomId);
-    } else {
-      createNewPlayerId(roomId);
-    }
-    return;
+if (roomId) {
+  localStorage.setItem("pendingRoomId", roomId);
+
+  if (savedId) {
+    loginWithId(savedId, roomId);
+  } else {
+    showPage("loginPage");
   }
+  return;
+}
 
     showPage("loginPage");
   
