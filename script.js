@@ -920,7 +920,7 @@ function updateActionButtons() {
 
   if (!currentRoom) return;
 
-  const me = players.find(p => String(p.name) === String(myPlayerId));
+  const me = players.find(p => String(p.id) === String(myPlayerId));
 
   if (currentRoom.status === "finished") {
     if (me && me.role === "banker") {
