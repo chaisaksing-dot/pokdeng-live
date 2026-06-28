@@ -1314,20 +1314,6 @@ function finishGame() {
       updates["rooms/" + currentRoom.id + "/players/" + p.name + "/money"] = playerMoney;
       updates["wallet/" + p.name] = playerMoney;
 
-     updates["rooms/" + currentRoom.id + "/players/" + p.name + "/settled"] = true;
-        result,
-        bet,
-        gross,
-        tong,
-        net: playerNet,
-        moneyAfter: playerMoney,
-        handLabel: playerInfo.label,
-        handPoint: playerInfo.point,
-        multiplier: playerInfo.multiplier,
-        bankerHandLabel: bankerInfo.label,
-        bankerPoint: bankerInfo.point,
-        bankerMultiplier: bankerInfo.multiplier
-      };
     });
 
     updates["rooms/" + currentRoom.id + "/players/" + banker.name + "/money"] = bankerMoney;
