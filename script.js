@@ -1314,7 +1314,7 @@ function finishGame() {
       updates["rooms/" + currentRoom.id + "/players/" + p.name + "/money"] = playerMoney;
       updates["wallet/" + p.name] = playerMoney;
 
-      updates["rooms/" + currentRoom.id + "/players/" + p.name + "/result"] = {
+     updates["rooms/" + currentRoom.id + "/players/" + p.name + "/settled"] = true;
         result,
         bet,
         gross,
@@ -1332,7 +1332,7 @@ function finishGame() {
 
     updates["rooms/" + currentRoom.id + "/players/" + banker.name + "/money"] = bankerMoney;
     updates["wallet/" + banker.name] = bankerMoney;
-    updates["rooms/" + currentRoom.id + "/players/" + banker.name + "/result"] = {
+    updates["rooms/" + currentRoom.id + "/players/" + banker.name + "/settled"] = true;
       result: bankerNet > 0 ? "win" : bankerNet < 0 ? "lose" : "draw",
       net: bankerNet,
       tongTotal,
@@ -1353,13 +1353,17 @@ function finishGame() {
     updates["rooms/" + currentRoom.id + "/showAllCards"] = true;
     updates["rooms/" + currentRoom.id + "/finishedAt"] = Date.now();
 
-    db.ref().update(updates).then(() => {
-      if (tongTotal > 0) {
-        db.ref("system/tongBalance").transaction(v => (Number(v) || 0) + tongTotal);
-      }
-
-      showRoundResult();
-    });
+   db.ref().update(updates).then(() => {
+  if (tongTotal > 0) {
+    return db.ref("system/tongBalance")
+      .transaction(v => (Number(v) || 0) + tongTotal);
+  }
+}).then(() => {
+  showRoundResult();
+}).catch(err => {
+  console.error(err);
+  alert("คิดเงินจบรอบไม่สำเร็จ");
+});
   });
 }
 
