@@ -468,9 +468,27 @@ function dealCards() {
 
   if (!banker) return alert("ไม่พบเจ้ามือ");
   if (normalPlayers.length === 0) return alert("ต้องมีผู้เล่นก่อนเริ่มเกม");
-  if (!normalPlayers.every(p => p.ready === true)) return alert("ผู้เล่นต้องกดพร้อมทุกคนก่อน");
+  if (!normalPlayers.every(p => p.ready === true)) {
+    return alert("ผู้เล่นต้องกดพร้อมทุกคนก่อน");
+  }
+
+  // ✅ เช็กเงินเจ้ามือก่อนแจกไพ่
+  const totalBet = normalPlayers.reduce((sum, p) => {
+    return sum + Number(p.bet || 0);
+  }, 0);
+
+  const requiredBankerMoney = totalBet * 5;
+
+  if (Number(banker.money || 0) < requiredBankerMoney) {
+    return alert(
+      "เงินเจ้ามือไม่พอ\n" +
+      "ยอดเดิมพันรวม: " + totalBet + "\n" +
+      "เจ้ามือต้องมีอย่างน้อย: " + requiredBankerMoney
+    );
+  }
 
   isDealing = true;
+
   const deck = createShuffledDeck();
   const updates = {};
 
@@ -481,9 +499,9 @@ function dealCards() {
   updates["rooms/" + currentRoom.id + "/turnDeadline"] = 0;
 
   players.forEach(p => {
-    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/cards"] = [];
-    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/actionDone"] = false;
-    updates["rooms/" + currentRoom.id + "/players/" + p.name + "/result"] = null;
+    updates["rooms/" + currentRoom.id + "/players/" + p.id + "/cards"] = [];
+    updates["rooms/" + currentRoom.id + "/players/" + p.id + "/actionDone"] = false;
+    updates["rooms/" + currentRoom.id + "/players/" + p.id + "/result"] = null;
   });
 
   const startBtn = el("startGameBtn");
@@ -491,6 +509,7 @@ function dealCards() {
 
   db.ref().update(updates).then(() => {
     const order = [];
+
     for (let r = 0; r < 2; r++) {
       normalPlayers.forEach(p => order.push(p.name));
       order.push(banker.name);
@@ -511,8 +530,10 @@ function dealCards() {
 
       db.ref("rooms/" + currentRoom.id + "/deck").transaction(currentDeck => {
         if (!currentDeck || currentDeck.length === 0) return currentDeck;
+
         const newDeck = [...currentDeck];
         const card = newDeck.shift();
+
         window.__dealCard = card;
         return newDeck;
       }, (error, committed) => {
@@ -525,24 +546,34 @@ function dealCards() {
         const card = window.__dealCard;
         window.__dealCard = null;
 
-        db.ref("rooms/" + currentRoom.id + "/players/" + playerId + "/cards").once("value").then(cardSnap => {
-          const nowCards = cardSnap.val() || [];
-          nowCards.push(card);
+        db.ref("rooms/" + currentRoom.id + "/players/" + playerId + "/cards")
+          .once("value")
+          .then(cardSnap => {
+            const nowCards = cardSnap.val() || [];
+            nowCards.push(card);
 
-          db.ref("rooms/" + currentRoom.id + "/players/" + playerId + "/cards")
-            .set(nowCards)
-            .then(() => {
-              index++;
-              setTimeout(dealNext, 400);
-            });
-        });
+            return db.ref("rooms/" + currentRoom.id + "/players/" + playerId + "/cards")
+              .set(nowCards);
+          })
+          .then(() => {
+            index++;
+            setTimeout(dealNext, 400);
+          })
+          .catch(err => {
+            console.error(err);
+            isDealing = false;
+            alert("บันทึกไพ่ผิดพลาด");
+          });
       });
     }
 
     dealNext();
+  }).catch(err => {
+    console.error(err);
+    isDealing = false;
+    alert("เริ่มแจกไพ่ไม่สำเร็จ");
   });
 }
-
 function checkPokImmediately() {
   db.ref("rooms/" + currentRoom.id + "/players").once("value").then(snap => {
     const latestPlayers = Object.values(snap.val() || {});
