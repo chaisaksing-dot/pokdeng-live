@@ -286,61 +286,63 @@ function joinOpenRoom(roomId) {
 function joinRoom() {
   const input = el("joinRoomId");
   const roomId = input ? input.value.trim() : "";
-  const playerId = localStorage.getItem("playerId") || myPlayerId;
 
   if (!roomId) return alert("กรุณาใส่เลขห้อง");
-  if (!playerId) return showPage("loginPage");
 
-  db.ref("rooms/" + roomId).once("value").then(roomSnap => {
-    if (!roomSnap.exists()) return alert("ไม่พบห้องนี้");
+  const playerId = localStorage.getItem("playerId");
+  const playerName = localStorage.getItem("lineName");
+  const pictureUrl = localStorage.getItem("linePicture");
 
-    const room = roomSnap.val();
-    const playerPath = "rooms/" + roomId + "/players/" + playerId;
+  if (!playerId || !playerName) {
+    alert("กรุณาเข้าสู่ระบบด้วย LINE ก่อน");
+    showPage("loginPage");
+    return;
+  }
 
-    // ถ้าเคยอยู่ในห้องแล้ว = กลับเข้าห้องเดิม ไม่สร้างซ้ำ
-    if (room.players && room.players[playerId]) {
-      db.ref(playerPath).update({
-        id: playerId,
-        name: playerId,
-        displayName: localStorage.getItem("playerName") || room.players[playerId].displayName || "ผู้เล่น",
-        photo: localStorage.getItem("playerPic") || room.players[playerId].photo || ""
-      });
-
-      listenRoom(roomId);
-      showPage("roomPage");
+  db.ref("rooms/" + roomId).once("value").then(snap => {
+    if (!snap.exists()) {
+      alert("ไม่พบห้องนี้");
       return;
     }
 
-    const roomPlayers = Object.values(room.players || {});
-    const normalPlayers = roomPlayers.filter(p => p.role === "player");
+    const room = snap.val();
+    currentRoom = room;
+    currentRoom.id = roomId;
 
-    if (normalPlayers.length >= MAX_PLAYERS) {
-      return alert("ห้องเต็มแล้ว");
+    const roomStatus = room.status || "waiting";
+    const walletMoney = Number(localStorage.getItem("playerMoney") || 0);
+
+    const playerData = {
+      id: playerId,
+      name: playerName,
+      displayName: playerName,
+      pictureUrl: pictureUrl || "",
+      photo: pictureUrl || "",
+      role: "player",
+      money: walletMoney,
+      bet: 0,
+      ready: false,
+      online: true,
+      joinedAt: Date.now()
+    };
+
+    // ถ้าเกมเริ่มแล้ว ให้รอรอบหน้า
+    if (roomStatus !== "waiting") {
+      playerData.waitingNextRound = true;
+      playerData.ready = false;
+      playerData.bet = 0;
     }
 
-    const joinRole = room.status === "waiting" ? "player" : "waiting";
+    db.ref("rooms/" + roomId + "/players/" + playerId).update(playerData).then(() => {
+      myPlayerId = playerId;
+      localStorage.setItem("currentRoomId", roomId);
 
-    db.ref("wallet/" + playerId).once("value").then(moneySnap => {
-      const money = Number(moneySnap.val()) || 0;
+      listenRoom(roomId);
+      showPage("roomPage");
 
-      db.ref(playerPath).set({
-        id: playerId,
-        name: playerId,
-        displayName: localStorage.getItem("playerName") || "ผู้เล่น",
-        photo: localStorage.getItem("playerPic") || "",
-        money,
-        bet: 0,
-        ready: false,
-        role: joinRole,
-        cards: null,
-        actionDone: false,
-        result: null,
-        settled: false,
-        pokLocked: false
-      }).then(() => {
-        listenRoom(roomId);
-        showPage("roomPage");
-      });
+      if (roomStatus !== "waiting") {
+        alert("โต๊ะกำลังเล่นอยู่ คุณจะเข้ารอบถัดไป");
+      }
     });
   });
 }
