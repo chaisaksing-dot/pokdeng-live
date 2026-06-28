@@ -1681,12 +1681,18 @@ try {
    
 
 
-localStorage.setItem("playerName", profile.displayName);
-localStorage.setItem("playerPic", profile.pictureUrl || "");
-    localStorage.setItem("playerId", profile.userId);
+// เก็บชื่อสำรองให้ joinRoom ใช้ได้ทุกแบบ
+localStorage.setItem("lineName", profile.displayName);
+localStorage.setItem("linePicture", profile.pictureUrl || "");
 
-    loginWithId(profile.userId, null);
+const pendingRoomId = localStorage.getItem("pendingRoomId");
+if (pendingRoomId) {
+  localStorage.removeItem("pendingRoomId");
+  loginWithId(profile.userId, pendingRoomId);
+  return;
+}
 
+loginWithId(profile.userId, null);
    
   } catch (err) {
     alert("ERROR: " + err.message);
