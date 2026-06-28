@@ -599,3 +599,27 @@ body:has(#roomPage[style*="block"]) {
   max-width: calc(100vw - 20px);
   overflow: visible;
 }
+/* FIX: ปุ่มเลือกเงินเดิมพันหาย */
+.bet-card {
+  position: absolute;
+  left: 50%;
+  bottom: 55px;
+  transform: translateX(-50%);
+  width: 285px;
+  max-width: 90%;
+  z-index: 999;
+  display: block;
+}
+
+.bet-buttons {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.bet-buttons button {
+  display: block !important;
+  min-height: 36px;
+  padding: 8px;
+  font-size: 13px;
+}
