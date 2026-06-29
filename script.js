@@ -890,8 +890,20 @@ function renderBetBox() {
   if (!box || !currentRoom) return;
 
   const me = players.find(p => String(p.id || p.name) === String(myPlayerId));
-  if (me && me.role === "player" && currentRoom.status === "waiting" && me.ready !== true) {
+
+  if (
+    me &&
+    me.role === "player" &&
+    currentRoom.status === "waiting" &&
+    me.ready !== true &&
+    me.waitingNextRound !== true
+  ) {
     box.style.display = "block";
+
+    const moneyText = el("myMoneyText");
+    if (moneyText) {
+      moneyText.innerHTML = "เงินของฉัน: " + Number(me.money || 0);
+    }
   } else {
     box.style.display = "none";
   }
