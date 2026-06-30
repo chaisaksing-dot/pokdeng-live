@@ -623,3 +623,49 @@ body:has(#roomPage[style*="block"]) {
   padding: 8px;
   font-size: 13px;
 }
+/* FIX: Lobby/Admin ต้องเลื่อนได้เต็มหน้า */
+html,
+body {
+  height: auto;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.app {
+  height: auto;
+  min-height: 100dvh;
+  overflow: visible;
+}
+
+#loginPage,
+#lobbyPage,
+#adminPage {
+  min-height: 100dvh;
+  overflow-y: auto;
+  padding-bottom: 120px;
+}
+
+/* ล็อกเฉพาะหน้าเล่นเกมเท่านั้น */
+#roomPage {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ปุ่มแอดมิน/เมนู ห้ามโดนตัด */
+.room-menu,
+.room-buttons {
+  position: fixed;
+  right: 10px;
+  z-index: 99999;
+  max-width: calc(100vw - 20px);
+  overflow: visible;
+}
+
+.room-menu {
+  top: 70px;
+}
+
+.room-buttons {
+  bottom: 12px;
+}
