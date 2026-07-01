@@ -590,41 +590,36 @@ function dealCards() {
   });
 }
 function checkPokImmediately() {
+  if (!currentRoom) return;
+
   db.ref("rooms/" + currentRoom.id + "/players").once("value").then(snap => {
-    const latestPlayers = Object.values(snap.val() || {});
-    const banker = latestPlayers.find(p => p.role === "banker");
-    if (!banker || !banker.cards) return;
+    const latestPlayers = snap.val() || {};
+    const updates = {};
+    let hasPok = false;
 
-    const bankerCards = Object.values(banker.cards || {});
-    const bankerPoint = getPoint(bankerCards);
+    Object.keys(latestPlayers).forEach(playerId => {
+      const p = latestPlayers[playerId];
+      const cards = p.cards || [];
 
-    const bankerPok =
-      bankerCards.length === 2 &&
-      bankerPoint >= 8;
+      if (cards.length >= 2) {
+        const info = getHandInfo(cards);
 
-    if (bankerPok) {
-      db.ref("rooms/" + currentRoom.id + "/showAllCards").set(true).then(() => {
-        finishGame();
-      });
-      return;
-    }
+        if (info.isPok === true || info.point === 8 || info.point === 9) {
+          hasPok = true;
 
-    const pokPlayers = latestPlayers.filter(p => {
-      if (p.role !== "player") return false;
-      if (p.settled === true) return false;
-
-      const cards = Object.values(p.cards || {});
-      return cards.length === 2 && getPoint(cards) >= 8;
+          updates["rooms/" + currentRoom.id + "/players/" + playerId + "/openCards"] = true;
+          updates["rooms/" + currentRoom.id + "/players/" + playerId + "/actionDone"] = true;
+          updates["rooms/" + currentRoom.id + "/players/" + playerId + "/handLabel"] = info.label;
+          updates["rooms/" + currentRoom.id + "/players/" + playerId + "/point"] = info.point;
+        }
+      }
     });
 
-    if (pokPlayers.length === 0) {
-      startTurnQueue();
-      return;
+    if (hasPok) {
+      updates["rooms/" + currentRoom.id + "/showAllCards"] = true;
     }
 
-    settlePokPlayers(pokPlayers, banker).then(() => {
-      startTurnQueue();
-    });
+    db.ref().update(updates);
   });
 }
 
@@ -675,6 +670,7 @@ function settlePokPlayers(pokPlayers, banker) {
 
     updates[`rooms/${currentRoom.id}/players/${p.id}/settled`] = true;
     updates[`rooms/${currentRoom.id}/players/${p.id}/pokLocked`] = true;
+    updates[`rooms/${currentRoom.id}/players/${p.id}/openCards`] = true;
     updates[`rooms/${currentRoom.id}/players/${p.id}/actionDone`] = true;
 
     updates[`rooms/${currentRoom.id}/players/${p.id}/result`] = {
@@ -835,7 +831,7 @@ function renderPlayers() {
 
     const isMe = String(p.id || p.name) === String(myPlayerId);
     const point = getPoint(p.cards || []);
-    const open = isMe || finished || showAll;
+    const open = isMe || finished || showAll || p.openCards === true || p.pokLocked === true;
     const canKick =
       String(getBanker()?.id || getBanker()?.name) === String(myPlayerId) &&
       currentRoom?.status === "waiting";
