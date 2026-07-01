@@ -593,36 +593,55 @@ function checkPokImmediately() {
   if (!currentRoom) return;
 
   db.ref("rooms/" + currentRoom.id + "/players").once("value").then(snap => {
-    const latestPlayers = snap.val() || {};
-    const updates = {};
-    let hasPok = false;
+    const latestPlayers = Object.values(snap.val() || {});
+    const banker = latestPlayers.find(p => p.role === "banker");
 
-    Object.keys(latestPlayers).forEach(playerId => {
-      const p = latestPlayers[playerId];
-      const cards = p.cards || [];
+    if (!banker) {
+      startTurnQueue();
+      return;
+    }
 
-      if (cards.length >= 2) {
-        const info = getHandInfo(cards);
+    const bankerInfo = getHandInfo(banker.cards || []);
+    const bankerPok = bankerInfo.point === 8 || bankerInfo.point === 9;
 
-        if (info.isPok === true || info.point === 8 || info.point === 9) {
-          hasPok = true;
-
-          updates["rooms/" + currentRoom.id + "/players/" + playerId + "/openCards"] = true;
-          updates["rooms/" + currentRoom.id + "/players/" + playerId + "/actionDone"] = true;
-          updates["rooms/" + currentRoom.id + "/players/" + playerId + "/handLabel"] = info.label;
-          updates["rooms/" + currentRoom.id + "/players/" + playerId + "/point"] = info.point;
-        }
-      }
+    const pokPlayers = latestPlayers.filter(p => {
+      if (p.role !== "player") return false;
+      const info = getHandInfo(p.cards || []);
+      return info.point === 8 || info.point === 9;
     });
 
-    if (hasPok) {
+    const updates = {};
+
+    pokPlayers.forEach(p => {
+      updates["rooms/" + currentRoom.id + "/players/" + p.id + "/openCards"] = true;
+      updates["rooms/" + currentRoom.id + "/players/" + p.id + "/pokLocked"] = true;
+      updates["rooms/" + currentRoom.id + "/players/" + p.id + "/actionDone"] = true;
+    });
+
+    if (bankerPok) {
+      updates["rooms/" + currentRoom.id + "/players/" + banker.id + "/openCards"] = true;
+      updates["rooms/" + currentRoom.id + "/players/" + banker.id + "/pokLocked"] = true;
+      updates["rooms/" + currentRoom.id + "/players/" + banker.id + "/actionDone"] = true;
       updates["rooms/" + currentRoom.id + "/showAllCards"] = true;
     }
 
-    db.ref().update(updates);
+    db.ref().update(updates).then(() => {
+      if (bankerPok) {
+        setTimeout(finishGame, 800);
+        return;
+      }
+
+      if (pokPlayers.length > 0) {
+        settlePokPlayers(pokPlayers, banker).then(() => {
+          startTurnQueue();
+        });
+        return;
+      }
+
+      startTurnQueue();
+    });
   });
 }
-
 function settlePokPlayers(pokPlayers, banker) {
   const bankerInfo = getHandInfo(banker.cards || []);
   let bankerMoney = Number(banker.money || 0);
@@ -760,7 +779,7 @@ function updateTurnTimer() {
 
   if (remain <= 0) {
     const banker = getBanker();
-    if (banker && String(myPlayerId) === String(banker.name)) {
+    if (banker && String(myPlayerId) === String(banker.id)) {
       autoStand(turnPlayer);
     }
   }
