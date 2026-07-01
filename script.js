@@ -1136,8 +1136,18 @@ function playerStand() {
 }
 
 function bankerStand() {
+  if (!currentRoom) return;
+
   const banker = getBanker();
-  if (banker) standForPlayer(banker.id);
+  if (!banker) return;
+
+  db.ref("rooms/" + currentRoom.id).update({
+    showAllCards: true,
+    status: "finished",
+    turnDeadline: 0
+  }).then(() => {
+    finishGame();
+  });
 }
 
 function standForPlayer(playerId) {
