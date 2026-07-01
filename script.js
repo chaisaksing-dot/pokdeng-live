@@ -698,6 +698,7 @@ function settlePokPlayers(pokPlayers, banker) {
       gross,
       tong,
       net: playerNet,
+      bankerNet: -playerNet,
       moneyAfter: playerMoney,
       handLabel: playerInfo.label,
       handPoint: playerInfo.point,
@@ -1316,8 +1317,14 @@ function finishGame() {
     let tongTotal = 0;
 
     latestPlayers
-  .filter(p => p.role === "player" && p.settled !== true)
+  .filter(p => p.role === "player")
   .forEach(p => {
+    if (p.settled === true) {
+  const oldResult = p.result || {};
+  bankerNet += Number(oldResult.bankerNet || 0);
+  tongTotal += Number(oldResult.tong || 0);
+  return;
+}
       const bet = Number(p.bet || 0);
       const playerInfo = getHandInfo(p.cards || []);
       const result = compareHands(playerInfo, bankerInfo);
@@ -1363,7 +1370,7 @@ function finishGame() {
       const playerMoney = Number(p.money || 0) + playerNet;
 
       updates["rooms/" + currentRoom.id + "/players/" + p.id + "/money"] = playerMoney;
-      updates["wallet/" + p.name] = playerMoney;
+      updates["wallet/" + p.id] = playerMoney;
 
       updates["rooms/" + currentRoom.id + "/players/" + p.id + "/result"] = {
         result,
@@ -1382,7 +1389,7 @@ function finishGame() {
     });
 
     updates["rooms/" + currentRoom.id + "/players/" + banker.id + "/money"] = bankerMoney;
-    updates["wallet/" + banker.name] = bankerMoney;
+    updates["wallet/" + banker.id] = bankerMoney;
     updates["rooms/" + currentRoom.id + "/players/" + banker.id + "/result"] = {
       result: bankerNet > 0 ? "win" : bankerNet < 0 ? "lose" : "draw",
       net: bankerNet,
@@ -1394,7 +1401,7 @@ function finishGame() {
     };
 
     updates["rooms/" + currentRoom.id + "/roundSummary"] = {
-      banker: banker.name,
+      banker: banker.id,
       bankerNet,
       tongTotal,
       finishedAt: Date.now()
