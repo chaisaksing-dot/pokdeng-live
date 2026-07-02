@@ -851,7 +851,11 @@ function renderPlayers() {
 
     const isMe = String(p.id || p.name) === String(myPlayerId);
     const point = getPoint(p.cards || []);
-    const open = isMe || finished || showAll || p.openCards === true || p.pokLocked === true;
+    const open =
+  finished ||
+  showAll ||
+  p.openCards === true ||
+  String(p.id) === String(myPlayerId);
     const canKick =
       String(getBanker()?.id || getBanker()?.name) === String(myPlayerId) &&
       currentRoom?.status === "waiting";
