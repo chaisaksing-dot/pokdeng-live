@@ -1473,7 +1473,8 @@ function newRound() {
     updates["rooms/" + currentRoom.id + "/players/" + p.id + "/actionDone"] = false;
     updates["rooms/" + currentRoom.id + "/players/" + p.id + "/result"] = null;
     updates["rooms/" + currentRoom.id + "/players/" + p.id + "/settled"] = false;
-updates["rooms/" + currentRoom.id + "/players/" + p.id + "/pokLocked"] = false;
+    updates["rooms/" + currentRoom.id + "/players/" + p.id + "/pokLocked"] = false;
+    updates["rooms/" + currentRoom.id + "/players/" + p.id + "/openCards"] = false;
   });
 
   db.ref().update(updates).then(() => {
