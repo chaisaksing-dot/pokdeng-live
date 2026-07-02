@@ -1062,7 +1062,7 @@ function finishTurn(playerId) {
     String(playerId) !== String(banker.id)
   ) {
     db.ref("rooms/" + currentRoom.id).update({
-      turnOrder: [...currentRoom.turnOrder, banker.name],
+      turnOrder: [...currentRoom.turnOrder, banker.id],
       turnIndex: nextIndex,
       turnDeadline: Date.now() + TURN_SECONDS * 1000
     });
