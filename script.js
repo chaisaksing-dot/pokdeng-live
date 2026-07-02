@@ -523,6 +523,7 @@ function dealCards() {
   if (startBtn) startBtn.style.display = "none";
 
   db.ref().update(updates).then(() => {
+    playSound("soundDeal");
     const order = [];
 
     for (let r = 0; r < 2; r++) {
