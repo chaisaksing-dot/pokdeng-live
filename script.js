@@ -1059,7 +1059,7 @@ function finishTurn(playerId) {
     banker.cards &&
     getPoint(banker.cards) < 8 &&
     Object.values(banker.cards).length < 3 &&
-    String(playerId) !== String(banker.name)
+    String(playerId) !== String(banker.id)
   ) {
     db.ref("rooms/" + currentRoom.id).update({
       turnOrder: [...currentRoom.turnOrder, banker.name],
