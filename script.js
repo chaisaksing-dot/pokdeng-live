@@ -1785,3 +1785,11 @@ function loginWithOldId() {
 }
 
 window.loginWithOldId = loginWithOldId;
+
+function playSound(id) {
+  const audio = document.getElementById(id);
+  if (!audio) return;
+
+  audio.currentTime = 0;
+  audio.play().catch(() => {});
+}
