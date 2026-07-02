@@ -765,6 +765,7 @@ function updateTurnTimer() {
 
   const order = currentRoom.turnOrder || [];
   const turnPlayer = order[currentRoom.turnIndex];
+  playSound("soundTurn");
 
   if (!turnPlayer) return;
 
