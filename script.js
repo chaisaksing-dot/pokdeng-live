@@ -1149,7 +1149,6 @@ function bankerStand() {
 
   db.ref("rooms/" + currentRoom.id).update({
     showAllCards: true,
-    status: "finished",
     turnDeadline: 0
   }).then(() => {
     finishGame();
