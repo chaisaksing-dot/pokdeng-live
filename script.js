@@ -1438,7 +1438,7 @@ function showRoundResult() {
    resultBox.innerHTML = `
     📊 สรุปรอบนี้<br><br>
     💰 ยอดเดิมพันรวม: ${totalBet}<br>
-    👑 เจ้ามือสุทธิ: ${moneyText(bankerResult.net || 0)}<br>
+    เจ้ามือสุทธิ: ${moneyText(bankerNet)}
     🧾 ค่าต๋งรวม: ${bankerResult.tongTotal || currentRoom.roundSummary?.tongTotal || 0}
   `;
 }
