@@ -1431,9 +1431,10 @@ function showRoundResult() {
     .filter(p => p.role === "player")
     .reduce((sum, p) => sum + (Number(p.result?.bet || p.bet || 0)), 0);
 
-  const banker = getBanker();
-  const bankerResult = banker?.result || me.result;
-
+ const banker = getBanker();
+ const bankerResult = banker?.result || {};
+ const summary = currentRoom.roundSummary || {};
+ const bankerNet = Number(summary.bankerNet ?? bankerResult.net ?? 0);
    resultBox.innerHTML = `
     📊 สรุปรอบนี้<br><br>
     💰 ยอดเดิมพันรวม: ${totalBet}<br>
