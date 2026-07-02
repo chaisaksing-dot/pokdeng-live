@@ -855,6 +855,7 @@ function renderPlayers() {
   finished ||
   showAll ||
   p.openCards === true ||
+  p.pokLocked === true ||
   String(p.id) === String(myPlayerId);
     const canKick =
       String(getBanker()?.id || getBanker()?.name) === String(myPlayerId) &&
