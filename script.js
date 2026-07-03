@@ -227,7 +227,6 @@ function createRoom() {
     const roomId = String(Date.now());
 
     // ===== โค้ด createRoom เดิมทั้งหมด =====
-    const roomId = String(Date.now());
     const roomData = {
   id: roomId,
   ownerId: OWNER_ID,   // เจ้าของระบบ
@@ -236,6 +235,7 @@ function createRoom() {
   bankerMoney: money,
       minBet,
       maxBet,
+      tongPercent,
       status: "waiting",
       deck: null,
       turnOrder: [],
