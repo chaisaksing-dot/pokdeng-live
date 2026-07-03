@@ -264,7 +264,7 @@ function createRoom() {
       showPage("roomPage");
     });
   });   
-}
+
 
 function listenOpenRooms() {
   const box = el("openRoomsList");
