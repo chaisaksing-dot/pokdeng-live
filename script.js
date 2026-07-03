@@ -209,6 +209,23 @@ function createRoom() {
       return;
     }
 
+    db.ref("rooms").once("value").then(snap => {
+    const rooms = snap.val() || {};
+
+    const myRoom = Object.values(rooms).find(r =>
+        String(r.ownerId || r.banker) === String(playerId)
+    );
+
+    if (myRoom) {
+        alert("คุณมีห้องเปิดอยู่แล้ว");
+        listenRoom(myRoom.id);
+        showPage("roomPage");
+        return;
+    }
+
+    const roomId = String(Date.now());
+
+    // ===== โค้ด createRoom เดิมทั้งหมด =====
     const roomId = String(Date.now());
     const roomData = {
       id: roomId,
