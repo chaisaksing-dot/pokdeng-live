@@ -199,6 +199,7 @@ function createRoom() {
 
   const minBet = Number(el("minBet")?.value) || 10;
   const maxBet = Number(el("maxBet")?.value) || 50;
+  const tongPercent = Number(el("tongPercent")?.value) || 0;
 
   if (minBet > maxBet) return alert("ขั้นต่ำต้องไม่เกินสูงสุด");
 
