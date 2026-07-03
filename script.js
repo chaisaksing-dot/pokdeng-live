@@ -420,8 +420,8 @@ function listenRoom(roomId) {
     if (el("minBetText")) el("minBetText").innerText = room.minBet || 10;
     if (el("maxBetText")) el("maxBetText").innerText = room.maxBet || 0;
     if (el("tongPercentText")) {
-       (l("tongPercentText").innerText = room.tongPercent ?? 0 + "%";
-    }
+  el("tongPercentText").innerText = (room.tongPercent || 0) + "%";
+}
 
     renderPlayers();
     renderBetBox();
