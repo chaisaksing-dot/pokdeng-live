@@ -264,7 +264,6 @@ function createRoom() {
       showPage("roomPage");
     });
   });
-  });
 }
 
 function listenOpenRooms() {
