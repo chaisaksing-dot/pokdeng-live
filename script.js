@@ -205,66 +205,67 @@ function createRoom() {
 
   db.ref("wallet/" + playerId).once("value").then(snap => {
     const money = Number(snap.val()) || 0;
+
     if (money < maxBet * 5) {
       alert("เครดิตเจ้ามือต้องมีอย่างน้อย " + (maxBet * 5));
       return;
     }
 
-    db.ref("rooms").once("value").then(snap => {
-    const rooms = snap.val() || {};
+    db.ref("rooms").once("value").then(roomSnap => {
+      const rooms = roomSnap.val() || {};
 
-    const myRoom = Object.values(rooms).find(r =>
+      const myRoom = Object.values(rooms).find(r =>
         String(r.ownerId || r.banker) === String(playerId)
-    );
+      );
 
-    if (myRoom) {
+      if (myRoom) {
         alert("คุณมีห้องเปิดอยู่แล้ว");
         listenRoom(myRoom.id);
         showPage("roomPage");
         return;
-    }
+      }
 
-    const roomId = String(Date.now());
+      const roomId = String(Date.now());
 
-    // ===== โค้ด createRoom เดิมทั้งหมด =====
-    const roomData = {
-  id: roomId,
-  ownerId: OWNER_ID,   // เจ้าของระบบ
-  adminId: playerId,   // คนสร้างห้อง
-  banker: playerId,    // เจ้ามือปัจจุบัน
-  bankerMoney: money,
-      minBet,
-      maxBet,
-      tongPercent,
-      status: "waiting",
-      deck: null,
-      turnOrder: [],
-      turnIndex: 0,
-      turnDeadline: 0,
-      createdAt: Date.now(),
-      players: {
-       [playerId]: {
-  id: playerId,
-  name: localStorage.getItem("lineName") || localStorage.getItem("playerName") || playerId,
-  displayName: localStorage.getItem("lineName") || localStorage.getItem("playerName") || playerId,
-  photo: localStorage.getItem("linePicture") || localStorage.getItem("playerPic") || "",
-  pictureUrl: localStorage.getItem("linePicture") || localStorage.getItem("playerPic") || "",
-  money,
-  bet: 0,
-  ready: false,
-  role: "banker",
-  cards: null,
-  actionDone: false
-}
-       }
-       };
+      const roomData = {
+        id: roomId,
+        ownerId: OWNER_ID,
+        adminId: playerId,
+        banker: playerId,
+        bankerMoney: money,
+        minBet,
+        maxBet,
+        tongPercent,
+        status: "waiting",
+        deck: null,
+        turnOrder: [],
+        turnIndex: 0,
+        turnDeadline: 0,
+        createdAt: Date.now(),
+        players: {
+          [playerId]: {
+            id: playerId,
+            name: localStorage.getItem("lineName") || localStorage.getItem("playerName") || playerId,
+            displayName: localStorage.getItem("lineName") || localStorage.getItem("playerName") || playerId,
+            photo: localStorage.getItem("linePicture") || localStorage.getItem("playerPic") || "",
+            pictureUrl: localStorage.getItem("linePicture") || localStorage.getItem("playerPic") || "",
+            money,
+            bet: 0,
+            ready: false,
+            role: "banker",
+            cards: null,
+            actionDone: false
+          }
+        }
+      };
 
-    db.ref("rooms/" + roomId).set(roomData).then(() => {
-      listenRoom(roomId);
-      showPage("roomPage");
+      db.ref("rooms/" + roomId).set(roomData).then(() => {
+        listenRoom(roomId);
+        showPage("roomPage");
+      });
     });
-  });   
-  }
+  });
+}
 
 function listenOpenRooms() {
   const box = el("openRoomsList");
