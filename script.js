@@ -263,8 +263,7 @@ function createRoom() {
       listenRoom(roomId);
       showPage("roomPage");
     });
-  });
-});   
+  });   
 }
 
 function listenOpenRooms() {
