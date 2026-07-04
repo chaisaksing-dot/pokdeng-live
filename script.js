@@ -451,26 +451,26 @@ function leaveRoom() {
   const roomId = currentRoom.id;
   const playerId = myPlayerId || localStorage.getItem("playerId");
 
+  const me = players.find(p => String(p.id || p.name) === String(playerId));
+
+  if (me && me.role === "banker") {
+    alert("เจ้ามือต้องส่งต่อเจ้ามือหรือปิดห้องก่อน");
+    return;
+  }
+
   stopTimer();
 
   db.ref("rooms/" + roomId + "/players/" + playerId)
     .remove()
     .then(() => {
-      db.ref("rooms/" + roomId + "/players")
-        .once("value")
-        .then(snap => {
-          if (!snap.exists() || Object.keys(snap.val() || {}).length === 0) {
-            db.ref("rooms/" + roomId).remove();
-          }
-        });
+      if (roomListenerRef) roomListenerRef.off();
+
+      currentRoom = null;
+      players = [];
+      localStorage.removeItem("currentRoomId");
+
+      showPage("lobbyPage");
     });
-
-  if (roomListenerRef) roomListenerRef.off();
-
-  currentRoom = null;
-  players = [];
-
-  showPage("lobbyPage");
 }
 
 function copyInviteLink() {
