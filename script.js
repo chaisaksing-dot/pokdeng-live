@@ -668,6 +668,7 @@ function checkPokImmediately() {
   });
 }
 function settlePokPlayers(pokPlayers, banker) {
+  const tongRate = (currentRoom?.tongPercent || 0) / 100;
   const bankerInfo = getHandInfo(banker.cards || []);
   let bankerMoney = Number(banker.money || 0);
   let tongTotal = 0;
@@ -684,22 +685,23 @@ function settlePokPlayers(pokPlayers, banker) {
     let playerNet = 0;
 
     if (result === "win") {
-      gross = bet * playerInfo.multiplier;
-      if (playerInfo.multiplier >= 2) {
-        tong = Math.floor(gross * 0.05);
-      }
+  gross = bet * playerInfo.multiplier;
+ 
+  if (playerInfo.multiplier >= 2) {
+    tong = Math.floor(gross * tongRate);
+  }
 
-      playerNet = gross - tong;
-      bankerMoney -= gross;
-      tongTotal += tong;
-    }
+  playerNet = gross - tong;
+  bankerMoney -= gross;
+  tongTotal += tong;
+}
 
     if (result === "lose") {
       gross = bet * bankerInfo.multiplier;
 
       let bankerTong = 0;
       if (bankerInfo.multiplier >= 2) {
-        bankerTong = Math.floor(gross * 0.05);
+ bnkerTong = Math.floor(gross * tongRate);
       }
 
       playerNet = -gross;
