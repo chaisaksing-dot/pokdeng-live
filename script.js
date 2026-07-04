@@ -1871,3 +1871,29 @@ function requestTransferBanker() {
     alert("ส่งต่อเจ้ามือเรียบร้อย");
   });
 }
+unction closeRoom() {
+  if (!currentRoom || !currentRoom.id) return alert("ไม่พบห้อง");
+
+  const playerId = myPlayerId || localStorage.getItem("playerId");
+  const banker = getBanker();
+
+  const isAdmin = String(currentRoom.adminId) === String(playerId);
+  const isBanker = banker && String(banker.id || banker.name) === String(playerId);
+
+  if (!isAdmin && !isBanker) {
+    return alert("เฉพาะแอดมินหรือเจ้ามือเท่านั้น");
+  }
+
+  if (!confirm("ต้องการปิดห้องนี้ใช่ไหม?")) return;
+
+  db.ref("rooms/" + currentRoom.id).remove().then(() => {
+    if (roomListenerRef) roomListenerRef.off();
+
+    currentRoom = null;
+    players = [];
+    localStorage.removeItem("currentRoomId");
+
+    showPage("lobbyPage");
+  });
+}
+ส่งเมื่อ 1 นาที
