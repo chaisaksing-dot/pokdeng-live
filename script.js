@@ -1821,3 +1821,53 @@ function playSound(id) {
   audio.currentTime = 0;
   audio.play().catch(() => {});
 }
+
+function requestTransferBanker() {
+  if (!currentRoom || !myPlayerId) return;
+
+  const banker = getBanker();
+  if (!banker || String(banker.id) !== String(myPlayerId)) {
+    alert("เฉพาะเจ้ามือเท่านั้น");
+    return;
+  }
+
+  const candidates = players.filter(p =>
+    p.role === "player" &&
+    String(p.id) !== String(myPlayerId) &&
+    Number(p.money || 0) >= Number(currentRoom.maxBet || 0) * 5
+  );
+
+  if (candidates.length === 0) {
+    alert("ยังไม่มีผู้เล่นที่เครดิตพอรับเป็นเจ้ามือ");
+    return;
+  }
+
+  let text = "เลือกหมายเลขผู้เล่นที่จะส่งต่อเจ้ามือ:\n\n";
+  candidates.forEach((p, i) => {
+    text += ${i + 1}. ${p.displayName || p.name || p.id} | เงิน ${p.money}\n;
+  });
+
+  const choice = prompt(text);
+  if (!choice) return;
+
+  const newBanker = candidates[Number(choice) - 1];
+  if (!newBanker) return alert("เลือกไม่ถูกต้อง");
+
+  if (!confirm("ยืนยันส่งต่อเจ้ามือให้ " + (newBanker.displayName || newBanker.name || newBanker.id) + " ?")) {
+    return;
+  }
+
+  const oldBankerId = banker.id;
+  const newBankerId = newBanker.id;
+
+  const updates = {};
+  updates["rooms/" + currentRoom.id + "/banker"] = newBankerId;
+  updates["rooms/" + currentRoom.id + "/bankerMoney"] = Number(newBanker.money || 0);
+  updates["rooms/" + currentRoom.id + "/players/" + oldBankerId + "/role"] = "player";
+  updates["rooms/" + currentRoom.id + "/players/" + newBankerId + "/role"] = "banker";
+  updates["rooms/" + currentRoom.id + "/status"] = "waiting";
+
+  db.ref().update(updates).then(() => {
+    alert("ส่งต่อเจ้ามือเรียบร้อย");
+  });
+}
