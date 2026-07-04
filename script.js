@@ -215,8 +215,8 @@ function createRoom() {
       const rooms = roomSnap.val() || {};
 
       const myRoom = Object.values(rooms).find(r =>
-        String(r.ownerId || r.banker) === String(playerId)
-      );
+  r.players && r.players[playerId]
+);
 
       if (myRoom) {
         alert("คุณมีห้องเปิดอยู่แล้ว");
