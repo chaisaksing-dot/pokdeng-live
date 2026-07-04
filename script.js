@@ -1896,4 +1896,4 @@ unction closeRoom() {
     showPage("lobbyPage");
   });
 }
-ส่งเมื่อ 1 นาที
+
