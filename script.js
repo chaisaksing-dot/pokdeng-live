@@ -1844,7 +1844,7 @@ function requestTransferBanker() {
 
   let text = "เลือกหมายเลขผู้เล่นที่จะส่งต่อเจ้ามือ:\n\n";
   candidates.forEach((p, i) => {
-    text += ${i + 1}. ${p.displayName || p.name || p.id} | เงิน ${p.money}\n;
+    text += `${i + 1}. ${p.displayName || p.name || p.id} | เงิน ${p.money}\n`;
   });
 
   const choice = prompt(text);
