@@ -1871,7 +1871,7 @@ function requestTransferBanker() {
     alert("ส่งต่อเจ้ามือเรียบร้อย");
   });
 }
-unction closeRoom() {
+function closeRoom() {
   if (!currentRoom || !currentRoom.id) return alert("ไม่พบห้อง");
 
   const playerId = myPlayerId || localStorage.getItem("playerId");
