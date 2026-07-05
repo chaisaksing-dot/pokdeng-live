@@ -151,11 +151,10 @@ function refreshUserInfo() {
   const playerId = localStorage.getItem("playerId") || myPlayerId;
   if (!playerId) return;
 
-  db.ref("wallet/" + playerId).once("value").then(snap => {
-    const money = Number(snap.val()) || 0;
-    const box = el("userInfo");
-    if (box) box.innerText = "รหัส: " + playerId + " | เครดิต: " + money;
-  });
+  WalletService.getBalance(playerId).then(money => {
+  const box = el("userInfo");
+  if (box) box.innerText = "รหัส: " + playerId + " | เครดิต: " + money;
+});
 }
 
 function logout() {
