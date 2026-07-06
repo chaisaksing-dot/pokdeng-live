@@ -669,3 +669,28 @@ body {
 .room-buttons {
   bottom: 12px;
 }
+.side-buttons {
+  position: fixed;
+  right: 18px;
+  top: 190px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 20;
+}
+
+.side-buttons .btn {
+  width: 150px;
+}
+
+@media (max-width: 768px) {
+  .side-buttons {
+    right: 10px;
+    top: 150px;
+  }
+
+  .side-buttons .btn {
+    width: 120px;
+    font-size: 12px;
+  }
+}
