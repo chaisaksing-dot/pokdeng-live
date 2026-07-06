@@ -467,6 +467,43 @@ function copyInviteLink() {
     .catch(() => prompt("คัดลอกลิงก์นี้ส่งให้เพื่อน", link));
 }
 
+function closeRoom() {
+  if (!currentRoom || !currentRoom.id) return alert("ไม่พบห้อง");
+  if (currentRoom.status !== "waiting") {
+  return alert("กำลังเล่นอยู่ ต้องจบรอบหรือเริ่มตาใหม่ก่อน ถึงจะปิดห้องได้");
+}
+
+  const playerId = myPlayerId || localStorage.getItem("playerId");
+
+  const banker = getBanker();
+
+  const isAdmin =
+    String(currentRoom.adminId) === String(playerId) ||
+    String(currentRoom.ownerId) === String(playerId);
+
+  const isBanker =
+    String(currentRoom.banker) === String(playerId) ||
+    (banker && String(banker.id || banker.name) === String(playerId));
+
+  const noBanker = !banker || !currentRoom.banker;
+
+  if (!isAdmin && !isBanker && !noBanker) {
+    return alert("เฉพาะแอดมินหรือเจ้ามือเท่านั้น");
+  }
+
+  if (!confirm("ต้องการปิดห้องนี้ใช่ไหม?")) return;
+
+  db.ref("rooms/" + currentRoom.id).remove().then(() => {
+    if (roomListenerRef) roomListenerRef.off();
+
+    currentRoom = null;
+    players = [];
+    localStorage.removeItem("currentRoomId");
+
+    showPage("lobbyPage");
+  });
+}
+
 function createShuffledDeck() {
   const deck = [...cards];
   for (let i = deck.length - 1; i > 0; i--) {
@@ -1351,9 +1388,10 @@ function finishGame() {
 
       if (result === "win") {
         gross = bet * playerInfo.multiplier;
-
+        
+const tongRate = Number(currentRoom.tongRate || 0);
         if (playerInfo.multiplier >= 2) {
-          tong = Math.floor(gross * 0.05);
+          tong = Math.floor(gross * tongRate / 100);
         }
 
         playerNet = gross - tong;
@@ -1365,10 +1403,12 @@ function finishGame() {
       if (result === "lose") {
         gross = bet * bankerInfo.multiplier;
 
-        let bankerTong = 0;
-        if (bankerInfo.multiplier >= 2) {
-          bankerTong = Math.floor(gross * 0.05);
-        }
+
+let bankerTong = 0;
+
+if (bankerInfo.multiplier >= 2) {
+    bankerTong = Math.floor(gross * tongRate / 100);
+}
 
         playerNet = -gross;
         bankerMoney += gross - bankerTong;
