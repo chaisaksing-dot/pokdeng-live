@@ -160,16 +160,11 @@
       </div>
     </div>
 
-    <div class="room-menu">
-
-  <button class="menu-btn" onclick="copyInviteLink()">
-    🔗 คัดลอกลิงก์เชิญ
-  </button>
-
-  <button id="ruleBtn" class="rule-btn" onclick="toggleRules()">
-    📜 กติกาโต๊ะ
-  </button>
-
+    <div class="room-buttons">
+  <button class="btn success" onclick="copyInviteLink()">📎 คัดลอกลิงก์เชิญ</button>
+  <button class="btn warning" onclick="transferBanker()">👑 ส่งต่อเจ้ามือ</button>
+  <button class="btn danger" onclick="closeRoom()">❌ ปิดห้อง</button>
+  <button class="btn danger" onclick="leaveRoom()">🚪 ออกจากห้อง</button>
 </div>
 
 <div id="ruleBox" class="rule-box" style="display:none;">
