@@ -160,11 +160,12 @@
       </div>
     </div>
 
-    <div class="room-buttons">
-  <button class="btn success" onclick="copyInviteLink()">📎 คัดลอกลิงก์เชิญ</button>
-  <button class="btn warning" onclick="transferBanker()">👑 ส่งต่อเจ้ามือ</button>
+   <div class="room-buttons side-buttons">
+  <button class="btn success" onclick="copyInviteLink()">🔗 คัดลอกลิงก์เชิญ</button>
+  <button class="btn warning" onclick="showRules()">📜 กติกาโต๊ะ</button>
+  <button class="btn success" onclick="transferBanker()">👑 ส่งต่อเจ้ามือ</button>
   <button class="btn danger" onclick="closeRoom()">❌ ปิดห้อง</button>
-  <button class="btn danger" onclick="leaveRoom()">🚪 ออกจากห้อง</button>
+  <button class="btn danger" onclick="leaveRoom()">ออกห้อง</button>
 </div>
 
 <div id="ruleBox" class="rule-box" style="display:none;">
@@ -214,7 +215,7 @@
 
 <b>ค่าต๋ง</b><br>
 
-หัก 5% เมื่อผู้ชนะได้ x2 ขึ้นไป
+หัก 0-5% เมื่อผู้ชนะได้ x2 ขึ้นไป
 
 </div>
     
@@ -287,7 +288,7 @@
       </button>
     </div>
 
-    <div class="room-buttons">
+     <div class="room-menu">
       <button class="btn danger" onclick="leaveRoom()">ออกห้อง</button>
     </div>
   </section>
