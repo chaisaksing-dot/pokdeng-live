@@ -2,9 +2,8 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
- 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>แอปเล่นไพ่</title>
+  <title>โต๊ะไพ่ออนไลน์</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -13,21 +12,10 @@
 
   <section id="loginPage" class="page" style="display:block;">
     <div class="card center">
-      <h1>แอปเล่นไพ่</h1>
+      <h1>🃏 โต๊ะไพ่ออนไลน์</h1>
       <p class="muted">ระบบจะจำรหัสผู้เล่นให้อัตโนมัติ</p>
 
       <button onclick="loginLine()" class="btn">เริ่มเล่นด้วย LINE</button>
-
-      <div id="oldIdBox" style="display:none; margin-top:12px;">
-        <input id="playerId"  placeholder="รหัสผู้เล่น">
-        <input
-           id="playerPin"
-           type="password"
-           maxlength="6"
-           placeholder="Pin เช่น 1234">
-        
-        <button onclick="loginWithOldId()" class="btn">เข้าสู่ระบบ</button>
-      </div>
     </div>
   </section>
 
@@ -81,9 +69,7 @@
         <p id="userInfo" class="creditText"></p>
       </div>
       <button onclick="logout()" class="btn small danger">ออก</button>
-      <button id="adminBtn" onclick="openAdmin()" class="btn small">
-  🔧 แอดมิน
-</button>
+      <button id="adminBtn" onclick="openAdmin()" class="btn small" style="display:none;">🔧 แอดมิน</button>
     </div>
 
     <div class="card">
@@ -119,16 +105,17 @@
         <option value="1000">1000</option>
         <option value="2000">2000</option>
         <option value="5000">5000</option>
-        </select>
-        <label>💰 ค่าต๋ง</label>
-<select id="tongPercent">
-  <option value="0">0%</option>
-  <option value="1">1%</option>
-  <option value="2">2%</option>
-  <option value="3">3%</option>
-  <option value="4">4%</option>
-  <option value="5" selected>5%</option>
-</select>
+      </select>
+
+      <label>💰 ค่าต๋ง</label>
+      <select id="tongPercent">
+        <option value="0">0%</option>
+        <option value="1">1%</option>
+        <option value="2">2%</option>
+        <option value="3">3%</option>
+        <option value="4">4%</option>
+        <option value="5" selected>5%</option>
+      </select>
 
       <button onclick="createRoom()" class="btn">สร้างห้อง</button>
     </div>
@@ -143,10 +130,6 @@
       <input id="joinRoomId" type="number" placeholder="ใส่เลขห้อง">
       <button onclick="joinRoom()" class="btn">เข้าห้อง</button>
     </div>
-
-    <button id="hiddenAdminBtn" onclick="openAdmin()" class="hidden-admin-btn">
-      Admin
-    </button>
   </section>
 
   <section id="roomPage" class="page" style="display:none;">
@@ -160,75 +143,36 @@
       </div>
     </div>
 
-   <div class="room-buttons side-buttons">
-  <button class="btn success" onclick="copyInviteLink()">🔗 คัดลอกลิงก์เชิญ</button>
-  <button class="btn warning" onclick="showRules()">📜 กติกาโต๊ะ</button>
-  <button class="btn success" onclick="transferBanker()">👑 ส่งต่อเจ้ามือ</button>
-  <button class="btn danger" onclick="closeRoom()">❌ ปิดห้อง</button>
-</div>
+    <div class="room-buttons side-buttons">
+      <button class="btn success" onclick="copyInviteLink()">🔗 คัดลอกลิงก์เชิญ</button>
+      <button class="btn warning" onclick="toggleRules()">📜 กติกาโต๊ะ</button>
+      <button class="btn success" onclick="requestTransferBanker()">👑 ส่งต่อเจ้ามือ</button>
+      <button class="btn danger" onclick="closeRoom()">❌ ปิดห้อง</button>
+      <button id="videoToggleBtn" class="btn gold" onclick="toggleVideo()" style="display:none;">🎥 เปิดกล้อง</button>
+      <button id="micToggleBtn" class="btn secondary" onclick="toggleMic()" style="display:none;">🎤 ปิดไมค์</button>
+    </div>
 
-<div id="ruleBox" class="rule-box" style="display:none;">
+    <div id="ruleBox" class="rule-box" style="display:none;">
+      <h3>📜 กติกาโต๊ะ</h3>
+      <b>ลำดับไพ่ใหญ่ไปเล็ก</b><br>
+      🏆 ป๊อก (8/9 สองใบ) — จบทันที<br>
+      🏆 ตอง = x5 (K ใหญ่สุด, A เล็กสุด)<br>
+      🏆 3 ใบอักษร (J/Q/K) = x3 (เจอกันเสมอเสมอ)<br>
+      🏆 เรียง = x3 (Q-K-A เรียงใหญ่สุด)<br>
+      🏆 3 เด้ง = x3 (ดอกเดียวกัน ไม่เรียง — เทียบแต้ม)<br>
+      🏆 2 เด้ง = x2 (คู่/ดอกเดียวกัน — เทียบแต้ม)<br>
+      ไพ่ธรรมดา = x1<br><br>
+      <b>ค่าต๋ง</b><br>
+      หักเมื่อผู้ชนะได้ตัวคูณ x2 ขึ้นไป
+    </div>
 
-<h3>📜 กติกาโต๊ะ</h3>
-
-<b>การนับไพ่พิเศษ</b><br>
-
-🏆 ตอง = x5<br>
-🏆 เรียงฟลัด = x4<br>
-🏆 3 ใบอักษร (JQK) = x3<br>
-🏆 ฟลัด = x3<br>
-🏆 2 เด้ง = x2<br>
-
-<br>
-
-<b>2 เด้ง คือ</b><br>
-
-• ไพ่ 2 ใบ ดอกเดียวกัน<br>
-เช่น 4♠ 8♠<br>
-
-หรือ
-
-• ไพ่ 2 ใบ หน้าเดียวกัน<br>
-เช่น 7♠ 7♥<br>
-
-<br>
-
-<b>การเปรียบเทียบ</b><br>
-
-ตอง > เรียงฟลัด > 3 ใบอักษร > ฟลัด > ไพ่ปกติ
-
-<br><br>
-
-ถ้าพิเศษเหมือนกัน<br>
-ให้เสมอ ไม่มีได้เสีย
-
-<br><br>
-
-<b>ป๊อก</b><br>
-
-• ผู้เล่นป๊อก 8/9 → จบเฉพาะคนนั้น<br>
-• เจ้ามือยังเล่นกับคนอื่นได้<br>
-• เจ้ามือป๊อก 8/9 → จบทันทีทั้งโต๊ะ
-
-<br><br>
-
-<b>ค่าต๋ง</b><br>
-
-หัก 0-5% เมื่อผู้ชนะได้ x2 ขึ้นไป
-
-</div>
-    
     <div class="casino-table">
-
-      <div class="player-seat banker-seat">
-        <div id="banker"></div>
-      </div>
+      <div class="player-seat banker-seat"><div id="banker"></div></div>
 
       <div class="table-center">
         <div id="deckPile" class="mini-card back"></div>
         <div id="deckRemain">เหลือ <span id="deckRemainCount">52</span> ใบ</div>
         <div id="turnTimer">เวลา: -</div>
-        <div id="cardsArea"></div>
         <div id="resultText">ยังไม่มีผล</div>
       </div>
 
@@ -244,36 +188,24 @@
       <div class="card bet-card" id="betCard" style="display:none;">
         <h3>เดิมพัน</h3>
         <div id="myMoneyText"></div>
-
         <label>เลือกจำนวนเดิมพัน:</label>
         <div id="betButtons" class="bet-buttons">
-  <button type="button" onclick="setBet(10)">10</button>
-  <button type="button" onclick="setBet(20)">20</button>
-  <button type="button" onclick="setBet(30)">30</button>
-
-  <button type="button" onclick="setBet(50)">50</button>
-  <button type="button" onclick="setBet(100)">100</button>
-  <button type="button" onclick="setBet(200)">200</button>
-
-  <button type="button" onclick="setBet(300)">300</button>
-  <button type="button" onclick="setBet(500)">500</button>
-  <button type="button" onclick="setBet(1000)">1000</button>
-</div>
-
-<input
-  id="betAmount"
-  type="hidden"
-  value="0"
-/>
-
+          <button type="button" onclick="setBet(10)">10</button>
+          <button type="button" onclick="setBet(20)">20</button>
+          <button type="button" onclick="setBet(30)">30</button>
+          <button type="button" onclick="setBet(50)">50</button>
+          <button type="button" onclick="setBet(100)">100</button>
+          <button type="button" onclick="setBet(200)">200</button>
+          <button type="button" onclick="setBet(300)">300</button>
+          <button type="button" onclick="setBet(500)">500</button>
+          <button type="button" onclick="setBet(1000)">1000</button>
+        </div>
+        <input id="betAmount" type="hidden" value="0" />
         <p>เสียสูงสุดกรณีตอง x5: <b id="maxLoseText">0</b></p>
-
         <button class="btn" onclick="playerReady()">พร้อม</button>
       </div>
 
-      <button id="startGameBtn" class="btn action-main" onclick="dealCards()" style="display:none;">
-        เริ่มเกม
-      </button>
+      <button id="startGameBtn" class="btn action-main" onclick="dealCards()" style="display:none;">เริ่มเกม</button>
 
       <div class="action-buttons">
         <button id="playerDrawBtn" class="btn action-btn" style="display:none;" onclick="playerDraw()">จั่ว</button>
@@ -282,30 +214,50 @@
         <button id="bankerStandBtn" class="btn action-btn secondary" style="display:none;" onclick="bankerStand()">อยู่</button>
       </div>
 
-      <button id="newRoundBtn" class="btn action-main" onclick="newRound()" style="display:none;">
-        เริ่มตาใหม่
-      </button>
+      <button id="newRoundBtn" class="btn action-main" onclick="newRound()" style="display:none;">เริ่มตาใหม่</button>
     </div>
 
-     <div class="room-menu">
+    <!-- ===== วิดีโอ 8 กล้อง ===== -->
+    <div class="video-grid" id="videoGrid"></div>
+
+    <!-- ===== แชทในห้อง ===== -->
+    <div class="chat-panel">
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="พิมพ์ข้อความ..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+        <button class="btn gold" onclick="sendChatMessage()">ส่ง</button>
+      </div>
+    </div>
+
+    <div class="room-menu">
       <button class="btn danger" onclick="leaveRoom()">ออกห้อง</button>
     </div>
   </section>
 
 </div>
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script src="js/config.js"></script>
-<script src="services/firebaseService.js"></script>
 
-<script src="script.js?v=1004"></script>
+<!-- Firebase SDK -->
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/state.js"></script>
+<script src="js/game.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/wallet.js"></script>
+<script src="js/room.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/chat.js"></script>
+<script src="js/video.js"></script>
+<script src="js/main.js"></script>
 
 <audio id="soundDeal" src="sounds/deal.mp3"></audio>
 <audio id="soundTurn" src="sounds/turn.mp3"></audio>
 <audio id="soundWin" src="sounds/win.mp3"></audio>
 <audio id="soundLose" src="sounds/lose.mp3"></audio>
-  
+
 </body>
 </html>
-

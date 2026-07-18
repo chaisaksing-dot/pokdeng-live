@@ -1,696 +1,306 @@
-* {
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
+/* style.css — โทนโต๊ะโป๊กเกอร์หรู (navy casino table)
+   สไตล์เดียวกับเวอร์ชันก่อน แต่ปรับ selector ให้ตรงกับโครงสร้าง index.html
+   (login/admin/lobby/room แบบ 8 ที่นั่ง) + รวมสไตล์แชท/วิดีโอไว้ในไฟล์เดียว
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@600;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap');
+
+:root {
+  --felt-dark: #0a1f3d;
+  --felt: #123566;
+  --felt-light: #1e4c8f;
+  --gold: #c9a227;
+  --gold-bright: #e6c34a;
+  --card-face: #f6f1e4;
+  --ink: #1b1b18;
+  --danger: #c4432b;
+  --success: #2e7d5b;
+  --warning: #b5772f;
+  --radius: 10px;
 }
+
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background: #101820;
-  color: white;
-}
-
-.app {
-  max-width: 430px;
-  margin: auto;
   min-height: 100vh;
-  padding: 15px;
-}
-
-.page {
-  display: none;
-}
-
-.card {
-  background: #1f2d3a;
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 15px;
-}
-
-.center {
-  text-align: center;
-  margin-top: 100px;
+  font-family: 'Noto Sans Thai', sans-serif;
+  color: var(--card-face);
+  background: radial-gradient(circle at 50% -10%, var(--felt-light), var(--felt) 55%, var(--felt-dark) 100%);
+  background-attachment: fixed;
+  padding-bottom: 20px;
 }
 
 h1, h2, h3 {
-  margin-top: 0;
+  font-family: 'Noto Serif Thai', serif;
+  letter-spacing: 0.01em;
+  margin: 0 0 8px;
 }
 
-.muted {
-  color: #b7c0c9;
-  font-size: 14px;
-}
+.app { max-width: 480px; margin: 0 auto; }
 
-input, select {
-  width: 100%;
-  padding: 12px;
-  margin: 8px 0 12px;
-  border-radius: 10px;
-  border: none;
-  font-size: 16px;
-}
+.page { padding: 14px 16px 30px; }
 
-.btn {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 12px;
-  background: #06c755;
-  color: white;
-  font-size: 16px;
-  margin-top: 8px;
-  box-shadow: 0 0 12px rgba(0,255,100,0.25);
-}
+.muted { opacity: 0.75; font-size: 0.85rem; }
 
-.btn.secondary {
-  background: #2979ff;
+/* ===== การ์ด/กล่องทั่วไป ===== */
+.card {
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(201, 162, 39, 0.35);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
 }
+.card.center { text-align: center; margin-top: 12vh; }
 
-.btn.danger {
-  background: #e53935;
-}
-
-.btn.small {
-  width: auto;
-  padding: 8px 12px;
-  font-size: 14px;
-}
-
-.btn:active {
-  transform: scale(0.96);
-}
-
+/* ===== แถบหัวข้อ ===== */
 .topbar {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.creditText {
-  color: #ffcc00;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.hidden-admin-btn {
-  opacity: 0.05;
-  width: 60px;
-  height: 30px;
-  background: transparent;
-  border: none;
-  color: white;
-}
-
-.room-item {
-  background: #162331;
-  border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 10px;
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-.casino-table {
-  position: relative;
-  width: 92vw;
-  max-width: 520px;
-  height: 520px;
-  margin: 35px auto 130px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #078b32 0%, #026b25 70%);
-  border: 8px solid #ffd21f;
-  box-shadow: 0 0 25px #ffd21f;
-}
-
-.table-center {
-  position: absolute;
-  top: 43%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  width: 170px;
-  color: white;
-}
-
-#deckPile {
-  margin: 0 auto 6px;
-}
-
-#deckRemain {
-  color: #ffd54f;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-#turnTimer {
-  color: #ffeb3b;
-  font-size: 13px;
-  margin-top: 4px;
-}
-
-#resultText {
-  font-size: 16px;
-  font-weight: bold;
-  color: #ffd166;
-  line-height: 1.5;
-  margin-top: 8px;
-}
-
-.player-seat {
-  position: absolute;
-  width: 95px;
-  text-align: center;
-  z-index: 5;
-  font-size: 10px;
-  color: #fff;
-}
-
-.banker-seat {
-  top: -62px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.player1 { top: 8%; left: -5%; }
-.player2 { top: 36%; left: -12%; }
-.player3 { bottom: 15%; left: 2%; }
-.player4 { bottom: -8%; left: 28%; }
-.player5 { bottom: -8%; right: 28%; }
-.player6 { bottom: 15%; right: 2%; }
-.player7 { top: 36%; right: -12%; }
-.player8 { top: 8%; right: -5%; }
-
-.banker-cards {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
+  gap: 8px;
   flex-wrap: wrap;
-  margin-top: 4px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(201, 162, 39, 0.3);
 }
+.topbar h2 { color: var(--gold-bright); margin: 0; }
+.topbar p { margin: 2px 0; font-size: 0.85rem; }
+.creditText { color: var(--gold-bright); font-family: 'Noto Serif Thai', serif; }
 
-.mini-card {
-  width: 38px;
-  height: 54px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  border-radius: 7px;
-  border: 1px solid #ddd;
-  font-size: 14px;
-  font-weight: bold;
-  box-shadow: 0 3px 6px rgba(0,0,0,.4);
-}
-
-.mini-card.back {
-  background:
-    repeating-linear-gradient(
-      45deg,
-      #ffffff 0 3px,
-      #16324a 3px 7px
-    );
-  border: 2px solid #ffffff;
-  color: transparent;
-  font-size: 0;
-}
-
-.red-card {
-  color: #e53935;
-}
-
-.black-card {
-  color: #111;
-}
-
-.bet-card {
-  position: absolute;
-  left: 50%;
-  bottom: -135px;
-  transform: translateX(-50%);
-  width: 300px;
-  max-width: 90%;
-  padding: 12px;
-  font-size: 14px;
-  z-index: 10;
-}
-
-.action-main {
-  position: absolute;
-  left: 50%;
-  bottom: -58px;
-  transform: translateX(-50%);
-  width: 150px;
-  height: 42px;
-  padding: 8px;
-  font-size: 15px;
-  z-index: 20;
-}
-
-.action-buttons {
-  position: absolute;
-  left: 50%;
-  bottom: -58px;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
-  z-index: 30;
-}
-
-.action-btn {
-  width: 80px;
-  height: 40px;
-  padding: 6px;
-  font-size: 15px;
-  border-radius: 10px;
-  margin: 0;
-}
-
-.room-buttons {
-  position: fixed;
-  right: 12px;
-  bottom: 12px;
-  width: 160px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.room-buttons .btn {
+/* ===== input / select ===== */
+input, select {
   width: 100%;
-  font-size: 14px;
+  font-family: 'Noto Sans Thai', sans-serif;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  border-radius: 8px;
+  color: var(--card-face);
+  padding: 9px 12px;
+  margin: 6px 0;
+  font-size: 0.9rem;
+}
+label { font-size: 0.8rem; opacity: 0.85; }
+
+/* ===== ปุ่ม ===== */
+.btn {
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius);
+  padding: 10px 18px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  background: var(--gold);
+  color: var(--ink);
+  margin: 4px 4px 4px 0;
+}
+.btn.secondary { background: rgba(255, 255, 255, 0.12); color: var(--card-face); }
+.btn.danger { background: var(--danger); color: #fff; }
+.btn.success { background: var(--success); color: #fff; }
+.btn.warning { background: var(--warning); color: #fff; }
+.btn.gold { background: var(--gold); color: var(--ink); }
+.btn.small { padding: 6px 12px; font-size: 0.8rem; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ===== ห้องที่ยังไม่เต็ม (lobby) ===== */
+.room-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(201, 162, 39, 0.25);
+  border-radius: 8px;
   padding: 10px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
 }
 
-#adminList,
-#reportBox,
-#topupRequestsList,
-#withdrawRequestsList,
-#openRoomsList {
-  font-size: 14px;
+/* ===== กติกาโต๊ะ ===== */
+.rule-box {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin: 0 16px 12px;
+  font-size: 0.85rem;
   line-height: 1.6;
 }
-.mini-card.open-card {
-  color: #111 !important;
-  font-size: 14px !important;
-}
 
-.mini-card.open-card span {
-  display: block;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-.red-card {
-  color: #e53935 !important;
-}
-
-.black-card {
-  color: #111 !important;
-}
-.rule-btn{
-  background:#ff9800;
-  color:white;
-  border:none;
-  border-radius:10px;
-  padding:8px 12px;
-}
-
-.rule-box{
-  position:fixed;
-  top:120px;
-  right:10px;
-
-  width:280px;
-  max-height:70vh;
-  overflow:auto;
-
-  background:#0f172a;
-  color:white;
-
-  padding:12px;
-  border-radius:12px;
-
-  z-index:9999;
-}
-.room-menu{
-  position:fixed;
-  top:70px;
-  right:10px;
-
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-
-  z-index:9999;
-}
-
-.menu-btn{
-  background:#22c55e;
-  color:white;
-  border:none;
-  border-radius:10px;
-  padding:8px 12px;
-}
-.bet-buttons{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-  margin:10px 0;
-}
-
-.bet-buttons button{
-  background:#334155;
-  color:#fff;
-  border:none;
-  border-radius:10px;
-  padding:12px;
-  font-weight:bold;
-}
-
-.bet-buttons button.active-bet{
-  background:#22c55e;
-  transform:scale(1.05);
-}
-/* เพิ่มส่วนนี้ที่ท้ายไฟล์ style.css */
-.player-box-ui {
+/* ===== ปุ่มแถวบนของหน้าห้อง ===== */
+.room-buttons.side-buttons {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 5px;
-  border-radius: 10px;
-  min-width: 60px;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 16px 10px;
 }
+.room-buttons.side-buttons .btn { font-size: 0.75rem; padding: 7px 10px; }
 
-.player-photo {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #ffd21f;
-  margin-bottom: 4px;
-}
+.room-menu { text-align: center; padding: 10px 16px 20px; }
 
-.player-info-text {
-  text-align: center;
-  line-height: 1.2;
-}
-
-.player-name {
-  font-size: 11px;
-  font-weight: bold;
-  white-space: nowrap;
-  color: #fff;
-}
-
-.player-money {
-  font-size: 10px;
-  color: #ffcc00;
-}
-.banker-cards,
-.player-cards{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:4px;
-  flex-wrap:nowrap;
-}
-
-.mini-card{
-  width:32px;
-  height:48px;
-  font-size:13px;
-}
-
-/* ===== FIX ROOM FIT SCREEN + CARDS NOT BLOCKED ===== */
-
-html,
-body {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.app {
-  height: 100dvh;
-  min-height: 100dvh;
-  padding: 8px;
-  overflow: hidden;
-}
-
-#roomPage {
-  height: 100dvh;
-  overflow: hidden;
-}
-
-#roomPage .topbar {
-  margin-bottom: 4px;
-  font-size: 12px;
-}
-
+/* ===== โต๊ะไพ่ 8 ที่นั่ง ===== */
 .casino-table {
-  width: 94vw;
-  max-width: 430px;
-  height: 68dvh;
-  max-height: 520px;
-  min-height: 430px;
-  margin: 8px auto 0;
-  border-width: 6px;
-}
-
-/* ยกกลางโต๊ะขึ้นนิด */
-.table-center {
-  top: 42%;
-  width: 160px;
-  font-size: 12px;
-}
-
-/* ให้ไพ่ลอยเหนือกล่องผู้เล่น */
-.player-cards,
-.banker-cards {
   position: relative;
-  z-index: 20;
-  margin-bottom: 4px;
-}
-
-.player-box-ui {
-  position: relative;
-  z-index: 10;
-  padding: 4px;
+  margin: 8px 16px 16px;
+  min-height: 420px;
+  background: radial-gradient(ellipse at center, var(--felt-light), var(--felt-dark));
+  border-radius: 24px;
+  border: 8px solid #14161a;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5), inset 0 0 0 2px rgba(201, 162, 39, 0.55);
+  padding: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: min-content;
+  gap: 8px;
+  align-items: start;
 }
 
 .player-seat {
-  width: 90px;
-  overflow: visible;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 4px;
+  min-height: 60px;
+  font-size: 0.7rem;
 }
-
-/* ย่อตัวผู้เล่นนิดหนึ่ง */
-.player-photo {
-  width: 36px;
-  height: 36px;
-}
-
-.player-name {
-  font-size: 10px;
-}
-
-.player-money {
-  font-size: 9px;
-}
-
-/* ย่อไพ่ให้พอดีมือถือ */
-.mini-card {
-  width: 30px;
-  height: 44px;
-  font-size: 12px;
-  border-radius: 6px;
-}
-
-/* ขยับตำแหน่งรอบโต๊ะไม่ให้หลุดจอ */
 .banker-seat {
-  top: -48px;
+  grid-column: 1 / -1;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 10px rgba(230, 195, 74, 0.5);
 }
 
-.player1 { top: 9%; left: -2%; }
-.player2 { top: 35%; left: -6%; }
-.player3 { bottom: 18%; left: 1%; }
+.table-center {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 8px 0;
+  color: var(--gold-bright);
+  font-family: 'Noto Serif Thai', serif;
+  font-size: 0.85rem;
+}
+#turnTimer, #resultText, #deckRemain { margin-top: 2px; }
 
-.player4 { bottom: 2%; left: 24%; }
-.player5 { bottom: 2%; right: 24%; }
+.player-box-ui { display: flex; align-items: center; gap: 6px; }
+.player-photo {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--gold);
+  flex-shrink: 0;
+}
+.player-info-text { line-height: 1.3; overflow: hidden; }
+.player-name { font-weight: 700; font-size: 0.72rem; color: var(--gold-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player-money { font-size: 0.65rem; opacity: 0.9; }
 
-.player6 { bottom: 18%; right: 1%; }
-.player7 { top: 35%; right: -6%; }
-.player8 { top: 9%; right: -2%; }
+/* ไพ่ขนาดเล็กบนที่นั่ง */
+.banker-cards { display: flex; gap: 2px; justify-content: center; margin-top: 3px; flex-wrap: wrap; }
+.mini-card {
+  width: 22px; height: 30px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  background: var(--card-face);
+  color: var(--ink);
+}
+.mini-card.back {
+  background: repeating-linear-gradient(45deg, var(--felt-light) 0 4px, var(--felt-dark) 4px 8px);
+  border: 1px solid var(--gold);
+}
+.red-card { color: var(--danger); }
+.black-card { color: var(--ink); }
 
-/* ปุ่มเดิมพัน/จั่ว/อยู่ ไม่ให้ดันจอลง */
+/* ===== กล่องเดิมพัน ===== */
 .bet-card {
-  bottom: 4px;
-  width: 280px;
-  max-width: 88%;
-  padding: 8px;
-  font-size: 12px;
+  grid-column: 1 / -1;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 12px;
+  text-align: center;
 }
-
-.action-main {
-  bottom: 8px;
-}
-
-.action-buttons {
-  bottom: 8px;
-}
-
-/* ปุ่มเมนูด้านขวาให้เล็กลง */
-.room-buttons {
-  right: 6px;
-  bottom: 6px;
-  width: 125px;
-  gap: 5px;
-}
-
-.room-buttons .btn {
-  font-size: 12px;
-  padding: 7px;
-}
-/* ===== FIX SCROLL: ให้ Lobby/Admin เลื่อนได้ แต่ห้องเกมไม่เลื่อน ===== */
-
-html,
-body {
-  width: 100%;
-  height: auto;
-  min-height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.app {
-  min-height: 100dvh;
-  height: auto;
-  overflow-y: auto;
-}
-
-/* ซ่อน scroll เฉพาะหน้าโต๊ะเกม */
-body:has(#roomPage[style*="block"]) {
-  height: 100dvh;
-  overflow: hidden;
-}
-
-#roomPage {
-  height: 100dvh;
-  overflow: hidden;
-}
-
-/* ให้หน้าอื่นเลื่อนได้ */
-#loginPage,
-#lobbyPage,
-#adminPage {
-  min-height: 100dvh;
-  overflow-y: auto;
-  padding-bottom: 90px;
-}
-
-/* ปุ่มแอดมิน/เมนูไม่โดนตัด */
-.room-buttons,
-.room-menu {
-  max-width: calc(100vw - 20px);
-  overflow: visible;
-}
-/* FIX: ปุ่มเลือกเงินเดิมพันหาย */
-.bet-card {
-  position: absolute;
-  left: 50%;
-  bottom: 55px;
-  transform: translateX(-50%);
-  width: 285px;
-  max-width: 90%;
-  z-index: 999;
-  display: block;
-}
-
 .bet-buttons {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
+  justify-content: center;
+  margin: 8px 0;
 }
-
 .bet-buttons button {
-  display: block !important;
-  min-height: 36px;
-  padding: 8px;
-  font-size: 13px;
+  border: 1px solid var(--gold);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--card-face);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  cursor: pointer;
 }
-/* FIX: Lobby/Admin ต้องเลื่อนได้เต็มหน้า */
-html,
-body {
-  height: auto;
-  min-height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.app {
-  height: auto;
-  min-height: 100dvh;
-  overflow: visible;
+.bet-buttons button.active-bet {
+  background: var(--gold);
+  color: var(--ink);
+  font-weight: 700;
 }
 
-#loginPage,
-#lobbyPage,
-#adminPage {
-  min-height: 100dvh;
-  overflow-y: auto;
-  padding-bottom: 120px;
+/* ===== ปุ่มควบคุมเกม ===== */
+.action-main {
+  grid-column: 1 / -1;
+  justify-self: center;
+  margin-top: 8px;
+}
+.action-buttons {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.action-btn { min-width: 90px; }
+
+@media (max-width: 480px) {
+  .casino-table { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ล็อกเฉพาะหน้าเล่นเกมเท่านั้น */
-#roomPage {
-  height: 100dvh;
+/* ===== วิดีโอ 8 กล้อง ===== */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 8px 16px;
+}
+@media (max-width: 480px) {
+  .video-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.video-tile {
+  position: relative;
+  background: #10182a;
+  border: 1px solid rgba(201, 162, 39, 0.35);
+  border-radius: 8px;
   overflow: hidden;
+  aspect-ratio: 1 / 1;
+}
+.video-tile video { width: 100%; height: 100%; object-fit: cover; background: #000; }
+.video-tile .video-name {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  font-size: 10px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  text-align: center;
+  padding: 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* ปุ่มแอดมิน/เมนู ห้ามโดนตัด */
-.room-menu,
-.room-buttons {
-  position: fixed;
-  right: 10px;
-  z-index: 99999;
-  max-width: calc(100vw - 20px);
-  overflow: visible;
-}
-
-.room-menu {
-  top: 70px;
-}
-
-.room-buttons {
-  bottom: 12px;
-}
-.side-buttons {
-  position: fixed;
-  right: 18px;
-  top: 190px;
+/* ===== แชทในห้อง ===== */
+.chat-panel {
+  margin: 10px 16px;
+  border: 1px solid rgba(201, 162, 39, 0.35);
+  border-radius: var(--radius);
+  background: rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  z-index: 20;
+  height: 170px;
 }
-
-.side-buttons .btn {
-  width: 150px;
-}
-
-@media (max-width: 768px) {
-  .side-buttons {
-    right: 10px;
-    top: 150px;
-  }
-
-  .side-buttons .btn {
-    width: 120px;
-    font-size: 12px;
-  }
-}
+.chat-messages { flex: 1; overflow-y: auto; padding: 8px 10px; font-size: 0.8rem; }
+.chat-messages .chat-line { margin-bottom: 6px; line-height: 1.4; }
+.chat-messages .chat-name { color: var(--gold-bright); font-weight: 700; margin-right: 4px; }
+.chat-input-row { display: flex; gap: 6px; padding: 8px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+.chat-input-row input { flex: 1; margin: 0; }
+.chat-input-row button { flex-shrink: 0; margin: 0; }

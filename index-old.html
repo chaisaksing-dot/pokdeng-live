@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+ 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>แอปเล่นไพ่</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+<div class="app">
+
+  <section id="loginPage" class="page" style="display:block;">
+    <div class="card center">
+      <h1>แอปเล่นไพ่</h1>
+      <p class="muted">ระบบจะจำรหัสผู้เล่นให้อัตโนมัติ</p>
+
+      <button onclick="loginLine()" class="btn">เริ่มเล่นด้วย LINE</button>
+
+      <div id="oldIdBox" style="display:none; margin-top:12px;">
+        <input id="playerId"  placeholder="รหัสผู้เล่น">
+        <input
+           id="playerPin"
+           type="password"
+           maxlength="6"
+           placeholder="Pin เช่น 1234">
+        
+        <button onclick="loginWithOldId()" class="btn">เข้าสู่ระบบ</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="adminPage" class="page" style="display:none;">
+    <div class="topbar">
+      <h2>หน้าแอดมิน</h2>
+      <button onclick="showPage('lobbyPage')" class="btn small">กลับ</button>
+    </div>
+
+    <div class="card">
+      <h3>เติม / ถอนเครดิต</h3>
+      <input id="playerName" placeholder="รหัสผู้เล่น">
+      <input id="amount" type="number" placeholder="จำนวนเงิน">
+      <button onclick="topUp()" class="btn">เติมเงิน</button>
+      <button onclick="withdraw()" class="btn danger">ถอนเงิน</button>
+    </div>
+
+    <div class="card">
+      <h3>คำขอโอนเงิน</h3>
+      <div id="topupRequestsList">ยังไม่มีรายการ</div>
+    </div>
+
+    <div class="card">
+      <h3>คำขอถอนเงิน</h3>
+      <div id="withdrawRequestsList">ยังไม่มีรายการ</div>
+    </div>
+
+    <div class="card">
+      <h3>จัดการแอดมิน</h3>
+      <input id="adminTargetId" placeholder="รหัสผู้เล่น เช่น 0002">
+      <select id="adminRole">
+        <option value="staff">Staff</option>
+        <option value="admin">Admin</option>
+        <option value="owner">Owner</option>
+      </select>
+      <button onclick="addAdmin()" class="btn">เพิ่ม / เปลี่ยนสิทธิ์</button>
+      <button onclick="removeAdmin()" class="btn danger">ลบแอดมิน</button>
+      <div id="adminList"></div>
+    </div>
+
+    <div class="card">
+      <h3>รายงานระบบ</h3>
+      <div id="reportBox">กำลังโหลด...</div>
+    </div>
+  </section>
+
+  <section id="lobbyPage" class="page" style="display:none;">
+    <div class="topbar">
+      <div>
+        <h2>Lobby</h2>
+        <p id="userInfo" class="creditText"></p>
+      </div>
+      <button onclick="logout()" class="btn small danger">ออก</button>
+      <button id="adminBtn" onclick="openAdmin()" class="btn small">
+  🔧 แอดมิน
+</button>
+    </div>
+
+    <div class="card">
+      <h3>กระเป๋าเงิน</h3>
+      <button onclick="showMoneyBox('topup')" class="btn">แจ้งโอนเงิน</button>
+      <button onclick="showMoneyBox('withdraw')" class="btn secondary">แจ้งถอนเงิน</button>
+
+      <div id="moneyRequestBox" style="display:none; margin-top:12px;">
+        <input id="requestAmount" type="number" placeholder="จำนวนเงิน">
+        <input id="bankInfo" placeholder="บัญชี / หมายเหตุ / รายละเอียด">
+        <button onclick="submitMoneyRequest()" class="btn">ส่งคำขอ</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>สร้างห้อง</h3>
+
+      <label>ขั้นต่ำต่อคน</label>
+      <select id="minBet">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+
+      <label>สูงสุดต่อคน</label>
+      <select id="maxBet">
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="200">200</option>
+        <option value="300">300</option>
+        <option value="500">500</option>
+        <option value="1000">1000</option>
+        <option value="2000">2000</option>
+        <option value="5000">5000</option>
+        </select>
+        <label>💰 ค่าต๋ง</label>
+<select id="tongPercent">
+  <option value="0">0%</option>
+  <option value="1">1%</option>
+  <option value="2">2%</option>
+  <option value="3">3%</option>
+  <option value="4">4%</option>
+  <option value="5" selected>5%</option>
+</select>
+
+      <button onclick="createRoom()" class="btn">สร้างห้อง</button>
+    </div>
+
+    <div class="card">
+      <h3>ห้องที่ยังไม่เต็ม</h3>
+      <div id="openRoomsList">กำลังโหลด...</div>
+    </div>
+
+    <div class="card">
+      <h3>เข้าห้องด้วยเลขห้อง</h3>
+      <input id="joinRoomId" type="number" placeholder="ใส่เลขห้อง">
+      <button onclick="joinRoom()" class="btn">เข้าห้อง</button>
+    </div>
+
+    <button id="hiddenAdminBtn" onclick="openAdmin()" class="hidden-admin-btn">
+      Admin
+    </button>
+  </section>
+
+  <section id="roomPage" class="page" style="display:none;">
+    <div class="topbar">
+      <div>
+        <h2>ห้อง <span id="roomIdText"></span></h2>
+        <p>เจ้ามือ: <span id="bankerMoneyText"></span></p>
+        <p>ขั้นต่ำ: <span id="minBetText"></span></p>
+        <p>สูงสุด: <span id="maxBetText"></span></p>
+        <p>💰 ค่าต๋ง : <span id="tongPercentText"></span></p>
+      </div>
+    </div>
+
+   <div class="room-buttons side-buttons">
+  <button class="btn success" onclick="copyInviteLink()">🔗 คัดลอกลิงก์เชิญ</button>
+  <button class="btn warning" onclick="showRules()">📜 กติกาโต๊ะ</button>
+  <button class="btn success" onclick="transferBanker()">👑 ส่งต่อเจ้ามือ</button>
+  <button class="btn danger" onclick="closeRoom()">❌ ปิดห้อง</button>
+</div>
+
+<div id="ruleBox" class="rule-box" style="display:none;">
+
+<h3>📜 กติกาโต๊ะ</h3>
+
+<b>การนับไพ่พิเศษ</b><br>
+
+🏆 ตอง = x5<br>
+🏆 เรียงฟลัด = x4<br>
+🏆 3 ใบอักษร (JQK) = x3<br>
+🏆 ฟลัด = x3<br>
+🏆 2 เด้ง = x2<br>
+
+<br>
+
+<b>2 เด้ง คือ</b><br>
+
+• ไพ่ 2 ใบ ดอกเดียวกัน<br>
+เช่น 4♠ 8♠<br>
+
+หรือ
+
+• ไพ่ 2 ใบ หน้าเดียวกัน<br>
+เช่น 7♠ 7♥<br>
+
+<br>
+
+<b>การเปรียบเทียบ</b><br>
+
+ตอง > เรียงฟลัด > 3 ใบอักษร > ฟลัด > ไพ่ปกติ
+
+<br><br>
+
+ถ้าพิเศษเหมือนกัน<br>
+ให้เสมอ ไม่มีได้เสีย
+
+<br><br>
+
+<b>ป๊อก</b><br>
+
+• ผู้เล่นป๊อก 8/9 → จบเฉพาะคนนั้น<br>
+• เจ้ามือยังเล่นกับคนอื่นได้<br>
+• เจ้ามือป๊อก 8/9 → จบทันทีทั้งโต๊ะ
+
+<br><br>
+
+<b>ค่าต๋ง</b><br>
+
+หัก 0-5% เมื่อผู้ชนะได้ x2 ขึ้นไป
+
+</div>
+    
+    <div class="casino-table">
+
+      <div class="player-seat banker-seat">
+        <div id="banker"></div>
+      </div>
+
+      <div class="table-center">
+        <div id="deckPile" class="mini-card back"></div>
+        <div id="deckRemain">เหลือ <span id="deckRemainCount">52</span> ใบ</div>
+        <div id="turnTimer">เวลา: -</div>
+        <div id="cardsArea"></div>
+        <div id="resultText">ยังไม่มีผล</div>
+      </div>
+
+      <div class="player-seat player1"><div id="player1"></div></div>
+      <div class="player-seat player2"><div id="player2"></div></div>
+      <div class="player-seat player3"><div id="player3"></div></div>
+      <div class="player-seat player4"><div id="player4"></div></div>
+      <div class="player-seat player5"><div id="player5"></div></div>
+      <div class="player-seat player6"><div id="player6"></div></div>
+      <div class="player-seat player7"><div id="player7"></div></div>
+      <div class="player-seat player8"><div id="player8"></div></div>
+
+      <div class="card bet-card" id="betCard" style="display:none;">
+        <h3>เดิมพัน</h3>
+        <div id="myMoneyText"></div>
+
+        <label>เลือกจำนวนเดิมพัน:</label>
+        <div id="betButtons" class="bet-buttons">
+  <button type="button" onclick="setBet(10)">10</button>
+  <button type="button" onclick="setBet(20)">20</button>
+  <button type="button" onclick="setBet(30)">30</button>
+
+  <button type="button" onclick="setBet(50)">50</button>
+  <button type="button" onclick="setBet(100)">100</button>
+  <button type="button" onclick="setBet(200)">200</button>
+
+  <button type="button" onclick="setBet(300)">300</button>
+  <button type="button" onclick="setBet(500)">500</button>
+  <button type="button" onclick="setBet(1000)">1000</button>
+</div>
+
+<input
+  id="betAmount"
+  type="hidden"
+  value="0"
+/>
+
+        <p>เสียสูงสุดกรณีตอง x5: <b id="maxLoseText">0</b></p>
+
+        <button class="btn" onclick="playerReady()">พร้อม</button>
+      </div>
+
+      <button id="startGameBtn" class="btn action-main" onclick="dealCards()" style="display:none;">
+        เริ่มเกม
+      </button>
+
+      <div class="action-buttons">
+        <button id="playerDrawBtn" class="btn action-btn" style="display:none;" onclick="playerDraw()">จั่ว</button>
+        <button id="playerStandBtn" class="btn action-btn secondary" style="display:none;" onclick="playerStand()">อยู่</button>
+        <button id="bankerDrawBtn" class="btn action-btn" style="display:none;" onclick="bankerDraw()">จั่ว</button>
+        <button id="bankerStandBtn" class="btn action-btn secondary" style="display:none;" onclick="bankerStand()">อยู่</button>
+      </div>
+
+      <button id="newRoundBtn" class="btn action-main" onclick="newRound()" style="display:none;">
+        เริ่มตาใหม่
+      </button>
+    </div>
+
+     <div class="room-menu">
+      <button class="btn danger" onclick="leaveRoom()">ออกห้อง</button>
+    </div>
+  </section>
+
+</div>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="js/config.js"></script>
+<script src="services/firebaseService.js"></script>
+
+<script src="script.js?v=1004"></script>
+
+<audio id="soundDeal" src="sounds/deal.mp3"></audio>
+<audio id="soundTurn" src="sounds/turn.mp3"></audio>
+<audio id="soundWin" src="sounds/win.mp3"></audio>
+<audio id="soundLose" src="sounds/lose.mp3"></audio>
+  
+</body>
+</html>
+

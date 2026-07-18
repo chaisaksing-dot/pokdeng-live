@@ -1,0 +1,111 @@
+/* =====================================================
+   video-chat.css
+   สไตล์เพิ่มเติมสำหรับกริดวิดีโอ + แชท — ไม่แตะ style.css เดิม
+   ===================================================== */
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 8px;
+  max-width: 480px;
+  margin: 8px auto;
+}
+
+@media (max-width: 480px) {
+  .video-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.video-tile {
+  position: relative;
+  background: #10182a;
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+}
+
+.video-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
+.video-tile .video-name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-size: 10px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  text-align: center;
+  padding: 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.video-tile.video-off::after {
+  content: "🎥 ปิด";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 11px;
+}
+
+.chat-panel {
+  max-width: 480px;
+  margin: 10px auto;
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  height: 180px;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #eee;
+}
+
+.chat-messages .chat-line {
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.chat-messages .chat-name {
+  color: #ffd700;
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chat-input-row input {
+  flex: 1;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  padding: 6px 8px;
+}
+
+.chat-input-row button {
+  flex-shrink: 0;
+}
