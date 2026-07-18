@@ -100,14 +100,14 @@ function flyCardTo(targetEl) {
   setTimeout(() => {
     card.remove();
     playSound("soundPlace");
-  }, 480);
+  }, 950);
 }
 
 function queueCardFlyAnimations(seatEl, newCount, prevCount) {
   if (!seatEl || newCount <= prevCount) return;
 
   for (let n = prevCount; n < newCount; n++) {
-    setTimeout(() => flyCardTo(seatEl), (n - prevCount) * 220);
+    setTimeout(() => flyCardTo(seatEl), (n - prevCount) * 500);
   }
 }
 

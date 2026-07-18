@@ -303,11 +303,11 @@ label { font-size: 0.8rem; opacity: 0.85; }
 /* ไพ่ที่ลอยออกจากกองกลางตอนแจก — องค์ประกอบชั่วคราว สร้าง/ลบด้วย JS */
 .flying-card {
   position: absolute;
-  width: 20px;
-  height: 27px;
+  width: 28px;
+  height: 38px;
   z-index: 50;
   pointer-events: none;
-  transition: transform 0.45s cubic-bezier(0.25, 0.8, 0.3, 1), opacity 0.45s ease;
+  transition: transform 0.9s cubic-bezier(0.25, 0.8, 0.3, 1), opacity 0.9s ease;
   transform: translate(-50%, -50%);
 }
 
