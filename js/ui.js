@@ -176,9 +176,17 @@ function renderPlayers() {
     const open = isMe || finished || showAll;
     const photoUrl = banker.photo || "https://via.placeholder.com/50";
 
+    const hasOwnStream = isMe && typeof myVideoStarted !== "undefined" && myVideoStarted && localStream;
+    const hasRemoteStream = !isMe && typeof bankerStream !== "undefined" && bankerStream;
+    const showVideo = hasOwnStream || hasRemoteStream;
+
+    const photoOrVideo = showVideo
+      ? `<video id="bankerPhotoVideo" class="player-photo" autoplay playsinline ${isMe ? "muted" : ""}></video>`
+      : `<img src="${photoUrl}" class="player-photo">`;
+
     bankerBox.innerHTML = `
       <div class="player-box-ui">
-        <img src="${photoUrl}" class="player-photo">
+        ${photoOrVideo}
         <div class="player-info-text">
           <div class="player-name">👑 ${shortName(banker.displayName || banker.name)}</div>
           <div class="player-money">เงิน: ${banker.money || 0}</div>
@@ -188,10 +196,28 @@ function renderPlayers() {
       ${renderCards(banker.cards, open)}
     `;
 
+    if (showVideo && typeof applyBankerVideoToSeat === "function") {
+      applyBankerVideoToSeat();
+    }
+
     const bankerId = "banker-" + (banker.id || banker.name);
     const bankerCardCount = Object.values(banker.cards || {}).length;
     queueCardFlyAnimations(bankerBox, bankerCardCount, lastCardCounts[bankerId] || 0);
     lastCardCounts[bankerId] = bankerCardCount;
+  }
+}
+
+// เรียกหลังวาดที่นั่งเจ้ามือใหม่ทุกครั้ง เพื่อผูกสตรีมวิดีโอ (ของตัวเอง หรือที่รับมาจากเจ้ามือ) เข้ากับ <video> ที่เพิ่งสร้าง
+function applyBankerVideoToSeat() {
+  const videoEl = document.getElementById("bankerPhotoVideo");
+  if (!videoEl) return;
+
+  const banker = getBanker();
+  const amIBanker = banker && String(banker.id || banker.name) === String(myPlayerId);
+  const stream = amIBanker ? localStream : (typeof bankerStream !== "undefined" ? bankerStream : null);
+
+  if (stream) {
+    videoEl.srcObject = stream;
   }
 }
 

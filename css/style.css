@@ -306,38 +306,6 @@ label { font-size: 0.8rem; opacity: 0.85; }
   transform: translate(-50%, -50%);
 }
 
-/* ===== วิดีโอ 8 กล้อง ===== */
-.video-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  padding: 8px 16px;
-}
-@media (max-width: 480px) {
-  .video-grid { grid-template-columns: repeat(3, 1fr); }
-}
-.video-tile {
-  position: relative;
-  background: #10182a;
-  border: 1px solid rgba(201, 162, 39, 0.35);
-  border-radius: 8px;
-  overflow: hidden;
-  aspect-ratio: 1 / 1;
-}
-.video-tile video { width: 100%; height: 100%; object-fit: cover; background: #000; }
-.video-tile .video-name {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  font-size: 10px;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.55);
-  text-align: center;
-  padding: 2px 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 /* ===== แชทในห้อง ===== */
 .chat-panel {
   margin: 10px 16px;
