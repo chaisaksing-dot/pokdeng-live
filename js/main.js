@@ -24,6 +24,7 @@ window.requestTransferBanker = requestTransferBanker;
 window.closeRoom = closeRoom;
 window.newRound = newRound;
 window.playerReady = playerReady;
+window.claimBanker = claimBanker;
 
 window.dealCards = dealCards;
 window.playerDraw = playerDraw;

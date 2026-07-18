@@ -146,28 +146,43 @@ function joinRoom() {
 
     const room = roomSnap.val();
     const roomStatus = room.status || "waiting";
+    const existingPlayer = (room.players || {})[playerId];
 
     db.ref("wallet/" + playerId).once("value").then(walletSnap => {
       const walletMoney = Number(walletSnap.val() || 0);
 
-      const playerData = {
-        id: playerId,
-        name: playerName,
-        displayName: playerName,
-        pictureUrl: pictureUrl,
-        photo: pictureUrl,
-        role: "player",
-        money: walletMoney,
-        bet: 0,
-        ready: false,
-        online: true,
-        joinedAt: Date.now()
-      };
+      let playerData;
 
-      if (roomStatus !== "waiting") {
-        playerData.waitingNextRound = true;
-        playerData.ready = false;
-        playerData.bet = 0;
+      if (existingPlayer) {
+        // คนนี้อยู่ในห้องนี้อยู่แล้ว (เช่น รีเฟรชหน้า หรือกดลิงก์เชิญของตัวเอง)
+        // แค่แตะสถานะออนไลน์ + อัปเดตชื่อ/รูป ห้ามแตะ role/cards/bet เดิม ไม่งั้นเจ้ามือจะถูกเปลี่ยนเป็นผู้เล่นโดยไม่ตั้งใจ
+        playerData = {
+          name: playerName,
+          displayName: playerName,
+          pictureUrl: pictureUrl,
+          photo: pictureUrl,
+          online: true
+        };
+      } else {
+        playerData = {
+          id: playerId,
+          name: playerName,
+          displayName: playerName,
+          pictureUrl: pictureUrl,
+          photo: pictureUrl,
+          role: "player",
+          money: walletMoney,
+          bet: 0,
+          ready: false,
+          online: true,
+          joinedAt: Date.now()
+        };
+
+        if (roomStatus !== "waiting") {
+          playerData.waitingNextRound = true;
+          playerData.ready = false;
+          playerData.bet = 0;
+        }
       }
 
       db.ref("rooms/" + roomId + "/players/" + playerId)
@@ -183,11 +198,68 @@ function joinRoom() {
           listenRoom(roomId);
           showPage("roomPage");
 
-          if (roomStatus !== "waiting") {
+          if (!existingPlayer && roomStatus !== "waiting") {
             alert("โต๊ะกำลังเล่นอยู่ คุณจะเข้ารอบถัดไป");
           }
         });
     });
+  });
+}
+
+// ถ้าเจ้ามือหายไปจากห้อง (โดนเตะ/ออกโดยไม่ได้ส่งต่อ/ปิดแอปกะทันหัน)
+// แทนที่จะเลื่อนใครขึ้นอัตโนมัติ ให้ตั้งธง bankerMissing แล้วให้ผู้เล่นกดรับเป็นเจ้ามือเอง
+function autoAssignBankerIfMissing() {
+  if (!currentRoom || !currentRoom.id) return;
+
+  const hasBanker = players.some(p => p.role === "banker");
+
+  if (hasBanker) {
+    if (currentRoom.bankerMissing) {
+      db.ref("rooms/" + currentRoom.id).update({ bankerMissing: false, bankerClaim: null });
+    }
+    return;
+  }
+
+  const hasEligiblePlayers = players.some(p => p.role === "player");
+  if (hasEligiblePlayers && !currentRoom.bankerMissing) {
+    db.ref("rooms/" + currentRoom.id + "/bankerMissing").set(true);
+  }
+}
+
+// ผู้เล่นกดปุ่ม "รับเป็นเจ้ามือ" — ใช้ transaction กันไม่ให้มีคนได้พร้อมกัน 2 คน
+function claimBanker() {
+  if (!currentRoom || !currentRoom.id) return;
+
+  const me = players.find(p => String(p.id || p.name) === String(myPlayerId));
+  if (!me || me.role !== "player") {
+    alert("เฉพาะผู้เล่นในห้องเท่านั้นที่รับเป็นเจ้ามือได้");
+    return;
+  }
+
+  db.ref("rooms/" + currentRoom.id + "/bankerClaim").transaction(current => {
+    if (current) return; // มีคนกดไปก่อนแล้ว ยกเลิก
+    return myPlayerId;
+  }, (error, committed, snap) => {
+    if (error) return;
+
+    if (!committed || String(snap.val()) !== String(myPlayerId)) {
+      alert("มีคนกดรับเป็นเจ้ามือไปก่อนแล้ว");
+      return;
+    }
+
+    const updates = {};
+    updates["rooms/" + currentRoom.id + "/banker"] = myPlayerId;
+    updates["rooms/" + currentRoom.id + "/bankerMoney"] = Number(me.money || 0);
+    updates["rooms/" + currentRoom.id + "/players/" + myPlayerId + "/role"] = "banker";
+    updates["rooms/" + currentRoom.id + "/status"] = "waiting";
+    updates["rooms/" + currentRoom.id + "/turnOrder"] = [];
+    updates["rooms/" + currentRoom.id + "/turnIndex"] = 0;
+    updates["rooms/" + currentRoom.id + "/turnDeadline"] = 0;
+    updates["rooms/" + currentRoom.id + "/showAllCards"] = false;
+    updates["rooms/" + currentRoom.id + "/bankerMissing"] = false;
+    updates["rooms/" + currentRoom.id + "/bankerClaim"] = null;
+
+    db.ref().update(updates);
   });
 }
 
@@ -239,6 +311,14 @@ function listenRoom(roomId) {
     checkAllReady();
     updateDeckRemain();
     updateActionButtons();
+    autoAssignBankerIfMissing();
+
+    const missingBox = el("bankerMissingBox");
+    if (missingBox) {
+      const me = players.find(p => String(p.id || p.name) === String(myPlayerId));
+      const iAmEligible = me && me.role === "player";
+      missingBox.style.display = (currentRoom.bankerMissing && iAmEligible) ? "block" : "none";
+    }
 
     if (
       currentRoom.status === "playing" &&
