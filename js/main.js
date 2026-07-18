@@ -49,11 +49,14 @@ window.onload = function () {
   const params = new URLSearchParams(window.location.search);
   const roomId = params.get("room");
   const savedId = localStorage.getItem("playerId");
+  const hasLineProfile = !!localStorage.getItem("lineName");
 
   if (roomId) {
     localStorage.setItem("pendingRoomId", roomId);
 
-    if (savedId) {
+    // ข้ามหน้า login อัตโนมัติได้เฉพาะตอนที่เคย login LINE จริงจากเครื่องนี้มาก่อน
+    // (มีชื่อ/รูปเก็บไว้แล้ว) ไม่งั้นจะเข้าห้องแบบไม่มีรูปเหมือนที่เจอ
+    if (savedId && hasLineProfile) {
       loginWithId(savedId, roomId);
     } else {
       showPage("loginPage");
