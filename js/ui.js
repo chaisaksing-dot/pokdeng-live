@@ -64,6 +64,51 @@ function updateDeckRemain() {
   if (box) box.innerText = remain;
 }
 
+let lastCardCounts = {};
+
+function flyCardTo(targetEl) {
+  const table = document.querySelector(".casino-table");
+  const deck = el("deckPile");
+  if (!table || !deck || !targetEl) return;
+
+  const tableRect = table.getBoundingClientRect();
+  const deckRect = deck.getBoundingClientRect();
+  const targetRect = targetEl.getBoundingClientRect();
+
+  const startX = deckRect.left - tableRect.left + deckRect.width / 2;
+  const startY = deckRect.top - tableRect.top + deckRect.height / 2;
+  const endX = targetRect.left - tableRect.left + targetRect.width / 2;
+  const endY = targetRect.top - tableRect.top + targetRect.height / 2;
+
+  const card = document.createElement("div");
+  card.className = "mini-card back flying-card";
+  card.style.left = startX + "px";
+  card.style.top = startY + "px";
+  table.appendChild(card);
+
+  playSound("soundDeal");
+
+  requestAnimationFrame(() => {
+    card.style.left = endX + "px";
+    card.style.top = endY + "px";
+    card.style.transform = "translate(-50%, -50%) rotate(360deg)";
+    card.style.opacity = "0.15";
+  });
+
+  setTimeout(() => {
+    card.remove();
+    playSound("soundPlace");
+  }, 480);
+}
+
+function queueCardFlyAnimations(seatEl, newCount, prevCount) {
+  if (!seatEl || newCount <= prevCount) return;
+
+  for (let n = prevCount; n < newCount; n++) {
+    setTimeout(() => flyCardTo(seatEl), (n - prevCount) * 220);
+  }
+}
+
 function renderPlayers() {
   for (let i = 1; i <= 8; i++) {
     const seat = el("player" + i);
@@ -116,6 +161,11 @@ function renderPlayers() {
       ${canKick ? `<button onclick="kickPlayer('${p.id || p.name}')" style="font-size:9px; background:#e53935; color:white; border:none; border-radius:4px; margin-top:2px;">❌ เตะ</button> ` : ""}
       ${renderCards(p.cards, open)}
     `;
+
+    const pid = p.id || p.name;
+    const cardCount = Object.values(p.cards || {}).length;
+    queueCardFlyAnimations(seat, cardCount, lastCardCounts[pid] || 0);
+    lastCardCounts[pid] = cardCount;
   });
 
   const bankerBox = el("banker");
@@ -137,6 +187,11 @@ function renderPlayers() {
       </div>
       ${renderCards(banker.cards, open)}
     `;
+
+    const bankerId = "banker-" + (banker.id || banker.name);
+    const bankerCardCount = Object.values(banker.cards || {}).length;
+    queueCardFlyAnimations(bankerBox, bankerCardCount, lastCardCounts[bankerId] || 0);
+    lastCardCounts[bankerId] = bankerCardCount;
   }
 }
 

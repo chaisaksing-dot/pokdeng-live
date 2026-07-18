@@ -139,17 +139,17 @@ label { font-size: 0.8rem; opacity: 0.85; }
 .casino-table {
   position: relative;
   margin: 8px 16px 16px;
-  padding: 10px 10px 16px;
+  padding: 6px 6px 16px;
 }
 
-/* วงกลมสีเขียวตกแต่ง (โต๊ะสักหลาด) วางไว้หลังที่นั่งทั้งหมด */
+/* วงกลมสีเขียวตกแต่ง (โต๊ะสักหลาด) — ศูนย์กลางวงอยู่ที่ top:180px เสมอ ทุกอย่างอิงจุดนี้ */
 .casino-table::before {
   content: "";
   position: absolute;
-  top: 8px;
+  top: 70px;
   left: 50%;
-  width: 260px;
-  height: 260px;
+  width: 220px;
+  height: 220px;
   transform: translateX(-50%);
   border-radius: 50%;
   background: radial-gradient(ellipse at center, var(--felt-light), var(--felt-dark));
@@ -159,53 +159,55 @@ label { font-size: 0.8rem; opacity: 0.85; }
 }
 
 /* พื้นที่ด้านบนที่กันไว้ให้วงกลม — เนื้อหาถัดไป (เดิมพัน/ปุ่ม) จะเริ่มต่อจากตรงนี้ */
-.casino-table { padding-top: 400px; }
+.casino-table { padding-top: 335px; }
 
 .player-seat, .table-center {
   position: absolute;
   z-index: 1;
   transform: translate(-50%, -50%);
-  width: 84px;
+  width: 78px;
   text-align: center;
 }
 
 .player-seat {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.45);
   border-radius: 8px;
   padding: 4px;
-  min-height: 56px;
-  font-size: 0.68rem;
+  min-height: 54px;
+  font-size: 0.66rem;
 }
 
 .banker-seat {
-  top: 40px;
+  top: 6px;
   left: 50%;
-  width: 100px;
-  background: rgba(0, 0, 0, 0.45);
+  width: 98px;
+  background: rgba(0, 0, 0, 0.5);
   box-shadow: 0 0 10px rgba(230, 195, 74, 0.6);
 }
 
+/* กองไพ่/เวลา/ผล — อยู่ตรงกลางวงกลมเป๊ะ (ศูนย์กลางวงกลมคือ top:180px) */
 .table-center {
-  top: 210px;
+  top: 180px;
   left: 50%;
-  width: 140px;
+  width: 130px;
   text-align: center;
   color: var(--gold-bright);
   font-family: 'Noto Serif Thai', serif;
-  font-size: 0.78rem;
-  background: none;
+  font-size: 0.76rem;
 }
+#deckPile { margin: 0 auto 2px; }
 #turnTimer, #resultText, #deckRemain { margin-top: 2px; }
 
-/* ที่นั่งผู้เล่น 8 คน กระจายรอบวงกลม (เจ้ามืออยู่บนสุด) */
-.player1 { top: 112px; left: calc(50% + 78px); }
-.player2 { top: 198px; left: calc(50% + 118px); }
-.player3 { top: 282px; left: calc(50% + 104px); }
-.player4 { top: 344px; left: calc(50% + 42px); }
-.player5 { top: 344px; left: calc(50% - 42px); }
-.player6 { top: 282px; left: calc(50% - 104px); }
-.player7 { top: 198px; left: calc(50% - 118px); }
-.player8 { top: 112px; left: calc(50% - 78px); }
+/* ที่นั่งผู้เล่น 8 คน กระจายรอบวงกลมเท่าๆ กัน (ศูนย์กลางเดียวกับวงกลม/กองไพ่)
+   แนวนอนใช้ % เทียบความกว้างโต๊ะ กันล้นจอมือถือจอแคบ, แนวตั้งใช้ px คงที่ */
+.player1 { top: 77px;  left: calc(50% + 25.5%); }
+.player2 { top: 157px; left: calc(50% + 39.1%); }
+.player3 { top: 248px; left: calc(50% + 34.4%); }
+.player4 { top: 307px; left: calc(50% + 13.6%); }
+.player5 { top: 307px; left: calc(50% - 13.6%); }
+.player6 { top: 248px; left: calc(50% - 34.4%); }
+.player7 { top: 157px; left: calc(50% - 39.1%); }
+.player8 { top: 77px;  left: calc(50% - 25.5%); }
 
 .player-box-ui { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .player-photo {
@@ -288,13 +290,20 @@ label { font-size: 0.8rem; opacity: 0.85; }
 }
 .action-btn { min-width: 90px; }
 
-@media (max-width: 400px) {
-  .casino-table::before { width: 220px; height: 220px; }
-  .player1, .player8 { top: 100px; }
-  .player4, .player5 { top: 300px; }
-  .player2, .player7 { left: calc(50% + 100px); }
-  .player7 { left: calc(50% - 100px); }
-  .table-center { top: 190px; }
+@media (max-width: 340px) {
+  .player-seat, .table-center { width: 66px; font-size: 0.6rem; }
+  .banker-seat { width: 84px; }
+}
+
+/* ไพ่ที่ลอยออกจากกองกลางตอนแจก — องค์ประกอบชั่วคราว สร้าง/ลบด้วย JS */
+.flying-card {
+  position: absolute;
+  width: 20px;
+  height: 27px;
+  z-index: 50;
+  pointer-events: none;
+  transition: transform 0.45s cubic-bezier(0.25, 0.8, 0.3, 1), opacity 0.45s ease;
+  transform: translate(-50%, -50%);
 }
 
 /* ===== วิดีโอ 8 กล้อง ===== */
