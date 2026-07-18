@@ -80,18 +80,20 @@ function flyCardTo(targetEl) {
   const endX = targetRect.left - tableRect.left + targetRect.width / 2;
   const endY = targetRect.top - tableRect.top + targetRect.height / 2;
 
+  const dx = endX - startX;
+  const dy = endY - startY;
+
   const card = document.createElement("div");
   card.className = "mini-card back flying-card";
   card.style.left = startX + "px";
   card.style.top = startY + "px";
+  card.style.transform = "translate(-50%, -50%)";
   table.appendChild(card);
 
   playSound("soundDeal");
 
   requestAnimationFrame(() => {
-    card.style.left = endX + "px";
-    card.style.top = endY + "px";
-    card.style.transform = "translate(-50%, -50%) rotate(360deg)";
+    card.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(360deg)`;
     card.style.opacity = "0.15";
   });
 
