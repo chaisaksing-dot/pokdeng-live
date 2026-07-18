@@ -178,11 +178,16 @@ label { font-size: 0.8rem; opacity: 0.85; }
 }
 
 .banker-seat {
-  top: 6px;
+  top: 26px;
   left: 50%;
-  width: 98px;
+  width: 130px;
   background: rgba(0, 0, 0, 0.5);
   box-shadow: 0 0 10px rgba(230, 195, 74, 0.6);
+}
+.banker-seat .player-photo {
+  width: 64px;
+  height: 64px;
+  border-width: 2px;
 }
 
 /* กองไพ่/เวลา/ผล — อยู่ตรงกลางวงกลมเป๊ะ (ศูนย์กลางวงกลมคือ top:180px) */
