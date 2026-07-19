@@ -339,6 +339,20 @@ function listenRoom(roomId) {
     updateTurnTimer();
     showRoundResult();
 
+    if (
+      currentRoom.status === "finished" &&
+      currentRoom.finishedAt &&
+      currentRoom.finishedAt !== lastPlayedResultAt
+    ) {
+      lastPlayedResultAt = currentRoom.finishedAt;
+
+      const me = players.find(p => String(p.id || p.name) === String(myPlayerId));
+      if (me && me.result) {
+        if (me.result.result === "win") playSound("soundWin");
+        else if (me.result.result === "lose") playSound("soundLose");
+      }
+    }
+
     if (typeof listenChat === "function" && (!chatListenerRef)) {
       listenChat(roomId);
     }

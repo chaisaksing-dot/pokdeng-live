@@ -16,6 +16,7 @@ let myAdminRole = null;
 
 // แชท / วิดีโอ
 let chatListenerRef = null;
+let lastPlayedResultAt = null; // กันเล่นเสียงแพ้/ชนะซ้ำหลายรอบสำหรับรอบเดิม
 let localStream = null;
 let peerConnections = {};
 let myVideoStarted = false;
