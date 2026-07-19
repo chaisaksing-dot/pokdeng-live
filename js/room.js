@@ -89,18 +89,26 @@ function listenOpenRooms() {
     const rooms = snap.val() || {};
     box.innerHTML = "";
 
-    Object.values(rooms).forEach(room => {
+    Object.entries(rooms).forEach(([roomId, room]) => {
       const roomPlayers = Object.values(room.players || {});
+      const hasBanker = roomPlayers.some(p => p.role === "banker");
+
+      // ห้องร้าง — ไม่มีใครอยู่ในห้องเลย (ทุกคนออกไปหมดแล้วรวมถึงเจ้ามือ) ลบทิ้งแล้วข้ามการแสดงผล
+      if (roomPlayers.length === 0 || !hasBanker) {
+        db.ref("rooms/" + roomId).remove();
+        return;
+      }
+
       const playerCount = roomPlayers.filter(p => p.role === "player").length;
 
       if (room.status === "waiting" && playerCount < MAX_PLAYERS) {
         box.innerHTML += `
           <div class="room-item">
-            <b>ห้อง ${room.id}</b><br>
+            <b>ห้อง ${roomId}</b><br>
             เจ้ามือ: ${room.banker}<br>
             ผู้เล่น: ${playerCount}/${MAX_PLAYERS}<br>
             ขั้นต่ำ: ${room.minBet} | สูงสุด: ${room.maxBet}<br>
-            <button class="btn small" onclick="joinOpenRoom('${room.id}')">เข้าห้อง</button>
+            <button class="btn small" onclick="joinOpenRoom('${roomId}')">เข้าห้อง</button>
           </div>
         `;
       }
