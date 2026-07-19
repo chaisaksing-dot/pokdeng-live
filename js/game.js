@@ -591,6 +591,7 @@ function finishGame() {
     const bankerInfo = getHandInfo(banker.cards || []);
     const updates = {};
 
+    const tongRate = (currentRoom?.tongPercent || 0) / 100;
     let bankerMoney = Number(banker.money || 0);
     let bankerNet = 0;
     let tongTotal = 0;
@@ -616,7 +617,7 @@ function finishGame() {
           gross = bet * playerInfo.multiplier;
 
           if (playerInfo.multiplier >= 2) {
-            tong = Math.floor(gross * 0.05);
+            tong = Math.floor(gross * tongRate);
           }
 
           playerNet = gross - tong;
@@ -630,7 +631,7 @@ function finishGame() {
 
           let bankerTong = 0;
           if (bankerInfo.multiplier >= 2) {
-            bankerTong = Math.floor(gross * 0.05);
+            bankerTong = Math.floor(gross * tongRate);
           }
 
           playerNet = -gross;

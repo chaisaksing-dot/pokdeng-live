@@ -44,6 +44,7 @@ window.withdraw = withdraw;
 window.sendChatMessage = sendChatMessage;
 window.toggleVideo = toggleVideo;
 window.toggleMic = toggleMic;
+window.testAllSounds = testAllSounds;
 
 window.onload = function () {
   const params = new URLSearchParams(window.location.search);

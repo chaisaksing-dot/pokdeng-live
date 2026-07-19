@@ -417,8 +417,41 @@ function toggleRules() {
 
 function playSound(id) {
   const audio = document.getElementById(id);
-  if (!audio) return;
+  if (!audio) {
+    alert("ไม่พบไฟล์เสียง id=" + id + " (ไม่มี <audio> tag นี้ในหน้า)");
+    return;
+  }
 
   audio.currentTime = 0;
-  audio.play().catch(() => {});
+  audio.play().catch(err => {
+    if (window.__soundDebug) {
+      alert("เล่นเสียง " + id + " ไม่สำเร็จ: " + err.name + " - " + err.message);
+    }
+  });
+}
+
+function testAllSounds() {
+  window.__soundDebug = true;
+  const ids = ["soundDeal", "soundPlace", "soundTurn", "soundWin", "soundLose"];
+  let i = 0;
+
+  function playNext() {
+    if (i >= ids.length) return;
+    const id = ids[i];
+    const audio = document.getElementById(id);
+
+    if (!audio) {
+      alert("❌ ไม่พบ <audio id=\"" + id + "\">");
+    } else {
+      audio.currentTime = 0;
+      audio.play()
+        .then(() => alert("✅ " + id + " เล่นได้ (ถ้าไม่ได้ยิน ให้เช็คสวิตช์ปิดเสียง/ระดับเสียงเครื่อง)"))
+        .catch(err => alert("❌ " + id + " เล่นไม่ได้: " + err.name + " - " + err.message));
+    }
+
+    i++;
+    setTimeout(playNext, 1200);
+  }
+
+  playNext();
 }
