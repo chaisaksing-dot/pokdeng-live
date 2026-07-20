@@ -28,7 +28,7 @@ body {
   color: var(--card-face);
   background: radial-gradient(circle at 50% -10%, var(--felt-light), var(--felt) 55%, var(--felt-dark) 100%);
   background-attachment: fixed;
-  padding-bottom: 20px;
+  padding-bottom: 70px;
 }
 
 h1, h2, h3 {
@@ -133,7 +133,17 @@ label { font-size: 0.8rem; opacity: 0.85; }
 }
 .room-buttons.side-buttons .btn { font-size: 0.75rem; padding: 7px 10px; }
 
-.room-menu { text-align: center; padding: 10px 16px 20px; }
+.room-menu {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 60;
+  padding: 0;
+  text-align: right;
+}
+.room-menu .btn {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
 
 /* ===== โต๊ะไพ่ 8 ที่นั่ง ===== */
 .casino-table {
