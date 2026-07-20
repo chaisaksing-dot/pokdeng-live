@@ -472,65 +472,106 @@ document.addEventListener("click", unlockOnce, { once: true });
 document.addEventListener("touchend", unlockOnce, { once: true });
 
 const MUSIC_TRACKS = {
-  luktung: "sounds/bgmusic-luktung.mp3?v=1",
-  beat: "sounds/bgmusic-beat.mp3?v=1",
-  edm: "sounds/bgmusic-edm.mp3?v=1",
-  isaan: "sounds/bgmusic-isaan.mp3?v=1",
-  pop: "sounds/bgmusic-pop.mp3?v=1",
-  hiphop: "sounds/bgmusic-hiphop.mp3?v=1",
-  reggae: "sounds/bgmusic-reggae.mp3?v=1",
-  disco: "sounds/bgmusic-disco.mp3?v=1",
-  asian: "sounds/bgmusic-asian.mp3?v=1",
-  rock: "sounds/bgmusic-rock.mp3?v=1"
+  luktung: "sounds/bgmusic-luktung.mp3?v=2",
+  beat: "sounds/bgmusic-beat.mp3?v=2",
+  edm: "sounds/bgmusic-edm.mp3?v=2",
+  isaan: "sounds/bgmusic-isaan.mp3?v=2",
+  pop: "sounds/bgmusic-pop.mp3?v=2",
+  hiphop: "sounds/bgmusic-hiphop.mp3?v=2",
+  reggae: "sounds/bgmusic-reggae.mp3?v=2",
+  disco: "sounds/bgmusic-disco.mp3?v=2",
+  asian: "sounds/bgmusic-asian.mp3?v=2",
+  rock: "sounds/bgmusic-rock.mp3?v=2"
 };
 
-function startBackgroundMusic() {
-  const music = document.getElementById("bgMusic");
-  if (!music) return;
+let musicGain = null;
+let currentMusicSource = null;
+const musicBuffers = {};
 
+function getMusicGain() {
+  const ctx = getAudioCtx();
+  if (!ctx) return null;
+  if (!musicGain) {
+    musicGain = ctx.createGain();
+    musicGain.gain.value = 0.35;
+    musicGain.connect(ctx.destination);
+  }
+  return musicGain;
+}
+
+function loadMusicBuffer(track) {
+  const ctx = getAudioCtx();
+  if (!ctx || musicBuffers[track]) return Promise.resolve();
+
+  return fetch(MUSIC_TRACKS[track])
+    .then(res => res.arrayBuffer())
+    .then(arr => ctx.decodeAudioData(arr))
+    .then(buf => { musicBuffers[track] = buf; })
+    .catch(err => console.error("โหลดเพลง " + track + " ไม่สำเร็จ", err));
+}
+
+function playMusicTrack(track) {
+  const ctx = getAudioCtx();
+  const gain = getMusicGain();
+  if (!ctx || !gain || !musicBuffers[track]) return;
+
+  if (currentMusicSource) {
+    try { currentMusicSource.stop(); } catch (e) {}
+    currentMusicSource = null;
+  }
+
+  const source = ctx.createBufferSource();
+  source.buffer = musicBuffers[track];
+  source.loop = true; // ลูปแบบ gapless จริง เพราะวนซ้ำที่ buffer ดิบโดยตรง ไม่มีช่วงเงียบคั่น
+  source.connect(gain);
+  source.start(0);
+  currentMusicSource = source;
+}
+
+function stopMusic() {
+  if (currentMusicSource) {
+    try { currentMusicSource.stop(); } catch (e) {}
+    currentMusicSource = null;
+  }
+}
+
+function startBackgroundMusic() {
   const muted = localStorage.getItem("musicMuted") === "1";
   const track = localStorage.getItem("musicTrack") || "luktung";
-
-  music.volume = 0.35;
-  music.src = MUSIC_TRACKS[track] || MUSIC_TRACKS.luktung;
 
   const select = document.getElementById("musicSelect");
   if (select) select.value = track;
 
-  if (!muted) {
-    music.play().catch(() => {});
-  }
+  loadMusicBuffer(track).then(() => {
+    if (!muted) playMusicTrack(track);
+  });
 
   const btn = el("musicToggleBtn");
   if (btn) btn.innerText = muted ? "🎵 เปิดเพลง" : "🎵 ปิดเพลง";
 }
 
 function changeMusicTrack(track) {
-  const music = document.getElementById("bgMusic");
-  if (!music || !MUSIC_TRACKS[track]) return;
-
-  const wasPlaying = !music.paused;
+  if (!MUSIC_TRACKS[track]) return;
   localStorage.setItem("musicTrack", track);
-  music.src = MUSIC_TRACKS[track];
 
-  if (wasPlaying) {
-    music.play().catch(() => {});
-  }
+  const muted = localStorage.getItem("musicMuted") === "1";
+  loadMusicBuffer(track).then(() => {
+    if (!muted) playMusicTrack(track);
+  });
 }
 
 function toggleMusic() {
-  const music = document.getElementById("bgMusic");
-  if (!music) return;
-
   const btn = el("musicToggleBtn");
+  const muted = localStorage.getItem("musicMuted") === "1";
 
-  if (music.paused) {
-    music.play().catch(() => {});
+  if (muted) {
     localStorage.setItem("musicMuted", "0");
+    const track = localStorage.getItem("musicTrack") || "luktung";
+    loadMusicBuffer(track).then(() => playMusicTrack(track));
     if (btn) btn.innerText = "🎵 ปิดเพลง";
   } else {
-    music.pause();
     localStorage.setItem("musicMuted", "1");
+    stopMusic();
     if (btn) btn.innerText = "🎵 เปิดเพลง";
   }
 }
