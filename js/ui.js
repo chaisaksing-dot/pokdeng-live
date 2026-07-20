@@ -90,7 +90,6 @@ function flyCardTo(targetEl) {
   card.style.transform = "translate(-50%, -50%)";
   table.appendChild(card);
 
-  playSound("soundDeal");
 
   requestAnimationFrame(() => {
     card.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(360deg)`;
