@@ -271,7 +271,7 @@ function dealCards() {
           })
           .then(() => {
             index++;
-            setTimeout(dealNext, 400);
+            setTimeout(dealNext, 900);
           })
           .catch(err => {
             console.error(err);

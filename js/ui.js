@@ -320,11 +320,15 @@ function updateTurnTimer() {
 
   const order = currentRoom.turnOrder || [];
   const turnPlayer = order[currentRoom.turnIndex];
-  playSound("soundTurn");
 
   if (!turnPlayer) return;
 
   const remain = Math.max(0, Math.ceil((Number(currentRoom.turnDeadline || 0) - Date.now()) / 1000));
+
+  // เตือนด้วยเสียงเฉพาะ 10 วินาทีสุดท้ายเท่านั้น ไม่ใช่ทุกวินาทีตลอดทั้ง 60 วิ
+  if (remain > 0 && remain <= 10) {
+    playSound("soundTurn");
+  }
 
   const timerBox = el("turnTimer");
   if (timerBox) timerBox.innerText = remain > 0 ? "เวลา: " + remain : "เวลา: 0";
@@ -415,43 +419,104 @@ function toggleRules() {
   }
 }
 
+/* =====================================================
+   ระบบเสียง — ใช้ Web Audio API แทน <audio> tag ธรรมดา
+   เหตุผล: iOS Safari ปลดล็อกได้ทีละไฟล์ต่อการแตะหนึ่งครั้งเท่านั้นถ้าใช้ <audio>,
+   แต่ถ้าใช้ AudioContext ปลดล็อก "ระบบเสียง" ครั้งเดียวก็เล่นได้ทุกไฟล์ทุกเวลาเลย
+   ===================================================== */
+
+let audioCtx = null;
+const soundBuffers = {};
+const SOUND_FILES = {
+  soundDeal: "sounds/deal.mp3?v=3",
+  soundPlace: "sounds/place.mp3?v=3",
+  soundTurn: "sounds/turn.mp3?v=3",
+  soundWin: "sounds/win.mp3?v=3",
+  soundLose: "sounds/lose.mp3?v=3"
+};
+
+function getAudioCtx() {
+  if (!audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) audioCtx = new AC();
+  }
+  return audioCtx;
+}
+
+function loadSoundBuffer(id) {
+  const ctx = getAudioCtx();
+  if (!ctx || soundBuffers[id]) return Promise.resolve();
+
+  return fetch(SOUND_FILES[id])
+    .then(res => res.arrayBuffer())
+    .then(arr => ctx.decodeAudioData(arr))
+    .then(buf => { soundBuffers[id] = buf; })
+    .catch(err => console.error("โหลดเสียง " + id + " ไม่สำเร็จ", err));
+}
+
+function unlockAllSounds() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  if (ctx.state === "suspended") ctx.resume();
+
+  Object.keys(SOUND_FILES).forEach(id => loadSoundBuffer(id));
+}
+
+function unlockOnce() {
+  unlockAllSounds();
+  document.removeEventListener("click", unlockOnce);
+  document.removeEventListener("touchend", unlockOnce);
+}
+
+document.addEventListener("click", unlockOnce, { once: true });
+document.addEventListener("touchend", unlockOnce, { once: true });
+
 function playSound(id) {
-  const audio = document.getElementById(id);
-  if (!audio) {
-    alert("ไม่พบไฟล์เสียง id=" + id + " (ไม่มี <audio> tag นี้ในหน้า)");
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+
+  if (ctx.state === "suspended") ctx.resume();
+
+  const buf = soundBuffers[id];
+  if (!buf) {
+    loadSoundBuffer(id); // ยังไม่พร้อม เผื่อไว้ใช้รอบหน้า
     return;
   }
 
-  audio.currentTime = 0;
-  audio.play().catch(err => {
+  try {
+    const source = ctx.createBufferSource();
+    source.buffer = buf;
+    source.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
     if (window.__soundDebug) {
-      alert("เล่นเสียง " + id + " ไม่สำเร็จ: " + err.name + " - " + err.message);
+      alert("เล่นเสียง " + id + " ไม่สำเร็จ: " + err.message);
     }
-  });
+  }
 }
 
 function testAllSounds() {
   window.__soundDebug = true;
+  unlockAllSounds();
+
   const ids = ["soundDeal", "soundPlace", "soundTurn", "soundWin", "soundLose"];
   let i = 0;
 
   function playNext() {
     if (i >= ids.length) return;
     const id = ids[i];
-    const audio = document.getElementById(id);
 
-    if (!audio) {
-      alert("❌ ไม่พบ <audio id=\"" + id + "\">");
+    if (soundBuffers[id]) {
+      playSound(id);
+      alert("✅ " + id + " เล่นได้ (ถ้าไม่ได้ยิน ให้เช็คสวิตช์ปิดเสียง/ระดับเสียงเครื่อง)");
     } else {
-      audio.currentTime = 0;
-      audio.play()
-        .then(() => alert("✅ " + id + " เล่นได้ (ถ้าไม่ได้ยิน ให้เช็คสวิตช์ปิดเสียง/ระดับเสียงเครื่อง)"))
-        .catch(err => alert("❌ " + id + " เล่นไม่ได้: " + err.name + " - " + err.message));
+      alert("❌ " + id + " ยังโหลด/ปลดล็อกไม่สำเร็จ");
     }
 
     i++;
     setTimeout(playNext, 1200);
   }
 
-  playNext();
+  // เผื่อเวลาให้ fetch + decode เสียงเสร็จก่อนเริ่มทดสอบ
+  setTimeout(playNext, 1000);
 }
