@@ -151,6 +151,18 @@
       <button id="videoToggleBtn" class="btn gold" onclick="toggleVideo()" style="display:none;">🎥 เปิดกล้อง</button>
       <button id="micToggleBtn" class="btn secondary" onclick="toggleMic()" style="display:none;">🎤 ปิดไมค์</button>
       <button id="musicToggleBtn" class="btn secondary" onclick="toggleMusic()">🎵 ปิดเพลง</button>
+      <select id="musicSelect" onchange="changeMusicTrack(this.value)" style="width:auto; display:inline-block; margin:4px 0;">
+        <option value="luktung">🎶 ลูกทุ่ง</option>
+        <option value="beat">🥁 จังหวะกลอง</option>
+        <option value="edm">⚡ EDM</option>
+        <option value="isaan">🎐 อีสาน</option>
+        <option value="pop">🎤 ป๊อป</option>
+        <option value="hiphop">🎧 ฮิปฮอป</option>
+        <option value="reggae">🌴 เร้กเก้</option>
+        <option value="disco">🪩 ดิสโก้</option>
+        <option value="asian">🎋 จีน/เอเชีย</option>
+        <option value="rock">🎸 ร็อค</option>
+      </select>
     </div>
 
     <div id="bankerMissingBox" class="rule-box" style="display:none; text-align:center;">
@@ -257,7 +269,7 @@
 <script src="js/video.js"></script>
 <script src="js/main.js"></script>
 
-<audio id="bgMusic" src="sounds/bgmusic.mp3?v=1" loop></audio>
+<audio id="bgMusic" loop></audio>
 <audio id="soundDeal" src="sounds/deal.mp3?v=2"></audio>
 <audio id="soundPlace" src="sounds/place.mp3?v=2"></audio>
 <audio id="soundTurn" src="sounds/turn.mp3?v=2"></audio>

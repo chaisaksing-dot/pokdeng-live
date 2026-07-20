@@ -472,12 +472,31 @@ function unlockOnce() {
 document.addEventListener("click", unlockOnce, { once: true });
 document.addEventListener("touchend", unlockOnce, { once: true });
 
+const MUSIC_TRACKS = {
+  luktung: "sounds/bgmusic-luktung.mp3?v=1",
+  beat: "sounds/bgmusic-beat.mp3?v=1",
+  edm: "sounds/bgmusic-edm.mp3?v=1",
+  isaan: "sounds/bgmusic-isaan.mp3?v=1",
+  pop: "sounds/bgmusic-pop.mp3?v=1",
+  hiphop: "sounds/bgmusic-hiphop.mp3?v=1",
+  reggae: "sounds/bgmusic-reggae.mp3?v=1",
+  disco: "sounds/bgmusic-disco.mp3?v=1",
+  asian: "sounds/bgmusic-asian.mp3?v=1",
+  rock: "sounds/bgmusic-rock.mp3?v=1"
+};
+
 function startBackgroundMusic() {
   const music = document.getElementById("bgMusic");
   if (!music) return;
 
   const muted = localStorage.getItem("musicMuted") === "1";
+  const track = localStorage.getItem("musicTrack") || "luktung";
+
   music.volume = 0.35;
+  music.src = MUSIC_TRACKS[track] || MUSIC_TRACKS.luktung;
+
+  const select = document.getElementById("musicSelect");
+  if (select) select.value = track;
 
   if (!muted) {
     music.play().catch(() => {});
@@ -485,6 +504,19 @@ function startBackgroundMusic() {
 
   const btn = el("musicToggleBtn");
   if (btn) btn.innerText = muted ? "🎵 เปิดเพลง" : "🎵 ปิดเพลง";
+}
+
+function changeMusicTrack(track) {
+  const music = document.getElementById("bgMusic");
+  if (!music || !MUSIC_TRACKS[track]) return;
+
+  const wasPlaying = !music.paused;
+  localStorage.setItem("musicTrack", track);
+  music.src = MUSIC_TRACKS[track];
+
+  if (wasPlaying) {
+    music.play().catch(() => {});
+  }
 }
 
 function toggleMusic() {
