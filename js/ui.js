@@ -464,12 +464,45 @@ function unlockAllSounds() {
 
 function unlockOnce() {
   unlockAllSounds();
+  startBackgroundMusic();
   document.removeEventListener("click", unlockOnce);
   document.removeEventListener("touchend", unlockOnce);
 }
 
 document.addEventListener("click", unlockOnce, { once: true });
 document.addEventListener("touchend", unlockOnce, { once: true });
+
+function startBackgroundMusic() {
+  const music = document.getElementById("bgMusic");
+  if (!music) return;
+
+  const muted = localStorage.getItem("musicMuted") === "1";
+  music.volume = 0.35;
+
+  if (!muted) {
+    music.play().catch(() => {});
+  }
+
+  const btn = el("musicToggleBtn");
+  if (btn) btn.innerText = muted ? "🎵 เปิดเพลง" : "🎵 ปิดเพลง";
+}
+
+function toggleMusic() {
+  const music = document.getElementById("bgMusic");
+  if (!music) return;
+
+  const btn = el("musicToggleBtn");
+
+  if (music.paused) {
+    music.play().catch(() => {});
+    localStorage.setItem("musicMuted", "0");
+    if (btn) btn.innerText = "🎵 ปิดเพลง";
+  } else {
+    music.pause();
+    localStorage.setItem("musicMuted", "1");
+    if (btn) btn.innerText = "🎵 เปิดเพลง";
+  }
+}
 
 function playSound(id) {
   const ctx = getAudioCtx();

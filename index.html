@@ -151,6 +151,7 @@
       <button id="videoToggleBtn" class="btn gold" onclick="toggleVideo()" style="display:none;">🎥 เปิดกล้อง</button>
       <button id="micToggleBtn" class="btn secondary" onclick="toggleMic()" style="display:none;">🎤 ปิดไมค์</button>
       <button class="btn secondary" onclick="testAllSounds()">🔊 ทดสอบเสียง</button>
+      <button id="musicToggleBtn" class="btn secondary" onclick="toggleMusic()">🎵 ปิดเพลง</button>
     </div>
 
     <div id="bankerMissingBox" class="rule-box" style="display:none; text-align:center;">
@@ -257,6 +258,7 @@
 <script src="js/video.js"></script>
 <script src="js/main.js"></script>
 
+<audio id="bgMusic" src="sounds/bgmusic.mp3?v=1" loop></audio>
 <audio id="soundDeal" src="sounds/deal.mp3?v=2"></audio>
 <audio id="soundPlace" src="sounds/place.mp3?v=2"></audio>
 <audio id="soundTurn" src="sounds/turn.mp3?v=2"></audio>

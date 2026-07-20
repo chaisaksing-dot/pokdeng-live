@@ -45,6 +45,7 @@ window.sendChatMessage = sendChatMessage;
 window.toggleVideo = toggleVideo;
 window.toggleMic = toggleMic;
 window.testAllSounds = testAllSounds;
+window.toggleMusic = toggleMusic;
 
 window.onload = function () {
   const params = new URLSearchParams(window.location.search);
