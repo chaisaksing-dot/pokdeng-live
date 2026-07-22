@@ -19,6 +19,37 @@
     </div>
   </section>
 
+  <section id="gameSelectPage" class="page" style="display:none;">
+    <div class="topbar">
+      <div>
+        <h2>เลือกเกม</h2>
+        <p id="userInfoGameSelect" class="creditText"></p>
+      </div>
+      <button onclick="logout()" class="btn small danger">ออก</button>
+    </div>
+
+    <div class="game-grid">
+      <div class="game-card" onclick="selectGame('pokdeng')">
+        <span class="icon">🂡</span>
+        <span class="name">ป๊อกเด้ง</span>
+      </div>
+      <div class="game-card" onclick="selectGame('kang')">
+        <span class="icon">🂮</span>
+        <span class="name">แคง</span>
+      </div>
+      <div class="game-card disabled" onclick="selectGame('dummy')">
+        <span class="icon">🂫</span>
+        <span class="name">ดัมมี่</span>
+        <span class="soon-badge">เร็วๆ นี้</span>
+      </div>
+      <div class="game-card disabled" onclick="selectGame('taktae')">
+        <span class="icon">🂹</span>
+        <span class="name">ตักเต๊ะ</span>
+        <span class="soon-badge">เร็วๆ นี้</span>
+      </div>
+    </div>
+  </section>
+
   <section id="adminPage" class="page" style="display:none;">
     <div class="topbar">
       <h2>หน้าแอดมิน</h2>
@@ -249,6 +280,89 @@
     </div>
   </section>
 
+  <section id="kangLobbyPage" class="page" style="display:none;">
+    <div class="topbar">
+      <div>
+        <h2>ล็อบบี้แคง</h2>
+        <p id="userInfoKang" class="creditText"></p>
+      </div>
+      <button onclick="showPage('gameSelectPage')" class="btn small">เปลี่ยนเกม</button>
+      <button onclick="logout()" class="btn small danger">ออก</button>
+    </div>
+
+    <div class="card">
+      <h3>สร้างห้อง</h3>
+      <label>เดิมพันหลักต่อรอบ</label>
+      <select id="kangBaseBet">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+      <button onclick="kangCreateRoom()" class="btn">+ สร้างห้อง</button>
+    </div>
+
+    <div class="card">
+      <h3>ห้องที่ยังไม่เต็ม</h3>
+      <div id="kangOpenRoomsList">กำลังโหลด...</div>
+    </div>
+
+    <div class="card">
+      <h3>เข้าห้องด้วยเลขห้อง</h3>
+      <input id="kangJoinRoomId" type="number" placeholder="ใส่เลขห้อง">
+      <button onclick="kangJoinRoomById()" class="btn">เข้าห้อง</button>
+    </div>
+  </section>
+
+  <section id="kangRoomPage" class="page" style="display:none;">
+    <div class="topbar">
+      <div>
+        <h2>ห้อง <span id="kangRoomIdText"></span></h2>
+        <p>เดิมพันหลัก: <span id="kangBaseBetText"></span> | สถานะ: <span id="kangStatusText"></span></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>ผู้เล่นในห้อง</h3>
+      <div id="kangPlayersList"></div>
+      <button class="btn secondary" onclick="kangPlayerReady()" id="kangReadyBtn">✅ พร้อม</button>
+      <button class="btn" onclick="kangStartGame()" id="kangStartBtn" style="display:none;">เริ่มเกม</button>
+    </div>
+
+    <div class="card" id="kangTableCard" style="display:none;">
+      <h3>กองทิ้ง (ล่าสุด) — เหลือในกองจั่ว: <span id="kangDeckCountText">-</span></h3>
+      <div id="kangDiscardTop" class="mini-card back" style="margin-bottom:10px;"></div>
+
+      <h3>ไพ่ของฉัน (แตะเพื่อเลือกก่อนทิ้ง/ไหล)</h3>
+      <div id="kangMyHand" class="bet-buttons"></div>
+
+      <div id="kangActionButtons" style="display:none; margin-top:10px;">
+        <button class="btn" onclick="kangDoDraw()">จั่ว</button>
+        <button class="btn secondary" onclick="kangDoDiscardSelected()">ทิ้งไพ่ที่เลือก</button>
+        <button class="btn secondary" onclick="kangDoFlowSelected()">ไหล</button>
+        <button class="btn danger" onclick="kangDoDeclare()">แคง</button>
+      </div>
+    </div>
+
+    <div class="card" id="kangResultCard" style="display:none;">
+      <h3>สรุปผลรอบนี้</h3>
+      <div id="kangResultBox" style="white-space:pre-line; font-size:0.85rem;"></div>
+      <button class="btn" onclick="kangNewRound()" id="kangNewRoundBtn" style="display:none;">รอบใหม่</button>
+    </div>
+
+    <div class="chat-panel">
+      <div class="chat-messages" id="kangChatMessages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="kangChatInput" placeholder="พิมพ์ข้อความ..." onkeydown="if(event.key==='Enter') kangSendChatMessage()">
+        <button class="btn gold" onclick="kangSendChatMessage()">ส่ง</button>
+      </div>
+    </div>
+
+    <div class="room-menu">
+      <button class="btn danger" onclick="kangLeaveRoom()">ออกห้อง</button>
+    </div>
+  </section>
+
 </div>
 
 <!-- Firebase SDK -->
@@ -260,10 +374,13 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/state.js"></script>
 <script src="js/game.js"></script>
+<script src="js/kang-game.js"></script>
+<script src="js/kang-ui.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/wallet.js"></script>
 <script src="js/room.js"></script>
+<script src="js/kang-room.js"></script>
 <script src="js/admin.js"></script>
 <script src="js/chat.js"></script>
 <script src="js/video.js"></script>

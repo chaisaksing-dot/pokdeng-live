@@ -41,6 +41,39 @@ h1, h2, h3 {
 
 .page { padding: 14px 16px 30px; }
 
+/* ===== หน้าเลือกเกม ===== */
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 10px 0;
+}
+.game-card {
+  background: linear-gradient(160deg, var(--card-face), #e9e1cc);
+  color: var(--ink);
+  border-radius: var(--radius);
+  padding: 18px 10px;
+  text-align: center;
+  cursor: pointer;
+  border: 2px solid transparent;
+  position: relative;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.game-card:hover { transform: translateY(-3px); border-color: var(--gold); }
+.game-card .icon { font-size: 2rem; display: block; margin-bottom: 6px; }
+.game-card .name { font-family: 'Noto Serif Thai', serif; font-weight: 700; }
+.game-card.disabled { opacity: 0.55; cursor: not-allowed; }
+.game-card.disabled:hover { transform: none; border-color: transparent; }
+.game-card .soon-badge {
+  position: absolute;
+  top: 6px; right: 6px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
 .muted { opacity: 0.75; font-size: 0.85rem; }
 
 /* ===== การ์ด/กล่องทั่วไป ===== */

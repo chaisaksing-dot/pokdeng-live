@@ -46,6 +46,22 @@ window.toggleVideo = toggleVideo;
 window.toggleMic = toggleMic;
 window.testAllSounds = testAllSounds;
 window.toggleMusic = toggleMusic;
+window.changeMusicTrack = changeMusicTrack;
+
+window.selectGame = selectGame;
+window.kangCreateRoom = kangCreateRoom;
+window.kangJoinRoomById = kangJoinRoomById;
+window.kangJoinRoom = kangJoinRoom;
+window.kangLeaveRoom = kangLeaveRoom;
+window.kangPlayerReady = kangPlayerReady;
+window.kangStartGame = kangStartGame;
+window.kangDoDraw = kangDoDraw;
+window.kangDoDiscardSelected = kangDoDiscardSelected;
+window.kangDoFlowSelected = kangDoFlowSelected;
+window.kangDoDeclare = kangDoDeclare;
+window.kangToggleCardSelect = kangToggleCardSelect;
+window.kangNewRound = kangNewRound;
+window.kangSendChatMessage = kangSendChatMessage;
 
 window.onload = function () {
   const params = new URLSearchParams(window.location.search);

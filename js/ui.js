@@ -8,7 +8,7 @@ function el(id) {
 }
 
 function showPage(pageId) {
-  ["loginPage", "adminPage", "lobbyPage", "roomPage"].forEach(id => {
+  ["loginPage", "gameSelectPage", "adminPage", "lobbyPage", "roomPage", "kangLobbyPage", "kangRoomPage"].forEach(id => {
     const box = el(id);
     if (box) box.style.display = "none";
   });
@@ -19,6 +19,20 @@ function showPage(pageId) {
   if (pageId === "lobbyPage") {
     refreshUserInfo();
     listenOpenRooms();
+  }
+
+  if (pageId === "gameSelectPage") {
+    const box = el("userInfoGameSelect");
+    const playerId = localStorage.getItem("playerId") || myPlayerId;
+    if (box && playerId) {
+      db.ref("wallet/" + playerId).once("value").then(snap => {
+        box.innerText = "เครดิต: " + (Number(snap.val()) || 0);
+      });
+    }
+  }
+
+  if (pageId === "kangLobbyPage" && typeof kangListenOpenRooms === "function") {
+    kangListenOpenRooms();
   }
 
   if (pageId === "adminPage") {
