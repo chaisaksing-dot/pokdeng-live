@@ -26,14 +26,38 @@ function kangRender() {
   }
   el("kangStatusText").innerText = statusText;
 
-  el("kangPlayersList").innerHTML = kangPlayers.map(p => {
+  for (let i = 1; i <= 6; i++) {
+    const seat = el("kangSeat" + i);
+    if (seat) seat.innerHTML = "";
+    const seatBox = seat ? seat.closest(".kang-seat") : null;
+    if (seatBox) seatBox.classList.remove("turn");
+  }
+
+  kangPlayers.forEach((p, i) => {
+    const seat = el("kangSeat" + (i + 1));
+    if (!seat) return;
+
     const isTurn = kangCurrentRoom.status === "playing" && (kangCurrentRoom.turnOrder || [])[kangCurrentRoom.turnIndex] === p.id;
+    const seatBox = seat.closest(".kang-seat");
+    if (seatBox && isTurn) seatBox.classList.add("turn");
+
     const cardCount = kangCurrentRoom.status !== "waiting" ? (p.hand || []).length : 0;
-    return `<div class="player-row ${isTurn ? "turn" : ""}" style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.1); font-size:0.85rem;">
-      <span>${shortName(p.name)}${p.id === kangCurrentRoom.creatorId ? " 👑" : ""} ${isTurn ? "⬅️ ตานี้" : ""}</span>
-      <span>เงิน ${p.money} ${kangCurrentRoom.status !== "waiting" ? "| ไพ่ " + cardCount + " ใบ" : (p.ready ? "✅" : "⏳")}</span>
-    </div>`;
-  }).join("");
+    const photoUrl = p.photo || "https://via.placeholder.com/50";
+    const statusLine = kangCurrentRoom.status === "waiting"
+      ? (p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม")
+      : "🂠 ไพ่ " + cardCount + " ใบ";
+
+    seat.innerHTML = `
+      <div class="player-box-ui">
+        <img src="${photoUrl}" class="player-photo">
+        <div class="player-info-text">
+          <div class="player-name">${p.id === kangCurrentRoom.creatorId ? "👑 " : ""}${shortName(p.name)}${isTurn ? " ⬅️" : ""}</div>
+          <div class="player-money">เงิน: ${p.money}</div>
+          <div class="player-money">${statusLine}</div>
+        </div>
+      </div>
+    `;
+  });
 
   const meP = kangMe();
   const isCreator = kangCurrentRoom.creatorId === myPlayerId;
@@ -50,6 +74,10 @@ function kangRender() {
 
   if (showTable) {
     el("kangDeckCountText").innerText = Array.isArray(kangCurrentRoom.deck) ? kangCurrentRoom.deck.length : "-";
+    const centerText = el("kangStatusCenterText");
+    if (centerText) {
+      centerText.innerText = kangCurrentRoom.status === "finished" ? "จบรอบแล้ว" : "กำลังเล่น";
+    }
 
     const pile = kangCurrentRoom.discardPile || [];
     const topCard = pile[pile.length - 1];

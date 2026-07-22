@@ -354,6 +354,21 @@ label { font-size: 0.8rem; opacity: 0.85; }
   transform: translate(-50%, -50%);
 }
 
+/* ===== โต๊ะวงกลมไพ่แคง (6 ที่นั่งเท่ากันหมด ไม่มีเจ้ามือ) ===== */
+.kang-table { padding-top: 380px; }
+.kang-table::before { width: 260px; height: 260px; top: 60px; }
+.kang-table .table-center { top: 190px; }
+
+.kang-seat1 { top: 50px;  left: 50%; }
+.kang-seat2 { top: 120px; left: calc(50% + 35.6%); }
+.kang-seat3 { top: 260px; left: calc(50% + 35.6%); }
+.kang-seat4 { top: 330px; left: 50%; }
+.kang-seat5 { top: 260px; left: calc(50% - 35.6%); }
+.kang-seat6 { top: 120px; left: calc(50% - 35.6%); }
+
+.kang-seat.turn { box-shadow: 0 0 10px rgba(126, 224, 168, 0.7); }
+.kang-seat .player-name { font-size: 0.68rem; }
+
 /* ===== แชทในห้อง ===== */
 .chat-panel {
   margin: 10px 16px;

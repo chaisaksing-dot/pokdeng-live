@@ -324,18 +324,28 @@
       </div>
     </div>
 
-    <div class="card">
-      <h3>ผู้เล่นในห้อง</h3>
+    <div class="room-buttons side-buttons">
       <button class="btn success" onclick="kangCopyInviteLink()">🔗 คัดลอกลิงก์เชิญ</button>
-      <div id="kangPlayersList"></div>
       <button class="btn secondary" onclick="kangPlayerReady()" id="kangReadyBtn">✅ พร้อม</button>
       <button class="btn" onclick="kangStartGame()" id="kangStartBtn" style="display:none;">เริ่มเกม</button>
     </div>
 
-    <div class="card" id="kangTableCard" style="display:none;">
-      <h3>กองทิ้ง (ล่าสุด) — เหลือในกองจั่ว: <span id="kangDeckCountText">-</span></h3>
-      <div id="kangDiscardTop" class="mini-card back" style="margin-bottom:10px;"></div>
+    <div class="casino-table kang-table">
+      <div class="table-center">
+        <div id="kangDiscardTop" class="mini-card back"></div>
+        <div>เหลือในกองจั่ว: <span id="kangDeckCountText">-</span></div>
+        <div id="kangStatusCenterText"></div>
+      </div>
 
+      <div class="player-seat kang-seat kang-seat1"><div id="kangSeat1"></div></div>
+      <div class="player-seat kang-seat kang-seat2"><div id="kangSeat2"></div></div>
+      <div class="player-seat kang-seat kang-seat3"><div id="kangSeat3"></div></div>
+      <div class="player-seat kang-seat kang-seat4"><div id="kangSeat4"></div></div>
+      <div class="player-seat kang-seat kang-seat5"><div id="kangSeat5"></div></div>
+      <div class="player-seat kang-seat kang-seat6"><div id="kangSeat6"></div></div>
+    </div>
+
+    <div class="card" id="kangTableCard" style="display:none;">
       <h3>ไพ่ของฉัน (แตะเพื่อเลือกก่อนทิ้ง/ไหล)</h3>
       <div id="kangMyHand" class="bet-buttons"></div>
 
