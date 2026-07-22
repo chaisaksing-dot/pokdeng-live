@@ -34,7 +34,7 @@ function loginWithId(playerId, roomIdAfterLogin) {
             joinRoom();
           }, 500);
         } else {
-          showPage("lobbyPage");
+          showPage("gameSelectPage");
         }
       });
     });
