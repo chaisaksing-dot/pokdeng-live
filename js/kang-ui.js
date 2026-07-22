@@ -139,7 +139,7 @@ function kangRender() {
         const label = kangShowCardLabel(c);
         const selected = kangSelectedCardIndices.includes(i);
         const selectedStyle = selected ? "outline:3px solid #c9a227; transform:translateY(-6px);" : "";
-        return `<button type="button" onclick="kangToggleCardSelect(${i})" class="mini-card" style="-webkit-appearance:none; appearance:none; border:none; padding:0; margin:0; background:var(--card-face); color:var(--ink); border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,0.4); cursor:pointer; ${selectedStyle}">${label.html}</button>`;
+        return `<button type="button" onclick="kangToggleCardSelect(${i})" class="mini-card" style="-webkit-appearance:none; appearance:none; border:none; padding:0; margin:0; background:var(--card-face); color:var(--ink); border-radius:2px; box-shadow:0 2px 4px rgba(0,0,0,0.4); cursor:pointer; ${selectedStyle}">${label.html}</button>`;
       }).join("");
 
       el("kangHandTotalText").innerText = kangGetHandTotal(hand);
