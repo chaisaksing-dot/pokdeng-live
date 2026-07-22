@@ -79,6 +79,28 @@ function updateDeckRemain() {
 }
 
 let lastCardCounts = {};
+let myRevealedCards = [];
+
+function revealMyCard(index) {
+  if (!myRevealedCards.includes(index)) myRevealedCards.push(index);
+  renderPlayers();
+}
+
+function renderMyCards(cardList) {
+  if (!cardList) return "";
+  const arr = Object.values(cardList);
+
+  return `
+    <div class="banker-cards">
+      ${arr.map((c, i) => {
+        if (myRevealedCards.includes(i)) {
+          return `<div class="mini-card open-card">${showCard(c)}</div>`;
+        }
+        return `<div class="mini-card back" onclick="revealMyCard(${i})" style="cursor:pointer;"></div>`;
+      }).join("")}
+    </div>
+  `;
+}
 
 function flyCardTo(targetEl) {
   const table = document.querySelector(".casino-table");
@@ -134,17 +156,22 @@ function renderPlayers() {
   const showAll = currentRoom?.showAllCards === true;
   const normalPlayers = players.filter(p => p.role === "player" || p.role === "waiting");
 
+  if (currentRoom && currentRoom.status === "waiting") {
+    myRevealedCards = [];
+  }
+
   normalPlayers.forEach((p, i) => {
     const seat = el("player" + (i + 1));
     if (!seat) return;
 
-    const point = getPoint(p.cards || []);
-    const open =
+    const isMySeat = String(p.id) === String(myPlayerId);
+    const forcedOpen =
       finished ||
       showAll ||
       p.openCards === true ||
-      p.pokLocked === true ||
-      String(p.id) === String(myPlayerId);
+      p.pokLocked === true;
+    const open = forcedOpen || isMySeat;
+    const point = getPoint(p.cards || []);
     const canKick =
       String(getBanker()?.id || getBanker()?.name) === String(myPlayerId) &&
       currentRoom?.status === "waiting";
@@ -159,6 +186,8 @@ function renderPlayers() {
         } ${moneyText(p.result.net)}</div>`
       : "";
 
+    const showPoint = forcedOpen || (isMySeat && p.cards && myRevealedCards.length === Object.values(p.cards).length && Object.values(p.cards).length > 0);
+
     seat.innerHTML = `
       <div class="player-box-ui">
         <img src="${photoUrl}" class="player-photo">
@@ -167,14 +196,14 @@ function renderPlayers() {
           <div class="player-money">เงิน: ${p.money || 0}</div>
           <div class="player-money">เดิมพัน: ${p.bet || 0}</div>
           ${resultLine}
-          <div class="player-money">แต้ม: ${open ? point : "-"}</div>
+          <div class="player-money">แต้ม: ${showPoint ? point : "-"}</div>
         </div>
       </div>
       <div style="font-size: 10px; margin-top: 2px;">
         ${p.role === "waiting" ? "🪑 รอรอบหน้า" : (p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม")}
       </div>
       ${canKick ? `<button onclick="kickPlayer('${p.id || p.name}')" style="font-size:9px; background:#e53935; color:white; border:none; border-radius:4px; margin-top:2px;">❌ เตะ</button> ` : ""}
-      ${renderCards(p.cards, open)}
+      ${isMySeat && !forcedOpen ? renderMyCards(p.cards) : renderCards(p.cards, open)}
     `;
 
     const pid = p.id || p.name;
@@ -188,7 +217,8 @@ function renderPlayers() {
   if (bankerBox && banker) {
     const isMe = String(banker.id || banker.name) === String(myPlayerId);
     const point = getPoint(banker.cards || []);
-    const open = isMe || finished || showAll;
+    const forcedOpenBanker = finished || showAll;
+    const open = forcedOpenBanker || isMe;
     const photoUrl = banker.photo || "https://via.placeholder.com/50";
 
     const hasOwnStream = isMe && typeof myVideoStarted !== "undefined" && myVideoStarted && localStream;
@@ -199,16 +229,18 @@ function renderPlayers() {
       ? `<video id="bankerPhotoVideo" class="player-photo" autoplay playsinline ${isMe ? "muted" : ""}></video>`
       : `<img src="${photoUrl}" class="player-photo">`;
 
+    const bankerShowPoint = forcedOpenBanker || (isMe && banker.cards && myRevealedCards.length === Object.values(banker.cards).length && Object.values(banker.cards).length > 0);
+
     bankerBox.innerHTML = `
       <div class="player-box-ui">
         ${photoOrVideo}
         <div class="player-info-text">
           <div class="player-name">👑 ${shortName(banker.displayName || banker.name)}</div>
           <div class="player-money">เงิน: ${banker.money || 0}</div>
-          <div class="player-money">แต้ม: ${open ? point : "-"}</div>
+          <div class="player-money">แต้ม: ${bankerShowPoint ? point : "-"}</div>
         </div>
       </div>
-      ${renderCards(banker.cards, open)}
+      ${isMe && !forcedOpenBanker ? renderMyCards(banker.cards) : renderCards(banker.cards, open)}
     `;
 
     if (showVideo && typeof applyBankerVideoToSeat === "function") {

@@ -20,6 +20,7 @@ window.joinOpenRoom = joinOpenRoom;
 window.leaveRoom = leaveRoom;
 window.copyInviteLink = copyInviteLink;
 window.kickPlayer = kickPlayer;
+window.revealMyCard = revealMyCard;
 window.requestTransferBanker = requestTransferBanker;
 window.closeRoom = closeRoom;
 window.newRound = newRound;
