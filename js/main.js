@@ -66,6 +66,7 @@ window.kangSendChatMessage = kangSendChatMessage;
 window.onload = function () {
   const params = new URLSearchParams(window.location.search);
   const roomId = params.get("room");
+  const kangRoomId = params.get("kangRoom");
   const savedId = localStorage.getItem("playerId");
   const hasLineProfile = !!localStorage.getItem("lineName");
 
@@ -76,6 +77,17 @@ window.onload = function () {
     // (มีชื่อ/รูปเก็บไว้แล้ว) ไม่งั้นจะเข้าห้องแบบไม่มีรูปเหมือนที่เจอ
     if (savedId && hasLineProfile) {
       loginWithId(savedId, roomId);
+    } else {
+      showPage("loginPage");
+    }
+    return;
+  }
+
+  if (kangRoomId) {
+    localStorage.setItem("pendingKangRoomId", kangRoomId);
+
+    if (savedId && hasLineProfile) {
+      loginWithId(savedId, null, kangRoomId);
     } else {
       showPage("loginPage");
     }

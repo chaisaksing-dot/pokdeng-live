@@ -8,7 +8,7 @@ function autoLogin() {
   showPage("loginPage");
 }
 
-function loginWithId(playerId, roomIdAfterLogin) {
+function loginWithId(playerId, roomIdAfterLogin, kangRoomIdAfterLogin) {
   myPlayerId = String(playerId);
   localStorage.setItem("playerId", myPlayerId);
 
@@ -32,6 +32,11 @@ function loginWithId(playerId, roomIdAfterLogin) {
             const joinInput = el("joinRoomId");
             if (joinInput) joinInput.value = roomIdAfterLogin;
             joinRoom();
+          }, 500);
+        } else if (kangRoomIdAfterLogin) {
+          showPage("kangLobbyPage");
+          setTimeout(() => {
+            kangJoinRoom(kangRoomIdAfterLogin);
           }, 500);
         } else {
           showPage("gameSelectPage");
@@ -113,6 +118,13 @@ async function loginLine() {
     if (pendingRoomId) {
       localStorage.removeItem("pendingRoomId");
       loginWithId(profile.userId, pendingRoomId);
+      return;
+    }
+
+    const pendingKangRoomId = localStorage.getItem("pendingKangRoomId");
+    if (pendingKangRoomId) {
+      localStorage.removeItem("pendingKangRoomId");
+      loginWithId(profile.userId, null, pendingKangRoomId);
       return;
     }
 

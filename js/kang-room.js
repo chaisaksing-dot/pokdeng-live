@@ -465,3 +465,14 @@ function kangNewRound() {
   if (kangCurrentRoom.creatorId !== myPlayerId) return alert("เฉพาะคนสร้างห้องเท่านั้นที่เริ่มรอบใหม่ได้");
   db.ref("kangRooms/" + kangCurrentRoom.id).update({ status: "waiting", result: null });
 }
+
+function kangCopyInviteLink() {
+  if (!kangCurrentRoom) return;
+  const url = window.location.origin + window.location.pathname + "?kangRoom=" + kangCurrentRoom.id;
+
+  navigator.clipboard.writeText(url).then(() => {
+    alert("คัดลอกลิงก์เชิญแล้ว: " + url);
+  }).catch(() => {
+    prompt("คัดลอกลิงก์นี้ไปส่งให้เพื่อนได้เลย:", url);
+  });
+}
