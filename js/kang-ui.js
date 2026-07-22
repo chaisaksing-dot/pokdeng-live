@@ -15,7 +15,8 @@ function kangShowCardLabel(card) {
   const rank = card.slice(0, -1);
   const suit = card.slice(-1);
   const isRed = suit === "♥" || suit === "♦";
-  return { text: rank + suit, isRed };
+  const cls = isRed ? "red-card" : "black-card";
+  return { html: `<span class="${cls}">${rank}${suit}</span>`, isRed };
 }
 
 function kangRender() {
@@ -103,8 +104,8 @@ function kangRender() {
     const discardBox = el("kangDiscardTop");
     if (topCard) {
       const label = kangShowCardLabel(topCard);
-      discardBox.className = "mini-card" + (label.isRed ? " red-card" : " black-card");
-      discardBox.innerText = label.text;
+      discardBox.className = "mini-card";
+      discardBox.innerHTML = label.html;
     } else {
       discardBox.className = "mini-card back";
       discardBox.innerText = "";
@@ -137,7 +138,7 @@ function kangRender() {
       el("kangMyHand").innerHTML = hand.map((c, i) => {
         const label = kangShowCardLabel(c);
         const selected = kangSelectedCardIndices.includes(i);
-        return `<button type="button" onclick="kangToggleCardSelect(${i})" class="mini-card ${label.isRed ? "red-card" : "black-card"}" style="border:none; cursor:pointer; ${selected ? "outline:3px solid #c9a227; transform:translateY(-6px);" : ""}">${label.text}</button>`;
+        return `<button type="button" onclick="kangToggleCardSelect(${i})" class="mini-card" style="border:none; cursor:pointer; ${selected ? "outline:3px solid #c9a227; transform:translateY(-6px);" : ""}">${label.html}</button>`;
       }).join("");
 
       el("kangHandTotalText").innerText = kangGetHandTotal(hand);
