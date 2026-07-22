@@ -137,7 +137,7 @@ function kangRender() {
       el("kangMyHand").innerHTML = hand.map((c, i) => {
         const label = kangShowCardLabel(c);
         const selected = kangSelectedCardIndices.includes(i);
-        return `<button type="button" onclick="kangToggleCardSelect(${i})" class="${label.isRed ? "red-card" : "black-card"}" style="${selected ? "background:#c9a227;" : ""}">${label.text}</button>`;
+        return `<button type="button" onclick="kangToggleCardSelect(${i})" class="mini-card ${label.isRed ? "red-card" : "black-card"}" style="border:none; cursor:pointer; ${selected ? "outline:3px solid #c9a227; transform:translateY(-6px);" : ""}">${label.text}</button>`;
       }).join("");
 
       el("kangHandTotalText").innerText = kangGetHandTotal(hand);
