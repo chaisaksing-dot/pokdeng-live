@@ -376,15 +376,6 @@ label { font-size: 0.8rem; opacity: 0.85; }
   width: 100%;
   margin-top: 2px;
 }
-.kang-hand-stack .stack-card {
-  position: absolute;
-  top: 0;
-  width: 20px;
-  height: 27px;
-  border-radius: 3px;
-  background: repeating-linear-gradient(45deg, var(--felt-light) 0 4px, var(--felt-dark) 4px 8px);
-  border: 1px solid var(--gold);
-}
 
 /* ===== แชทในห้อง ===== */
 .chat-panel {

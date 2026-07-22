@@ -324,12 +324,6 @@
       </div>
     </div>
 
-    <div class="room-buttons side-buttons">
-      <button class="btn success" onclick="kangCopyInviteLink()">🔗 คัดลอกลิงก์เชิญ</button>
-      <button class="btn secondary" onclick="kangPlayerReady()" id="kangReadyBtn">✅ พร้อม</button>
-      <button class="btn" onclick="kangStartGame()" id="kangStartBtn" style="display:none;">เริ่มเกม</button>
-    </div>
-
     <div class="casino-table kang-table">
       <div class="table-center">
         <div id="kangDiscardTop" class="mini-card back"></div>
@@ -345,15 +339,30 @@
       <div class="player-seat kang-seat kang-seat6"><div id="kangSeat6"></div></div>
     </div>
 
-    <div class="card" id="kangTableCard" style="display:none;">
-      <h3>ไพ่ของฉัน (แตะเพื่อเลือกก่อนทิ้ง/ไหล)</h3>
-      <div id="kangMyHand" class="bet-buttons"></div>
+    <div class="room-buttons side-buttons">
+      <button class="btn success" onclick="kangCopyInviteLink()">🔗 คัดลอกลิงก์เชิญ</button>
+      <button class="btn secondary" onclick="kangPlayerReady()" id="kangReadyBtn">✅ พร้อม</button>
+      <button class="btn" onclick="kangStartGame()" id="kangStartBtn" style="display:none;">เริ่มเกม</button>
+    </div>
 
-      <div id="kangActionButtons" style="display:none; margin-top:10px;">
-        <button class="btn" onclick="kangDoDraw()">จั่ว</button>
-        <button class="btn secondary" onclick="kangDoDiscardSelected()">ทิ้งไพ่ที่เลือก</button>
-        <button class="btn secondary" onclick="kangDoFlowSelected()">ไหล</button>
-        <button class="btn danger" onclick="kangDoDeclare()">แคง</button>
+    <div class="card" id="kangTableCard" style="display:none;">
+      <h3>ไพ่ของฉัน</h3>
+
+      <div id="kangHandHiddenBox" style="display:none; text-align:center;">
+        <div class="kang-hand-stack" id="kangHiddenStack" style="height:38px; margin:10px auto;"></div>
+        <button class="btn gold" onclick="kangRevealHand()">👁️ ดูไพ่ของฉัน</button>
+      </div>
+
+      <div id="kangHandShownBox" style="display:none;">
+        <div id="kangMyHand" class="bet-buttons"></div>
+        <p>รวมแต้ม: <b id="kangHandTotalText">0</b></p>
+
+        <div id="kangActionButtons" style="display:none; margin-top:10px;">
+          <button class="btn" onclick="kangDoDraw()">จั่ว</button>
+          <button class="btn secondary" onclick="kangDoDiscardSelected()">ทิ้งไพ่ที่เลือก</button>
+          <button class="btn secondary" onclick="kangDoFlowSelected()">ไหล</button>
+          <button class="btn danger" onclick="kangDoDeclare()">แคง</button>
+        </div>
       </div>
     </div>
 

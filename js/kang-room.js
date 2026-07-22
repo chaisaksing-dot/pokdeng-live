@@ -149,6 +149,8 @@ function kangLeaveRoom() {
     }
     kangCurrentRoom = null;
     kangPlayers = [];
+    kangHandRevealed = false;
+    kangLastSeenRoundNumber = null;
     showPage("kangLobbyPage");
   });
 }

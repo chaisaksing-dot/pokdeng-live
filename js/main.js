@@ -65,6 +65,7 @@ window.kangSendChatMessage = kangSendChatMessage;
 window.kangCopyInviteLink = kangCopyInviteLink;
 window.kangRetryAfterTopUp = kangRetryAfterTopUp;
 window.kangSkipDueToMoneyWarning = kangSkipDueToMoneyWarning;
+window.kangRevealHand = kangRevealHand;
 
 window.onload = function () {
   const params = new URLSearchParams(window.location.search);

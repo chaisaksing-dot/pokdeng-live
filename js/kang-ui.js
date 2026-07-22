@@ -3,6 +3,14 @@
    วาดหน้าจอห้องไพ่แคง — ใช้ style เดียวกับป๊อกเด้ง (.mini-card, .btn, ฯลฯ)
    ===================================================== */
 
+let kangHandRevealed = false;
+let kangLastSeenRoundNumber = null;
+
+function kangRevealHand() {
+  kangHandRevealed = true;
+  kangRender();
+}
+
 function kangShowCardLabel(card) {
   const rank = card.slice(0, -1);
   const suit = card.slice(-1);
@@ -49,10 +57,10 @@ function kangRender() {
 
     let stackHtml = "";
     if (kangCurrentRoom.status !== "waiting" && cardCount > 0) {
-      const offset = Math.min(8, Math.floor(60 / cardCount));
+      const offset = Math.min(10, Math.floor(60 / cardCount));
       let cards = "";
       for (let n = 0; n < cardCount; n++) {
-        cards += `<div class="stack-card" style="left:${n * offset}px; z-index:${n};"></div>`;
+        cards += `<div class="mini-card back" style="position:absolute; left:${n * offset}px; z-index:${n};"></div>`;
       }
       stackHtml = `<div class="kang-hand-stack">${cards}</div><div class="player-money" style="text-align:center;">${cardCount} ใบ</div>`;
     }
@@ -102,15 +110,41 @@ function kangRender() {
       discardBox.innerText = "";
     }
 
-    const hand = (meP && meP.hand) || [];
-    el("kangMyHand").innerHTML = hand.map((c, i) => {
-      const label = kangShowCardLabel(c);
-      const selected = kangSelectedCardIndices.includes(i);
-      return `<button type="button" onclick="kangToggleCardSelect(${i})" class="${label.isRed ? "red-card" : "black-card"}" style="${selected ? "background:#c9a227;" : ""}">${label.text}</button>`;
-    }).join("");
+    // รีเซ็ตการ "เปิดดูไพ่" ทุกครั้งที่เริ่มรอบใหม่ (เห็นแต่หลังไพ่ก่อนเสมอ)
+    if (kangCurrentRoom.roundNumber !== kangLastSeenRoundNumber) {
+      kangLastSeenRoundNumber = kangCurrentRoom.roundNumber;
+      kangHandRevealed = false;
+    }
 
-    const actionBox = el("kangActionButtons");
-    if (actionBox) actionBox.style.display = kangIsMyTurn() ? "block" : "none";
+    const hand = (meP && meP.hand) || [];
+    const hiddenBox = el("kangHandHiddenBox");
+    const shownBox = el("kangHandShownBox");
+
+    if (!kangHandRevealed && hand.length > 0) {
+      hiddenBox.style.display = "block";
+      shownBox.style.display = "none";
+
+      const offset = Math.min(14, Math.floor(160 / hand.length));
+      let cards = "";
+      for (let n = 0; n < hand.length; n++) {
+        cards += `<div class="mini-card back" style="position:absolute; left:${n * offset}px; z-index:${n};"></div>`;
+      }
+      el("kangHiddenStack").innerHTML = cards;
+    } else {
+      hiddenBox.style.display = "none";
+      shownBox.style.display = "block";
+
+      el("kangMyHand").innerHTML = hand.map((c, i) => {
+        const label = kangShowCardLabel(c);
+        const selected = kangSelectedCardIndices.includes(i);
+        return `<button type="button" onclick="kangToggleCardSelect(${i})" class="${label.isRed ? "red-card" : "black-card"}" style="${selected ? "background:#c9a227;" : ""}">${label.text}</button>`;
+      }).join("");
+
+      el("kangHandTotalText").innerText = kangGetHandTotal(hand);
+
+      const actionBox = el("kangActionButtons");
+      if (actionBox) actionBox.style.display = kangIsMyTurn() ? "block" : "none";
+    }
   }
 
   if (kangCurrentRoom.status === "finished") {
