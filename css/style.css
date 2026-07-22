@@ -368,6 +368,23 @@ label { font-size: 0.8rem; opacity: 0.85; }
 
 .kang-seat.turn { box-shadow: 0 0 10px rgba(126, 224, 168, 0.7); }
 .kang-seat .player-name { font-size: 0.68rem; }
+#kangDiscardTop { margin: 0 auto 2px; }
+
+.kang-hand-stack {
+  position: relative;
+  height: 30px;
+  width: 100%;
+  margin-top: 2px;
+}
+.kang-hand-stack .stack-card {
+  position: absolute;
+  top: 0;
+  width: 20px;
+  height: 27px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(45deg, var(--felt-light) 0 4px, var(--felt-dark) 4px 8px);
+  border: 1px solid var(--gold);
+}
 
 /* ===== แชทในห้อง ===== */
 .chat-panel {

@@ -45,7 +45,17 @@ function kangRender() {
     const photoUrl = p.photo || "https://via.placeholder.com/50";
     const statusLine = kangCurrentRoom.status === "waiting"
       ? (p.ready ? "✅ พร้อม" : "⏳ ยังไม่พร้อม")
-      : "🂠 ไพ่ " + cardCount + " ใบ";
+      : "";
+
+    let stackHtml = "";
+    if (kangCurrentRoom.status !== "waiting" && cardCount > 0) {
+      const offset = Math.min(8, Math.floor(60 / cardCount));
+      let cards = "";
+      for (let n = 0; n < cardCount; n++) {
+        cards += `<div class="stack-card" style="left:${n * offset}px; z-index:${n};"></div>`;
+      }
+      stackHtml = `<div class="kang-hand-stack">${cards}</div><div class="player-money" style="text-align:center;">${cardCount} ใบ</div>`;
+    }
 
     seat.innerHTML = `
       <div class="player-box-ui">
@@ -53,9 +63,10 @@ function kangRender() {
         <div class="player-info-text">
           <div class="player-name">${p.id === kangCurrentRoom.creatorId ? "👑 " : ""}${shortName(p.name)}${isTurn ? " ⬅️" : ""}</div>
           <div class="player-money">เงิน: ${p.money}</div>
-          <div class="player-money">${statusLine}</div>
+          ${statusLine ? `<div class="player-money">${statusLine}</div>` : ""}
         </div>
       </div>
+      ${stackHtml}
     `;
   });
 
