@@ -79,4 +79,30 @@ function kangRender() {
     const newRoundBtn = el("kangNewRoundBtn");
     if (newRoundBtn) newRoundBtn.style.display = isCreator ? "inline-block" : "none";
   }
+
+  kangRenderMoneyWarning();
+}
+
+function kangRenderMoneyWarning() {
+  const box = el("kangMoneyWarningBox");
+  if (!box) return;
+
+  const w = kangCurrentRoom.moneyWarning;
+  if (!w) {
+    box.style.display = "none";
+    return;
+  }
+
+  const remainMs = Math.max(0, w.deadline - Date.now());
+  const remainSec = Math.ceil(remainMs / 1000);
+  const mm = String(Math.floor(remainSec / 60)).padStart(2, "0");
+  const ss = String(remainSec % 60).padStart(2, "0");
+
+  box.style.display = "block";
+  box.innerHTML = `
+    ⚠️ ${w.reasonLabel} (ต้องมีอย่างน้อย ${w.requiredAmount})<br>
+    เหลือเวลาเติมเครดิต: ${mm}:${ss}<br>
+    <button class="btn gold" onclick="kangRetryAfterTopUp()">✅ เติมแล้ว ลองอีกครั้ง</button>
+    <button class="btn danger" onclick="kangSkipDueToMoneyWarning()">⏭️ ข้ามตานี้เลย</button>
+  `;
 }

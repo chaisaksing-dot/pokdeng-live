@@ -143,15 +143,25 @@ function kangLeaveRoom() {
   db.ref("kangRooms/" + kangCurrentRoom.id + "/players/" + myPlayerId).remove().then(() => {
     if (kangRoomListenerRef) kangRoomListenerRef.off();
     if (kangChatListenerRef) kangChatListenerRef.off();
+    if (kangMoneyWarningIntervalId) {
+      clearInterval(kangMoneyWarningIntervalId);
+      kangMoneyWarningIntervalId = null;
+    }
     kangCurrentRoom = null;
     kangPlayers = [];
     showPage("kangLobbyPage");
   });
 }
 
+let kangMoneyWarningIntervalId = null;
+
 function kangListenRoom(roomId) {
   if (kangRoomListenerRef) kangRoomListenerRef.off();
   kangRoomListenerRef = db.ref("kangRooms/" + roomId);
+
+  if (!kangMoneyWarningIntervalId) {
+    kangMoneyWarningIntervalId = setInterval(kangCheckMoneyWarningExpiry, 2000);
+  }
 
   kangRoomListenerRef.on("value", snap => {
     const room = snap.val();
@@ -309,6 +319,49 @@ function kangToggleCardSelect(index) {
   kangRender();
 }
 
+const KANG_MONEY_WARNING_MS = 3 * 60 * 1000; // 3 นาที
+
+function kangRaiseMoneyWarning(targetPlayerId, requiredAmount, reasonLabel) {
+  db.ref("kangRooms/" + kangCurrentRoom.id + "/moneyWarning").set({
+    targetPlayerId,
+    requiredAmount,
+    reasonLabel,
+    deadline: Date.now() + KANG_MONEY_WARNING_MS
+  });
+}
+
+function kangClearMoneyWarning() {
+  db.ref("kangRooms/" + kangCurrentRoom.id + "/moneyWarning").remove();
+}
+
+function kangRetryAfterTopUp() {
+  const w = kangCurrentRoom.moneyWarning;
+  if (!w) return;
+  const target = kangPlayers.find(p => p.id === w.targetPlayerId);
+  if (target && Number(target.money || 0) >= w.requiredAmount) {
+    kangClearMoneyWarning();
+    alert("เครดิตพอแล้วครับ ลองกดทำรายการเดิมอีกครั้ง");
+  } else {
+    alert("เครดิตยังไม่พอครับ (ต้องมีอย่างน้อย " + w.requiredAmount + ")");
+  }
+}
+
+function kangSkipDueToMoneyWarning() {
+  kangClearMoneyWarning();
+  kangAdvanceTurn();
+}
+
+function kangCheckMoneyWarningExpiry() {
+  const w = kangCurrentRoom && kangCurrentRoom.moneyWarning;
+  if (!w) return;
+
+  if (typeof kangRenderMoneyWarning === "function") kangRenderMoneyWarning();
+
+  if (Date.now() >= w.deadline) {
+    kangSkipDueToMoneyWarning();
+  }
+}
+
 function kangDoDiscardSelected() {
   if (!kangIsMyTurn()) return;
   if (kangSelectedCardIndices.length === 0) return alert("เลือกไพ่ที่จะทิ้งก่อน");
@@ -325,6 +378,21 @@ function kangDoDiscardSelected() {
 
   const discarded = kangSelectedCardIndices.map(i => hand[i]);
   const remainingHand = hand.filter((_, i) => !kangSelectedCardIndices.includes(i));
+
+  if (remainingHand.length === 0) {
+    const me = kangMe();
+    const othersCount = kangPlayers.length - 1;
+    const worstCase = kangCurrentRoom.baseBet * othersCount;
+
+    if (me && Number(me.money || 0) < worstCase) {
+      kangRaiseMoneyWarning(me.id, worstCase, me.name + " มีเงินไม่พอเผื่อกรณีแคงพลาด");
+      alert(
+        "⚠️ ทิ้งไพ่ใบนี้จะทำให้ไพ่หมดมือ (แคงอัตโนมัติ) แต่คุณมีเงินไม่พอเผื่อกรณีแพ้ (ต้องมีอย่างน้อย " + worstCase +
+        ") ให้เวลา 3 นาทีในการเติมเครดิต ไม่งั้นจะข้ามตานี้ให้อัตโนมัติ — เลือกไพ่ใบอื่นทิ้งแทนได้ถ้าไม่อยากรอ"
+      );
+      return;
+    }
+  }
 
   const updates = {};
   updates["kangRooms/" + kangCurrentRoom.id + "/players/" + myPlayerId + "/hand"] = remainingHand;
@@ -360,6 +428,21 @@ function kangDoFlowSelected() {
   const remainingHand = hand.filter((_, i) => i !== cardIndex);
   const isKnockout = remainingHand.length === 0;
 
+  const feeder = kangPlayers.find(p => p.id === feederId);
+  const othersCount = kangPlayers.length - 1;
+  const flowCost = Math.floor(kangCurrentRoom.baseBet * 0.05) * othersCount;
+  const knockoutCost = isKnockout ? Math.floor(kangCurrentRoom.baseBet * 0.10) * othersCount : 0;
+  const totalFeederCost = flowCost + knockoutCost;
+
+  if (feeder && Number(feeder.money || 0) < totalFeederCost) {
+    kangRaiseMoneyWarning(feeder.id, totalFeederCost, feeder.name + " มีเงินไม่พอจ่ายค่าปรับไหล");
+    alert(
+      "⚠️ " + feeder.name + " มีเงินไม่พอจ่ายค่าปรับไหล (ต้องมีอย่างน้อย " + totalFeederCost +
+      ") ให้เวลา 3 นาทีในการเติมเครดิต ไม่งั้นจะข้ามตานี้ให้อัตโนมัติ"
+    );
+    return;
+  }
+
   const updates = {};
   updates["kangRooms/" + kangCurrentRoom.id + "/players/" + myPlayerId + "/hand"] = remainingHand;
   updates["kangRooms/" + kangCurrentRoom.id + "/discardPile"] = [...pile, card];
@@ -384,6 +467,20 @@ function kangDoFlowSelected() {
 
 function kangDoDeclare() {
   if (!kangIsMyTurn()) return;
+
+  const me = kangMe();
+  const othersCount = kangPlayers.length - 1;
+  const worstCase = kangCurrentRoom.baseBet * othersCount;
+
+  if (me && Number(me.money || 0) < worstCase) {
+    kangRaiseMoneyWarning(me.id, worstCase, me.name + " มีเงินไม่พอเผื่อกรณีแคงพลาด");
+    alert(
+      "⚠️ คุณมีเงินไม่พอเผื่อกรณีแคงแล้วพลาด (ต้องมีอย่างน้อย " + worstCase +
+      ") ให้เวลา 3 นาทีในการเติมเครดิต ไม่งั้นจะข้ามตานี้ให้อัตโนมัติ"
+    );
+    return;
+  }
+
   kangFinishRound(myPlayerId, myPlayerId, null);
 }
 
